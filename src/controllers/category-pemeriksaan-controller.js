@@ -50,6 +50,9 @@ export default class CategoryPemeriksaanController {
         try {
             request.body.faskes_uuid = "faskes_uuid";
             request.body.name = request.query.name;
+            request.body.page = request.query.page; 
+            request.body.limit = request.query.limit;
+
 
             const categoryPemeriksaan = await CategoryPemeriksaanService.findAll(request.body);
             response.status(200).json(categoryPemeriksaan);

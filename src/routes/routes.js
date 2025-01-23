@@ -1,5 +1,7 @@
 import express from "express";
 import CategoryPemeriksaanController from "../controllers/category-pemeriksaan-controller.js";
+import ItemPemeriksaanController from "../controllers/item-pemeriksaan-controller.js";
+import SpesimenController from "../controllers/spesimen-controller.js";
 
 const apiBase = process.env.API_BASE || "api";
 const apiVersion = process.env.API_VERSION || "v1";
@@ -11,5 +13,17 @@ routes.get(`${baseUrl}/category-pemeriksaan/:uuid`, CategoryPemeriksaanControlle
 routes.get(`${baseUrl}/category-pemeriksaan`, CategoryPemeriksaanController.findAll);
 routes.put(`${baseUrl}/category-pemeriksaan/:uuid`, CategoryPemeriksaanController.update);
 routes.delete(`${baseUrl}/category-pemeriksaan/:uuid`, CategoryPemeriksaanController.delete);
+
+routes.post(`${baseUrl}/item-pemeriksaan`, ItemPemeriksaanController.create);
+routes.get(`${baseUrl}/item-pemeriksaan/:uuid`, ItemPemeriksaanController.show);
+routes.get(`${baseUrl}/item-pemeriksaan`, ItemPemeriksaanController.findAll);
+routes.put(`${baseUrl}/item-pemeriksaan/:uuid`, ItemPemeriksaanController.update);
+routes.delete(`${baseUrl}/item-pemeriksaan/:uuid`, ItemPemeriksaanController.delete);
+
+routes.post(`${baseUrl}/spesimen`, SpesimenController.create);
+routes.get(`${baseUrl}/spesimen/:uuid`, SpesimenController.show);
+routes.get(`${baseUrl}/spesimen`, SpesimenController.getAll);
+routes.put(`${baseUrl}/spesimen/:uuid`, SpesimenController.update);
+routes.delete(`${baseUrl}/spesimen/:uuid`, SpesimenController.delete);
 
 export default routes;
