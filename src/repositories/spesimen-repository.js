@@ -1,6 +1,7 @@
 import { SpesimenModel } from "@adameds/model-sdk/lab";
 import toEpochDate from "../helpers/date-helper.js";
 import pagination from "../helpers/pagination.js";
+import {Op} from "sequelize";
 
 export default class SpesimenRepository {
     static async create(data) {
@@ -25,17 +26,25 @@ export default class SpesimenRepository {
         );
     }
 
-    static async findByCode(code) {
+    static async findByCode(code, faskes_uuid) {
         return await SpesimenModel.findOne({
             where: {
                 code: code,
-                deleted_at: null
+                deleted_at: {
+                    [Op.is]: null
+                },
+                faskes_uuid: faskes_uuid
             }
         });
     }
 
     static async findByUuid(uuid) {
-        return await SpesimenModel.findByPk(uuid);
+        return await SpesimenModel.findOne({
+            where: { uuid: uuid, deleted_at: {[Op.is]:null} },
+            attributes:{
+                exclude: ["created_at", "updated_at", "deleted_at"]
+            }
+        });
     }
 
     static async findAll(req) {

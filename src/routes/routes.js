@@ -2,10 +2,13 @@ import express from "express";
 import CategoryPemeriksaanController from "../controllers/category-pemeriksaan-controller.js";
 import ItemPemeriksaanController from "../controllers/item-pemeriksaan-controller.js";
 import SpesimenController from "../controllers/spesimen-controller.js";
+import KelompokPemeriksaanController from "../controllers/keloompok-pemeriksaan-controller.js";
 
 const apiBase = process.env.API_BASE || "api";
 const apiVersion = process.env.API_VERSION || "v1";
 const baseUrl = `/${apiBase}/${apiVersion}/lab`;
+
+console.log("baseUrl", baseUrl);
 
 const routes = express.Router();
 routes.post(`${baseUrl}/category-pemeriksaan`, CategoryPemeriksaanController.create);
@@ -25,5 +28,11 @@ routes.get(`${baseUrl}/spesimen/:uuid`, SpesimenController.show);
 routes.get(`${baseUrl}/spesimen`, SpesimenController.getAll);
 routes.put(`${baseUrl}/spesimen/:uuid`, SpesimenController.update);
 routes.delete(`${baseUrl}/spesimen/:uuid`, SpesimenController.delete);
+
+routes.get(`${baseUrl}/kelompok-pemeriksaan`, KelompokPemeriksaanController.findAll);
+routes.post(`${baseUrl}/kelompok-pemeriksaan`, KelompokPemeriksaanController.create);
+routes.put(`${baseUrl}/kelompok-pemeriksaan/:uuid`, KelompokPemeriksaanController.update);
+routes.delete(`${baseUrl}/kelompok-pemeriksaan/:uuid`, KelompokPemeriksaanController.delete);
+
 
 export default routes;

@@ -1,3 +1,4 @@
+import ConflictException from "../exception/conflict-exception.js";
 import NotfoundException from "../exception/notfound-exception.js";
 import SpesimenRepository from "../repositories/spesimen-repository.js";
 import SpesimenValidation from "../validations/spesimen-validation.js";
@@ -6,6 +7,14 @@ import ZodValidator from "../validations/zod-validator.js";
 export default class SpesimenSevice {
      static async create(req){
         const validData = ZodValidator.validate(SpesimenValidation.CREATE, req)
+
+        console.log(validData)
+        const isSpesimentExist = await SpesimenRepository.findByCode(validData.code, validData.faskes_uuid)
+
+         if(isSpesimentExist){
+            throw new ConflictException("Spesimen already exist")
+         }
+
         return await SpesimenRepository.create(validData)
      }
 
@@ -17,13 +26,14 @@ export default class SpesimenSevice {
         }
 
         const validData = ZodValidator.validate(SpesimenValidation.CREATE, req)
-        return await SpesimenRepository.update(uuid, req)
+        return await SpesimenRepository.update(uuid, validData)
      }
 
      static async delete(uuid){
         const isSpesimentExist = await SpesimenRepository.findByUuid(uuid)
 
         if(!isSpesimentExist){
+         console.log("Spesimen not found")
             throw new NotfoundException("Spesimen not found")
         }
 
@@ -36,6 +46,8 @@ export default class SpesimenSevice {
         if(!spesimen){
             throw new NotfoundException("Spesimen not found")
         }
+
+         return spesimen
      }
 
      static async getAll(req){

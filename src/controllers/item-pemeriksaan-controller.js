@@ -16,7 +16,7 @@ export default class ItemPemeriksaanController {
         try {
             req.body.faskes_uuid = "faskes_uuid";
             const uuid = req.params.uuid;
-            await ItemPemeriksaanService.update(uuid, { nama, harga });
+            await ItemPemeriksaanService.update(uuid, req.body);
 
             res.status(200).json(successResponse("Item Pemeriksaan updated"));
         } catch (error) {
@@ -27,7 +27,7 @@ export default class ItemPemeriksaanController {
     static async delete(req, res, next) {
         try {
             const uuid = req.params.uuid;
-            await ItemPemeriksaanService.delete(uuid);
+            await ItemPemeriksaanService.update(uuid);
             res.status(200).json(successResponse("Item Pemeriksaan deleted"));
         } catch (error) {
             next(error);
@@ -37,7 +37,7 @@ export default class ItemPemeriksaanController {
     static async show(req, res, next) {
         try {
             const uuid = req.params.uuid;
-            const itemPemeriksaan = await ItemPemeriksaanService.findByUuid(uuid);
+            const itemPemeriksaan = await ItemPemeriksaanService.show(uuid);
             res.status(200).json(successResponse("Item Pemeriksaan detail", itemPemeriksaan));
         } catch (error) {
             next(error);
@@ -48,7 +48,7 @@ export default class ItemPemeriksaanController {
     static async findAll(req, res, next) {
         try {
             req.body.faskes_uuid = "faskes_uuid";
-            const itemPemeriksaan = await ItemPemeriksaanService.findAll(req);
+            const itemPemeriksaan = await ItemPemeriksaanService.findAll(req.body);
             res.status(200).json(successResponse("Item Pemeriksaan list", itemPemeriksaan));
         } catch (error) {
             next(error);

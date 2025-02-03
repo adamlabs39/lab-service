@@ -6,7 +6,7 @@ export default class SpesimenController{
         try {
             req.body.faskes_uuid = "faskes_uuid"
             await SpesimenSevice.create(req.body)
-            return res.status(201).json(successResponse("Spesimen updated"))
+            return res.status(201).json(successResponse("Spesimen created"))
         } catch (error) {
             next(error)
         }
@@ -16,7 +16,7 @@ export default class SpesimenController{
         try {
             req.body.faskes_uuid = "faskes_uuid"
             const uuid = req.params.uuid
-            await SpesimenSevice.update(uuid,req)
+            await SpesimenSevice.update(uuid,req.body)
             return res.status(200).json(successResponse("Spesimen updated"))
         } catch (error) {
             next(error)
@@ -50,7 +50,7 @@ export default class SpesimenController{
             req.body.limit = req.query.name
             req.body.faskes_uuid = "faskes_uuid"
 
-            const categoryPemeriksaans = await SpesimenSevice.getAll(req)
+            const categoryPemeriksaans = await SpesimenSevice.getAll(req.body)
             return res.status(200).json(successResponse("Success get al data spesimen", categoryPemeriksaans))
         } catch (error) {
             next(error)

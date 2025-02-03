@@ -1,6 +1,4 @@
-// impoxrt { date } from "zod";
 import toEpochDate from "../helpers/date-helper.js";
-import BpjsModel from "../../../model-sdk/models/admisi/bpjs-model.js";
 import { CategoryPemeriksaanModel } from "@adameds/model-sdk/lab";
 import { Op } from "sequelize";
 import pagination from "../helpers/pagination.js";
@@ -23,17 +21,23 @@ export default class CategoryPemeriksaanRepository {
     );
   }
 
-  static async findByCode(code) {
+  static async findByCode(code, faskes_uuid) {
     return await CategoryPemeriksaanModel.findOne({
       where: {
         code: code,
         deleted_at: null,
+        faskes_uuid: faskes_uuid,
       },
     });
   }
 
   static async findByUuid(uuid) {
-    return await CategoryPemeriksaanModel.findByPk(uuid);
+    return await CategoryPemeriksaanModel.findOne({
+      where: { uuid: uuid, deleted_at: null },
+      attributes:{
+        exclude: ["created_at", "updated_at", "deleted_at"],
+      }
+    });
   }
   static async findAll(req) {
     const options = {

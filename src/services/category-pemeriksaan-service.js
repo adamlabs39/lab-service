@@ -12,7 +12,7 @@ export default class CategoryPemeriksaanService {
     );
 
     const isCategoryPemeriksaanExist =
-      await CategoryPemeriksaanRepository.findByCode(validData.code);
+      await CategoryPemeriksaanRepository.findByCode(validData.code, validData.faskes_uuid);
 
     if (isCategoryPemeriksaanExist) {
       throw new ConflictException("Category Pemeriksaan already exist");
@@ -41,7 +41,6 @@ export default class CategoryPemeriksaanService {
       validData
     );
 
-    console.log(categoryPemeriksaan);
     return categoryPemeriksaan;
   }
 
