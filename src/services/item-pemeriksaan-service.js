@@ -6,6 +6,8 @@ import SnomedRepository from "../repositories/snomed-repository.js";
 import Icd9Repository from "../repositories/icd9-repository.js";
 import ConflictException from "../exception/conflict-exception.js";
 import NotfoundException from "../exception/notfound-exception.js";
+import PilihanHasilItemPemeriksaanRepository from "../repositories/pilihan-hasil-item-pemeriksaan-repository.js";
+import CategoryPemeriksaanRepository from "../repositories/category-pemeriksaan-repository.js";
 
 
 export default class ItemPemeriksaanService {
@@ -14,7 +16,12 @@ export default class ItemPemeriksaanService {
  
         const isItemPemeriksaanExist = await ItemPemeriksaanRepository.findByCode(validData.code, validData.faskes_uuid);
   
-        
+        const isCategoryPemeriksaanExist = await CategoryPemeriksaanRepository.findByUuid(validData.category_pemeriksaan_uuid);
+
+        if (!isCategoryPemeriksaanExist) {
+            throw new NotfoundException("Category Pemeriksaan not found");
+        }
+
         if (isItemPemeriksaanExist) {
             throw new ConflictException("Item Pemeriksaan already exist");
         }
@@ -40,7 +47,16 @@ export default class ItemPemeriksaanService {
             }
         }
 
+        
         const itemPemeriksaan = await ItemPemeriksaanRepository.create(validData);
+        
+        if(validData.jenis_input === "pilihan"){
+            await PilihanHasilItemPemeriksaanRepository.create({
+                item_pemeriksaan_uuid: itemPemeriksaan.uuid,
+                pilihan_hasil: validData.pilihan_hasil_item_pemeriksaans,
+                "faskes_uuid": validData.faskes_uuid
+            })
+        }
         return itemPemeriksaan;
     }
 
@@ -49,6 +65,12 @@ export default class ItemPemeriksaanService {
 
         if (!isItemPemeriksaanExist) {
             throw new NotfoundException("Item Pemeriksaan not found");
+        }
+
+        const isCategoryPemeriksaanExist = await CategoryPemeriksaanRepository.findByUuid(req.category_pemeriksaan_uuid);
+
+        if (!isCategoryPemeriksaanExist) {
+            throw new NotfoundException("Category Pemeriksaan not found");
         }
 
         const validData = ZodValidator.validate(ItemPemeriksaanValidation.UPDATE, req);
@@ -73,7 +95,17 @@ export default class ItemPemeriksaanService {
             }
         }
 
+        
         const itemPemeriksaan = await ItemPemeriksaanRepository.update(uuid, validData);
+        
+        if(validData.jenis_input === "pilihan"){
+            await PilihanHasilItemPemeriksaanRepository.deleteByItemPemeriksaan(uuid);
+            await PilihanHasilItemPemeriksaanRepository.create({
+                item_pemeriksaan_uuid: uuid,
+                pilihan_hasil: validData.pilihan_hasil_item_pemeriksaans,
+                "faskes_uuid": validData.faskes_uuid
+            })
+        }
 
         return itemPemeriksaan;
     }

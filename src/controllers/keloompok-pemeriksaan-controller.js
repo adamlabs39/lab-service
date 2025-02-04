@@ -43,7 +43,7 @@ export default class KelompokPemeriksaanController {
             req.body.limit = req.query.limit;
             req.body.faskes_uuid = "faskes_uuid";
             const result = await KelompokPemeriksaanService.getAll(req.body);
-            return res.status(200).json(result);
+            return res.status(200).json(successResponse("Kelompok Pemeriksaan found", result));
         } catch (error) {
             next(error);
         }

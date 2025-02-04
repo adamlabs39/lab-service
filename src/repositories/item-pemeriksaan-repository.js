@@ -1,4 +1,4 @@
-import { CategoryPemeriksaanModel, ItemPemeriksaanModel } from "@adameds/model-sdk/lab";
+import { CategoryPemeriksaanModel, ItemPemeriksaanModel, PilihanHasilItemPemeriksaanModel } from "@adameds/model-sdk/lab";
 import pagination from "../helpers/pagination.js";
 import toEpochDate from "../helpers/date-helper.js";
 import { Op } from "sequelize";
@@ -45,11 +45,18 @@ export default class ItemPemeriksaanRepository {
         uuid: uuid,
         deleted_at: { [Op.is]: null },
       },
-      include: {
-        model: CategoryPemeriksaanModel,
-        as: "category_pemeriksaan",
-      attributes:["name", "id", "uuid"],
-    }});
+      include: [
+        {
+          model: CategoryPemeriksaanModel,
+          as: "category_pemeriksaan",
+        attributes:["name", "id", "uuid"],
+      },
+      {
+        model: PilihanHasilItemPemeriksaanModel,
+        as: "pilihan_hasil_item_pemeriksaan",
+        attributes:["pilihan_hasil"],
+      }
+      ]});
   }
 
   static async findAll(req) {

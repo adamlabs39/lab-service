@@ -58,22 +58,25 @@ export default class KelompokPemeriksaanRepository {
                     [Op.is]: null,
                 },
             },
-            include:[
-                {
-                    model: ItemPemeriksaanModel,
-                    as: "items",
-                    attributes: [],
-                    where: {
-                        deleted_at: {
-                            [Op.is]: null,
-                        },
-                    },
-                    attributes: ["id","uuid", "name"]
-                },
-            ],
             attributes: {
                 exclude: ["created_at", "updated_at", "deleted_at"],
             },
+            // include:[
+            //     {
+            //         model: ItemPemeriksaanModel,
+            //         as: "items",
+            //         attributes: [],
+            //         where: {
+            //             deleted_at: {
+            //                 [Op.is]: null,
+            //             },
+            //         },
+            //         attributes: ["id","uuid", "name"]
+            //     },
+            // ],
+            // attributes: {
+            //     exclude: ["created_at", "updated_at", "deleted_at"],
+            // },
         };
 
         return await KelompokPemeriksaanModel.findAll(options);
