@@ -150,7 +150,7 @@ export default class KelompokPemeriksaanService {
                 code: kelompokPemeriksaan.code,
                 uuid: kelompokPemeriksaan.uuid,
                 category_pemeriksaan_uuid: kelompokPemeriksaan.category_pemeriksaan_uuid,
-                category_pemeriksaan: kelompokPemeriksaan.category_pemeriksaan,
+                category_pemeriksaan: kelompokPemeriksaan.category_pemeriksaan.name,
                 item_pemeriksaan: kelompokPemeriksaan.item_kelompok_pemeriksaan.map(item => {
                     return {
                         id : item.item_pemeriksaan.id,

@@ -3,6 +3,7 @@ import CategoryPemeriksaanController from "../controllers/category-pemeriksaan-c
 import ItemPemeriksaanController from "../controllers/item-pemeriksaan-controller.js";
 import SpesimenController from "../controllers/spesimen-controller.js";
 import KelompokPemeriksaanController from "../controllers/keloompok-pemeriksaan-controller.js";
+import TarifLabController from "../controllers/tarif-lab-controller.js";
 
 const apiBase = process.env.API_BASE || "api";
 const apiVersion = process.env.API_VERSION || "v1";
@@ -33,6 +34,11 @@ routes.get(`${baseUrl}/kelompok-pemeriksaan`, KelompokPemeriksaanController.find
 routes.post(`${baseUrl}/kelompok-pemeriksaan`, KelompokPemeriksaanController.create);
 routes.put(`${baseUrl}/kelompok-pemeriksaan/:uuid`, KelompokPemeriksaanController.update);
 routes.delete(`${baseUrl}/kelompok-pemeriksaan/:uuid`, KelompokPemeriksaanController.delete);
+
+routes.post(`${baseUrl}/tarif-lab`, TarifLabController.create);
+routes.get(`${baseUrl}/tarif-lab`, TarifLabController.getAll);
+routes.put(`${baseUrl}/tarif-lab/:uuid`, TarifLabController.update);
+routes.delete(`${baseUrl}/tarif-lab/:uuid`, TarifLabController.delete);
 
 
 export default routes;
