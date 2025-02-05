@@ -12,7 +12,6 @@ import ZodValidator from "../validations/zod-validator.js";
 
 export default class KelompokPemeriksaanService {
     static async create(req) {
-        console.log(req)
         const validData = ZodValidator.validate(KelompokPemeriksaanValidation.CREATE, req);
 
         validData.item_pemeriksaans.forEach(async (item) => {
@@ -141,7 +140,30 @@ export default class KelompokPemeriksaanService {
     }
 
     static async getAll(req) {
-        return await KelompokPemeriksaanRepository.findAll(req);
+        const kelompokPemerikasan = await KelompokPemeriksaanRepository.findAll(req);
+        // return kelompokPemerikasan      
+
+        const formatedKelompokPemeriksaan = kelompokPemerikasan.map(kelompokPemeriksaan => {
+            return {
+                id: kelompokPemeriksaan.id,
+                name: kelompokPemeriksaan.name,
+                code: kelompokPemeriksaan.code,
+                uuid: kelompokPemeriksaan.uuid,
+                category_pemeriksaan_uuid: kelompokPemeriksaan.category_pemeriksaan_uuid,
+                category_pemeriksaan: kelompokPemeriksaan.category_pemeriksaan,
+                item_pemeriksaan: kelompokPemeriksaan.item_kelompok_pemeriksaan.map(item => {
+                    return {
+                        id : item.item_pemeriksaan.id,
+                        name: item.item_pemeriksaan.name,
+                        uuid: item.item_pemeriksaan.uuid,
+                    }
+                }  
+                )
+            };
+        });
+        
+
+        return formatedKelompokPemeriksaan;
     }
 }
 

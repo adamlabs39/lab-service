@@ -1,6 +1,12 @@
-import {ItemPemeriksaanModel, KelompokPemeriksaanModel } from "@adameds/model-sdk/lab";
+import {CategoryPemeriksaanModel, ItemKelompokPemeriksaanModel, ItemPemeriksaanModel, KelompokPemeriksaanModel } from "@adameds/model-sdk/lab";
 import { Op } from "sequelize";
 import toEpochDate from "../helpers/date-helper.js";
+
+KelompokPemeriksaanModel.belongsTo(CategoryPemeriksaanModel, {
+    foreignKey: "category_pemeriksaan_uuid",
+    as: "category_pemeriksaan",
+    constraints: false,
+})
 
 export default class KelompokPemeriksaanRepository {
     static async create(data) {
@@ -61,22 +67,40 @@ export default class KelompokPemeriksaanRepository {
             attributes: {
                 exclude: ["created_at", "updated_at", "deleted_at"],
             },
-            // include:[
-            //     {
-            //         model: ItemPemeriksaanModel,
-            //         as: "items",
-            //         attributes: [],
-            //         where: {
-            //             deleted_at: {
-            //                 [Op.is]: null,
-            //             },
-            //         },
-            //         attributes: ["id","uuid", "name"]
-            //     },
-            // ],
-            // attributes: {
-            //     exclude: ["created_at", "updated_at", "deleted_at"],
-            // },
+            include:[
+                {
+                    model: ItemKelompokPemeriksaanModel,
+                    as: "item_kelompok_pemeriksaan",
+                    where: {
+                        deleted_at: {
+                            [Op.is]: null,
+                        },
+                    },
+                    include :{
+                        model : ItemPemeriksaanModel,
+                        as : "item_pemeriksaan",
+                        where : {
+                            deleted_at : {
+                                [Op.is] : null
+                            }
+                        },
+                        attributes : ["uuid", "name", "code"]
+                    }
+                },
+                 {
+                    model : CategoryPemeriksaanModel,
+                    as : "category_pemeriksaan",
+                    where : {
+                        deleted_at : {
+                            [Op.is] : null
+                        }
+                    },
+                    attributes : ["uuid", "name", "code"]
+                }
+            ],
+            attributes: {
+                exclude: ["created_at", "updated_at", "deleted_at"],
+            },
         };
 
         return await KelompokPemeriksaanModel.findAll(options);

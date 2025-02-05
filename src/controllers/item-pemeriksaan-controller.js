@@ -27,7 +27,7 @@ export default class ItemPemeriksaanController {
     static async delete(req, res, next) {
         try {
             const uuid = req.params.uuid;
-            await ItemPemeriksaanService.update(uuid);
+            await ItemPemeriksaanService.delete(uuid);
             res.status(200).json(successResponse("Item Pemeriksaan deleted"));
         } catch (error) {
             next(error);

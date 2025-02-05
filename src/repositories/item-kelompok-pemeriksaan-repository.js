@@ -1,5 +1,29 @@
-import { ItemKelompokPemeriksaanModel } from "@adameds/model-sdk/lab";
+import { ItemKelompokPemeriksaanModel, ItemPemeriksaanModel, KelompokPemeriksaanModel } from "@adameds/model-sdk/lab";
 import toEpochDate from "../helpers/date-helper.js";
+
+ItemKelompokPemeriksaanModel.belongsTo(KelompokPemeriksaanModel, {
+    foreignKey: "kelompok_pemeriksaan_uuid",
+    as: "kelompok_pemeriksaan",
+    constraints: false,
+  });
+  
+  ItemKelompokPemeriksaanModel.belongsTo(ItemPemeriksaanModel, {
+    foreignKey: "item_pemeriksaan_uuid",
+    as: "item_pemeriksaan",
+    constraints: false,
+  });
+  
+  KelompokPemeriksaanModel.hasMany(ItemKelompokPemeriksaanModel, {
+    foreignKey: "kelompok_pemeriksaan_uuid",
+    as: "item_kelompok_pemeriksaan",
+    constraints: false,
+  });
+  
+  ItemPemeriksaanModel.hasMany(ItemKelompokPemeriksaanModel, {
+    foreignKey: "item_pemeriksaan_uuid",
+    as: "item_kelompok_pemeriksaan",
+    constraints: false,
+  })
 
 export default class ItemKelompokPemeriksaanRepository {
     static async update(uuid, data) {
@@ -71,3 +95,4 @@ export default class ItemKelompokPemeriksaanRepository {
         return await ItemKelompokPemeriksaanModel.findAll(options);
     }
 }
+
