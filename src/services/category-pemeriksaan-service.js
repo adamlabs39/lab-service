@@ -1,3 +1,4 @@
+import sequelizeInstance from "@adameds/model-sdk/instance";
 import ConflictException from "../exception/conflict-exception.js";
 import NotfoundException from "../exception/notfound-exception.js";
 import CategoryPemeriksaanRepository from "../repositories/category-pemeriksaan-repository.js";
@@ -15,13 +16,12 @@ export default class CategoryPemeriksaanService {
       await CategoryPemeriksaanRepository.findByCode(validData.code, validData.faskes_uuid);
 
     if (isCategoryPemeriksaanExist) {
-      throw new ConflictException("Category Pemeriksaan already exist");
+      throw new ConflictException("Category Pemeriksaan dengan code tersebut telah digunakan");
     }
 
-    const categoryPemeriksaan = await CategoryPemeriksaanRepository.create(
-      validData
-    );
-    return categoryPemeriksaan;
+    sequelizeInstance.transaction(async (t) => {
+      await CategoryPemeriksaanRepository.create(validData, t);
+    });
   }
 
   static async update(uuid, data) {
@@ -29,19 +29,16 @@ export default class CategoryPemeriksaanService {
       await CategoryPemeriksaanRepository.findByUuid(uuid);
 
     if (!isCategoryPemeriksaanExist) {
-       throw new NotfoundException("Category Pemeriksaan not found");
+       throw new NotfoundException("Category Pemeriksaan tidak ada");
     }
 
     const validData = ZodValidator.validate(
       CategoryPemeriksaanValidation.UPDATE,
       data
     );
-    const categoryPemeriksaan = await CategoryPemeriksaanRepository.update(
-      uuid,
-      validData
-    );
-
-    return categoryPemeriksaan;
+   sequelizeInstance.transaction(async (t) => {
+      await CategoryPemeriksaanRepository.update(uuid, validData, t);
+   })
   }
 
   static async delete(uuid) {
@@ -49,13 +46,12 @@ export default class CategoryPemeriksaanService {
     const isCategoryPemeriksaanExist = await CategoryPemeriksaanRepository.findByUuid(uuid);
 
     if (!isCategoryPemeriksaanExist) {
-        throw new NotfoundException("Category Pemeriksaan not found");
+        throw new NotfoundException("Category Pemeriksaan tidak ada");
     }
 
-    const categoryPemeriksaan = await CategoryPemeriksaanRepository.delete(
-      uuid
-    );
-    return categoryPemeriksaan;
+    sequelizeInstance.transaction(async (t) => {
+      await CategoryPemeriksaanRepository.delete(uuid, t);
+    });
   }
 
   static async show(uuid) {
@@ -64,7 +60,7 @@ export default class CategoryPemeriksaanService {
     );
     
     if (!categoryPemeriksaan) {
-      throw new NotfoundException("Category Pemeriksaan not found");
+      throw new NotfoundException("Category Pemeriksaan tidak ada");
     }
 
     return categoryPemeriksaan;

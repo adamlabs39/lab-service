@@ -4,20 +4,21 @@ import { Op } from "sequelize";
 import pagination from "../helpers/pagination.js";
 
 export default class CategoryPemeriksaanRepository {
-  static async create(data) {
-    return await CategoryPemeriksaanModel.create(data);
+  static async create(data, transaction) {
+    return await CategoryPemeriksaanModel.create(data, { transaction });
   }
 
-  static async update(uuid, data) {
+  static async update(uuid, data, transaction) {
     return await CategoryPemeriksaanModel.update(data, {
       where: { uuid: uuid },
-    });
+    }, { transaction });
   }
 
-  static async delete(uuid) {
+  static async delete(uuid, transaction) {
     return await CategoryPemeriksaanModel.update(
       { deleted_at: toEpochDate(new Date()) },
-      { where: { uuid: uuid } }
+      { where: { uuid: uuid } },
+      { transaction }
     );
   }
 

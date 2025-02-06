@@ -6,8 +6,8 @@ export default class CategoryPemeriksaanController {
        try {
         const data = request.body;
         data.faskes_uuid = "faskes_uuid";
-        const categoryPemeriksaan = await CategoryPemeriksaanService.create(data);
-       return response.status(201).json(successResponse("Category Pemeriksaan created", categoryPemeriksaan));
+        await CategoryPemeriksaanService.create(data);
+       return response.status(201).json(successResponse("Data berhasil disimpan"));
        } catch (error) {
          next(error)
        }
@@ -20,7 +20,7 @@ export default class CategoryPemeriksaanController {
             data.faskes_uuid = "faskes_uuid";
             await CategoryPemeriksaanService.update(uuid, data);
 
-            response.status(200).json(successResponse("Category Pemeriksaan updated"));
+            response.status(200).json(successResponse("Data berhasil diedit"));
         } catch (error) {
             next(error)
         }
@@ -30,7 +30,7 @@ export default class CategoryPemeriksaanController {
         try {
             const uuid = request.params.uuid;
             await CategoryPemeriksaanService.delete(uuid);
-            response.status(200).json(successResponse("Category Pemeriksaan deleted"));
+            response.status(200).json(successResponse("Data berhasil dihapus"));
         } catch (error) {
             next(error)
         }
@@ -55,7 +55,7 @@ export default class CategoryPemeriksaanController {
 
 
             const categoryPemeriksaan = await CategoryPemeriksaanService.findAll(request.body);
-            response.status(200).json(categoryPemeriksaan);
+            response.status(200).json(successResponse("Data berhasil ditampilkan", categoryPemeriksaan));
         } catch (error) {
             next(error)
         }
