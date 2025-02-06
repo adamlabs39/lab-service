@@ -46,4 +46,14 @@ export default class TarifLabController {
             next(error);
         }
     }
+
+    static async show(req, res, next) {
+        try {
+            const uuid = req.params.uuid;
+            const tarifLab = await TarifLabService.show(uuid);
+            res.status(200).json(successResponse("Data berhasil ditampilkan", tarifLab));
+        } catch (error) {
+            next(error);
+        }
+    }
 }

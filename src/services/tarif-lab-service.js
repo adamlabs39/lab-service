@@ -144,6 +144,16 @@ export default class TarifLabService{
         })
     }
 
+    static async show (uuid){
+        const tarifLab = await TarifLabRepository.findByUuid(uuid);
+
+        if (!tarifLab) {
+            throw new NotfoundException("Tarif Lab tidak ada");
+        }
+
+        return tarifLab;
+    }
+
     static async update(uuid, req){
         const isTarifLabExist = await TarifLabRepository.findByUuid(uuid);
 
