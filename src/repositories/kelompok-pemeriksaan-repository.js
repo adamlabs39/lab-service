@@ -19,6 +19,19 @@ export default class KelompokPemeriksaanRepository {
         });
     }
 
+    static async findByUuids(uuids) {
+        return await KelompokPemeriksaanModel.findAll({
+            where: {
+                uuid: {
+                    [Op.in]: uuids,
+                },
+                deleted_at: {
+                    [Op.is]: null,
+                },
+            },
+        });
+    }
+
     static async delete(uuid) {
         return await KelompokPemeriksaanModel.update(
             { deleted_at: toEpochDate(new Date()) },

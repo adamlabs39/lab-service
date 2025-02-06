@@ -22,48 +22,50 @@ export default class TarifLabService{
         if (isCodeExist) {
             throw new ConflictException("Code sudah terdaftarkan");
         }
+    
+    const penjamins = await PenjaminRepository.findByUuids(validData.penjamin_uuids);
 
-       await Promise.all(
+    if(penjamins.length !== validData.penjamin_uuids.length){
+        throw new NotfoundException("Penjamin tidak ada");
+    }
 
-         validData.penjamin_uuids.map(async (penjamin) => {
-            const isPenjaminExist = await PenjaminRepository.findByUuid(penjamin);
-            console.log(isPenjaminExist)
-            if (!isPenjaminExist) {
-                throw new NotfoundException("Penjamin tidak ada");
-            }
-        })
-       )
+    const itemPemeriksaanUuids = []
+    const kelomPokPemerikSaanUuids = []
+    const nameTarifKomponenUuids = []
 
-    await Promise.all(
         validData.tarif_lab_items.map(async (item) => {
             if(item.item_pemeriksaan_uuid){
-                const isItemPemeriksaanExist = await ItemPemeriksaanRepository.findByUuid(item.item_pemeriksaan_uuid);
-
-                if (!isItemPemeriksaanExist) {
-                    throw new NotfoundException("Item Pemeriksaan tidak ada");
-                }
+                itemPemeriksaanUuids.push(item.item_pemeriksaan_uuid);
             }
 
             if(item.kelompok_pemeriksaan_uuid){
-                const isKelompokPemeriksaanExist = await KelompokPemeriksaanRepository.findByUuid(item.kelompok_pemeriksaan_uuid);
-
-                if (!isKelompokPemeriksaanExist) {
-                    throw new NotfoundException("Kelompok Pemeriksaan tidak ada");
-                }
+                kelomPokPemerikSaanUuids.push(item.kelompok_pemeriksaan_uuid);
             }
 
             if(item.komponen_tindakan_labs){
                 item.komponen_tindakan_labs.map(async (komponen) => {
-                    const isKomponenExist = await NameTarifKomponenRepository.findByUuid(komponen.tarif_komponen_uuid);
-
-                    if (!isKomponenExist) {
-                        throw new NotfoundException("Komponen Tindakan tidak ada");
-                    }
+                    nameTarifKomponenUuids.push(komponen.tarif_komponen_uuid);
                 });
             }
         })
-    )
 
+        const itemPemeriksaans = await ItemPemeriksaanRepository.findByUuids(itemPemeriksaanUuids);
+
+        if(itemPemeriksaans.length !== itemPemeriksaanUuids.length){
+            throw new NotfoundException("Item Pemeriksaan tidak ada");
+        }
+
+        const kelompokPemeriksaans = await KelompokPemeriksaanRepository.findByUuids(kelomPokPemerikSaanUuids);
+
+        if(kelompokPemeriksaans.length !== kelomPokPemerikSaanUuids.length){
+            throw new NotfoundException("Kelompok Pemeriksaan tidak ada");
+        }
+
+        const nameTarifKomponens = await NameTarifKomponenRepository.findByUuids(nameTarifKomponenUuids);
+
+        if(nameTarifKomponens.length !== nameTarifKomponenUuids.length){
+            throw new NotfoundException("Komponen Tarif tidak ada");
+        }
 
         const tarifLab = await TarifLabRepository.create({
             code: validData.code,
@@ -159,45 +161,44 @@ export default class TarifLabService{
             throw new ConflictException("Code sudah terdaftarkan");
         }
 
-        await Promise.all(
-            validData.penjamin_uuids.map(async (penjamin) => {
-                const isPenjaminExist = await PenjaminRepository.findByUuid(penjamin);
-                if (!isPenjaminExist) {
-                    throw new NotfoundException("Penjamin tidak ada");
-                }
-            })
-        )
-
-
-        await Promise.all(
+        const itemPemeriksaanUuids = []
+        const kelomPokPemerikSaanUuids = []
+        const nameTarifKomponenUuids = []
+    
             validData.tarif_lab_items.map(async (item) => {
                 if(item.item_pemeriksaan_uuid){
-                    const isItemPemeriksaanExist = await ItemPemeriksaanRepository.findByUuid(item.item_pemeriksaan_uuid);
-    
-                    if (!isItemPemeriksaanExist) {
-                        throw new NotfoundException("Item Pemeriksaan tidak ada");
-                    }
+                    itemPemeriksaanUuids.push(item.item_pemeriksaan_uuid);
                 }
     
                 if(item.kelompok_pemeriksaan_uuid){
-                    const isKelompokPemeriksaanExist = await KelompokPemeriksaanRepository.findByUuid(item.kelompok_pemeriksaan_uuid);
-    
-                    if (!isKelompokPemeriksaanExist) {
-                        throw new NotfoundException("Kelompok Pemeriksaan tidak ada");
-                    }
+                    kelomPokPemerikSaanUuids.push(item.kelompok_pemeriksaan_uuid);
                 }
     
                 if(item.komponen_tindakan_labs){
                     item.komponen_tindakan_labs.map(async (komponen) => {
-                        const isKomponenExist = await NameTarifKomponenRepository.findByUuid(komponen.tarif_komponen_uuid);
-    
-                        if (!isKomponenExist) {
-                            throw new NotfoundException("Komponen Tindakan tidak ada");
-                        }
+                        nameTarifKomponenUuids.push(komponen.tarif_komponen_uuid);
                     });
                 }
             })
-        )
+    
+            const itemPemeriksaans = await ItemPemeriksaanRepository.findByUuids(itemPemeriksaanUuids);
+    
+            if(itemPemeriksaans.length !== itemPemeriksaanUuids.length){
+                throw new NotfoundException("Item Pemeriksaan tidak ada");
+            }
+    
+            const kelompokPemeriksaans = await KelompokPemeriksaanRepository.findByUuids(kelomPokPemerikSaanUuids);
+    
+            if(kelompokPemeriksaans.length !== kelomPokPemerikSaanUuids.length){
+                throw new NotfoundException("Kelompok Pemeriksaan tidak ada");
+            }
+    
+            const nameTarifKomponens = await NameTarifKomponenRepository.findByUuids(nameTarifKomponenUuids);
+    
+            if(nameTarifKomponens.length !== nameTarifKomponenUuids.length){
+                throw new NotfoundException("Komponen Tarif tidak ada");
+            }
+    
 
         await TarifLabRepository.update(uuid, {
             code: validData.code,
