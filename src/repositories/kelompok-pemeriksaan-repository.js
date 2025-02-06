@@ -9,14 +9,14 @@ KelompokPemeriksaanModel.belongsTo(CategoryPemeriksaanModel, {
 })
 
 export default class KelompokPemeriksaanRepository {
-    static async create(data) {
-        return await KelompokPemeriksaanModel.create(data);
+    static async create(data, transaction) {
+        return await KelompokPemeriksaanModel.create(data, { transaction });
     }
 
-    static async update(uuid, data) {
+    static async update(uuid, data, transaction) {
         return await KelompokPemeriksaanModel.update(data, {
             where: { uuid: uuid },
-        });
+        }, { transaction });
     }
 
     static async findByUuids(uuids) {
@@ -32,10 +32,11 @@ export default class KelompokPemeriksaanRepository {
         });
     }
 
-    static async delete(uuid) {
+    static async delete(uuid, transaction) {
         return await KelompokPemeriksaanModel.update(
             { deleted_at: toEpochDate(new Date()) },
-            { where: { uuid: uuid } }
+            { where: { uuid: uuid } },
+            { transaction }
         );
     }
 
@@ -62,7 +63,41 @@ export default class KelompokPemeriksaanRepository {
             },
             attributes: {
                 exclude: ["created_at", "updated_at", "deleted_at"],
-            }
+            },
+            include:[
+                {
+                    model: ItemKelompokPemeriksaanModel,
+                    as: "item_kelompok_pemeriksaan",
+                    where: {
+                        deleted_at: {
+                            [Op.is]: null,
+                        },
+                    },
+                    include :{
+                        model : ItemPemeriksaanModel,
+                        as : "item_pemeriksaan",
+                        where : {
+                            deleted_at : {
+                                [Op.is] : null
+                            }
+                        },
+                        attributes : ["uuid", "name", "code"]
+                    }
+                },
+                 {
+                    model : CategoryPemeriksaanModel,
+                    as : "category_pemeriksaan",
+                    where : {
+                        deleted_at : {
+                            [Op.is] : null
+                        }
+                    },
+                    attributes : ["uuid", "name", "code"]
+                }
+            ],
+            attributes: {
+                exclude: ["created_at", "updated_at", "deleted_at"],
+            },
         });
     }
 

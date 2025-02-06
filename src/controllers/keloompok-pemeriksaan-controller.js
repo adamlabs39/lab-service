@@ -8,7 +8,7 @@ export default class KelompokPemeriksaanController {
             data.faskes_uuid = "faskes_uuid";
             console.log("kontroler");
             await KelompokPemeriksaanService.create(data);
-            return res.status(201).json(successResponse("Kelompok Pemeriksaan created"));
+            return res.status(201).json(successResponse("Data berhasil disimpan"));
         } catch (error) {
             next(error);
         }
@@ -20,7 +20,7 @@ export default class KelompokPemeriksaanController {
             const data = req.body;
             data.faskes_uuid = "faskes_uuid";
             await KelompokPemeriksaanService.update(uuid, data);
-            return res.status(200).json(successResponse("Kelompok Pemeriksaan updated"));
+            return res.status(200).json(successResponse("Data berhasil diedit"));
         } catch (error) {
             next(error);
         }
@@ -30,7 +30,17 @@ export default class KelompokPemeriksaanController {
         try {
             const uuid = req.params.uuid;
             await KelompokPemeriksaanService.delete(uuid);
-            return res.status(200).json(successResponse("Kelompok Pemeriksaan deleted"));
+            return res.status(200).json(successResponse("Data berhasil dhapus   "));
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    static async show(req, res, next) {
+        try {
+            const uuid = req.params.uuid;
+            const result = await KelompokPemeriksaanService.show(uuid);
+            return res.status(200).json(successResponse("Data berhasil ditampilkan", result));
         } catch (error) {
             next(error);
         }
@@ -43,7 +53,7 @@ export default class KelompokPemeriksaanController {
             req.body.limit = req.query.limit;
             req.body.faskes_uuid = "faskes_uuid";
             const result = await KelompokPemeriksaanService.getAll(req.body);
-            return res.status(200).json(successResponse("Kelompok Pemeriksaan found", result));
+            return res.status(200).json(successResponse("Data berhasil ditampilkan", result));
         } catch (error) {
             next(error);
         }

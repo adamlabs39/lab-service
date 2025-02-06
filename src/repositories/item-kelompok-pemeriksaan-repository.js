@@ -26,23 +26,25 @@ ItemKelompokPemeriksaanModel.belongsTo(KelompokPemeriksaanModel, {
   })
 
 export default class ItemKelompokPemeriksaanRepository {
-    static async update(uuid, data) {
+    static async update(uuid, data, transaction) {
         return await ItemKelompokPemeriksaanModel.update(data, {
             where: { uuid: uuid },
-        });
+        }, { transaction });
     }
 
-    static async delete(uuid) {
+    static async delete(uuid, transaction) {
         return await ItemKelompokPemeriksaanModel.update(
             { deleted_at: toEpochDate(new Date()) },
-            { where: { uuid: uuid } }
+            { where: { uuid: uuid } },
+            { transaction }
         );
     }
 
-    static async deleteByKelompokPemeriksaan(kelompok_pemeriksaan_uuid) {
+    static async deleteByKelompokPemeriksaan(kelompok_pemeriksaan_uuid, transaction) {
         return await ItemKelompokPemeriksaanModel.update(
           { deleted_at: toEpochDate(new Date()) },
-          { where: { kelompok_pemeriksaan_uuid: kelompok_pemeriksaan_uuid } }
+          { where: { kelompok_pemeriksaan_uuid: kelompok_pemeriksaan_uuid } },
+            { transaction }
         );
       }
 
@@ -61,8 +63,8 @@ export default class ItemKelompokPemeriksaanRepository {
         });
     }
 
-    static async bulkCreate(data) {
-        return await ItemKelompokPemeriksaanModel.bulkCreate(data);
+    static async bulkCreate(data, transaction) {
+        return await ItemKelompokPemeriksaanModel.bulkCreate(data, { transaction });
     }
 
     static async findByUuid(uuid) {
