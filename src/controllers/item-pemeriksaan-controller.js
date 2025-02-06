@@ -54,4 +54,45 @@ export default class ItemPemeriksaanController {
             next(error);
         }
     }
+
+    static async createNilaiRujukan(req, res, next) {
+        try {
+            req.body.faskes_uuid = "faskes_uuid";
+            await ItemPemeriksaanService.createNilaiRujukan(req.body);
+            return res.status(201).json(successResponse("Nilai Rujukan created"));
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    static async findAllNilaiRujukan(req, res, next) {
+        try {
+            const item_pemeriksaan_uuid = req.params.item_pemeriksaan_uuid;
+            const itemPemeriksaan = await ItemPemeriksaanService.findAllNilaiRujukan( item_pemeriksaan_uuid);
+            res.status(200).json(successResponse("Nilai Rujukan list", itemPemeriksaan));
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    static async deleteNilaiRujukan(req, res, next) {
+        try {
+            const uuid = req.params.uuid
+            await ItemPemeriksaanService.deleteNilaiRujukan(uuid);
+            res.status(200).json(successResponse("Nilai Rujukan deleted"));
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    static async updateNilaiRujukan(req, res, next) {
+        try {
+            const uuid = req.params.uuid
+            req.body.faskes_uuid = "faskes_uuid";
+            await ItemPemeriksaanService.updateNilaiRujukan(uuid, req.body);
+            res.status(200).json(successResponse("Nilai Rujukan updated"));
+        } catch (error) {
+            next(error);
+        }
+    }
 }

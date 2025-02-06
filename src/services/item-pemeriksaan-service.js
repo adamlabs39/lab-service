@@ -8,6 +8,9 @@ import ConflictException from "../exception/conflict-exception.js";
 import NotfoundException from "../exception/notfound-exception.js";
 import PilihanHasilItemPemeriksaanRepository from "../repositories/pilihan-hasil-item-pemeriksaan-repository.js";
 import CategoryPemeriksaanRepository from "../repositories/category-pemeriksaan-repository.js";
+import NilaiRujukanValidation from "../validations/nilai-rujukan-validation.js";
+import NilaiRujukanRepository from "../repositories/nilai-rujukan-repository.js";
+import BadRequestException from "../exception/bad-request-exception.js";
 
 
 export default class ItemPemeriksaanService {
@@ -113,12 +116,9 @@ export default class ItemPemeriksaanService {
     static async delete(uuid) {
         const isItemPemeriksaanExist = await ItemPemeriksaanRepository.findByUuid(uuid);
 
-        console.log("uuid", uuid);
         if (!isItemPemeriksaanExist) {
             throw new NotfoundException("Item Pemeriksaan not found");
         }
-
-        console.log("uuid", uuid);
 
         const itemPemeriksaan = await ItemPemeriksaanRepository.delete(uuid);
         return itemPemeriksaan;
@@ -137,5 +137,77 @@ export default class ItemPemeriksaanService {
     static async findAll(req) {
         const itemPemeriksaan = await ItemPemeriksaanRepository.findAll(req);
         return itemPemeriksaan;
+    }
+
+    static async createNilaiRujukan(req){
+        console.log("req", req.item_pemeriksaan_uuid );
+        const validItemPemeriksaanUuid = ZodValidator.validate(NilaiRujukanValidation.PEMERIKSAAN_UUID, req.item_pemeriksaan_uuid);
+        const isItemPemeriksaanExist = await ItemPemeriksaanRepository.findByUuid(validItemPemeriksaanUuid);
+
+        if (!isItemPemeriksaanExist) {
+            throw new NotfoundException("Item Pemeriksaan not found");
+        }
+
+        let validata
+        if(isItemPemeriksaanExist.jenis_input == "angka"){
+            validata = ZodValidator.validate(NilaiRujukanValidation.CREATE_ANGKA, req);
+        }else if(isItemPemeriksaanExist.jenis_input === "text" || item_pemeriksaan_uuid.jenis_input === "long text"){
+            validata = ZodValidator.validate(NilaiRujukanValidation.CREATE_TEXT, req);
+        }else{
+            throw new BadRequestException("Jenis input tidak valid");
+        }
+
+         await NilaiRujukanRepository.create({
+            ...validata
+         }); 
+    }
+
+    static async findAllNilaiRujukan(item_pemeriksaan_uuid){
+        const isItemPemeriksaanExist = await ItemPemeriksaanRepository.findByUuid(item_pemeriksaan_uuid);
+
+        if (!isItemPemeriksaanExist) {
+            throw new NotfoundException("Item Pemeriksaan not found");
+        }
+
+        return await NilaiRujukanRepository.findByItemPemeriksaan(item_pemeriksaan_uuid);
+        
+    }
+
+    static async updateNilaiRujukan(uuid, req){
+        const isNilairujukanExist = await NilaiRujukanRepository.findByUuid(uuid);
+
+        if (!isNilairujukanExist) {
+            throw new NotfoundException("Nilai Rujukan not found");
+        }
+
+        const validPemeriksaanUuid = ZodValidator.validate(NilaiRujukanValidation.PEMERIKSAAN_UUID, req.item_pemeriksaan_uuid);
+
+        const isItemPemeriksaanExist = await ItemPemeriksaanRepository.findByUuid(validPemeriksaanUuid);
+
+        if (!isItemPemeriksaanExist) {
+            throw new NotfoundException("Item Pemeriksaan not found");
+        }
+
+        let validata
+
+        if(isItemPemeriksaanExist.jenis_input == "angka"){
+            validata = ZodValidator.validate(NilaiRujukanValidation.UPDATE_ANGKA, req);
+        }else if(isItemPemeriksaanExist.jenis_input === "text" || item_pemeriksaan_uuid.jenis_input === "long text"){
+            validata = ZodValidator.validate(NilaiRujukanValidation.UPDATE_TEXT, req);
+        }else{
+            throw new BadRequestException("Jenis input tidak valid");
+        }
+
+        await NilaiRujukanRepository.update(uuid, validata);
+    }
+
+    static async deleteNilaiRujukan(uuid){
+        const isNilairujukanExist = await NilaiRujukanRepository.findByUuid(uuid);
+
+        if (!isNilairujukanExist) {
+            throw new NotfoundException("Nilai Rujukan not found");
+        }
+
+        await NilaiRujukanRepository.delete(uuid);
     }
 }

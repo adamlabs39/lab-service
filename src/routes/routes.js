@@ -40,5 +40,10 @@ routes.get(`${baseUrl}/tarif-lab`, TarifLabController.getAll);
 routes.put(`${baseUrl}/tarif-lab/:uuid`, TarifLabController.update);
 routes.delete(`${baseUrl}/tarif-lab/:uuid`, TarifLabController.delete);
 
+routes.post(`${baseUrl}/nilai-rujukan/`, ItemPemeriksaanController.createNilaiRujukan);
+routes.get(`${baseUrl}/nilai-rujukan/:item_pemeriksaan_uuid`, ItemPemeriksaanController.findAllNilaiRujukan);
+routes.put(`${baseUrl}/nilai-rujukan/:uuid`, ItemPemeriksaanController.updateNilaiRujukan);
+routes.delete(`${baseUrl}/nilai-rujukan/:uuid`, ItemPemeriksaanController.deleteNilaiRujukan);
+
 
 export default routes;

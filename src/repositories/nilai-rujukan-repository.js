@@ -1,0 +1,45 @@
+import { NilaiRujukanModel } from "@adameds/model-sdk/lab";
+import toEpochDate from "../helpers/date-helper.js";
+import { Op } from "sequelize";
+
+export default class NilaiRujukanRepository {
+    static async create(data) {
+        return await NilaiRujukanModel.create(data);
+    }
+
+   static async findByUuid(uuid) {
+        return await NilaiRujukanModel.findOne({
+            where: { uuid: uuid, deleted_at: { [Op.is]: null } },
+            attributes: {
+                exclude: ["created_at", "updated_at", "deleted_at"],
+            },
+        });
+    }
+
+    static async findByItemPemeriksaan(item_pemeriksaan_uuid) {
+        return await NilaiRujukanModel.findAll({
+            where: {
+                item_pemeriksaan_uuid: item_pemeriksaan_uuid,
+                deleted_at: {
+                    [Op.is]: null
+                },
+            },
+            attributes:{
+                exclude: ["created_at", "updated_at", "deleted_at"]
+            }
+        });
+    }
+
+    static async update(uuid, data) {
+        return await NilaiRujukanModel.update(data, {
+            where: { uuid: uuid },
+        });
+    }
+
+    static async delete(uuid) {
+        return await NilaiRujukanModel.update(
+            { deleted_at: toEpochDate(new Date()) },
+            { where: { uuid: uuid } }
+        );
+    }
+}
