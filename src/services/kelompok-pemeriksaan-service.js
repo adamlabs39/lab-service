@@ -14,13 +14,11 @@ export default class KelompokPemeriksaanService {
     static async create(req) {
         const validData = ZodValidator.validate(KelompokPemeriksaanValidation.CREATE, req);
 
-        validData.item_pemeriksaans.forEach(async (item) => {
-           const isItemPemeriksaanExist = await ItemPemeriksaanRepository.findByUuid(item);
+        const itemPemeriksaans = await ItemPemeriksaanRepository.findByUuids(validData.item_pemeriksaans);
 
-              if (!isItemPemeriksaanExist) {
-                throw new NotfoundException("Item Pemeriksaan not found");
-                }
-        });
+        if(itemPemeriksaans.length !== validData.item_pemeriksaans.length){
+            throw new NotfoundException("Item Pemeriksaan not found");
+        }
 
         const isCategoryPemeriksaanExist = await CategoryPemeriksaanRepository.findByUuid(validData.category_pemeriksaan_uuid);
 
@@ -77,13 +75,11 @@ export default class KelompokPemeriksaanService {
 
         const validData = ZodValidator.validate(KelompokPemeriksaanValidation.UPDATE, data);
 
-        validData.item_pemeriksaans.forEach(async (item) => {
-            const isItemPemeriksaanExist = await ItemPemeriksaanRepository.findByUuid(item);
+        const itemPemeriksaans = await ItemPemeriksaanRepository.findByUuids(validData.item_pemeriksaans);
 
-            if (!isItemPemeriksaanExist) {
-                throw new NotfoundException("Item Pemeriksaan not found");
-            }
-        });
+        if(itemPemeriksaans.length !== validData.item_pemeriksaans.length){
+            throw new NotfoundException("Item Pemeriksaan not found");
+        }
 
         const isCategoryPemeriksaanExist = await CategoryPemeriksaanRepository.findByUuid(validData.category_pemeriksaan_uuid);
 

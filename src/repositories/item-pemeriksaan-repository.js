@@ -15,6 +15,19 @@ export default class ItemPemeriksaanRepository {
     });
   }
 
+  static async findByUuids(uuids) {
+    return await ItemPemeriksaanModel.findAll({
+      where: {
+        uuid: {
+          [Op.in]: uuids,
+        },
+        deleted_at: {
+          [Op.is]: null,
+        },
+      },
+    });
+  }
+
 
   static async delete(uuid) {
     console.log("uuid", uuid);
