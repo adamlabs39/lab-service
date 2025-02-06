@@ -11,6 +11,7 @@ import CategoryPemeriksaanRepository from "../repositories/category-pemeriksaan-
 import NilaiRujukanValidation from "../validations/nilai-rujukan-validation.js";
 import NilaiRujukanRepository from "../repositories/nilai-rujukan-repository.js";
 import BadRequestException from "../exception/bad-request-exception.js";
+import sequelizeInstance from "@adameds/model-sdk/instance";
 
 
 export default class ItemPemeriksaanService {
@@ -22,58 +23,59 @@ export default class ItemPemeriksaanService {
         const isCategoryPemeriksaanExist = await CategoryPemeriksaanRepository.findByUuid(validData.category_pemeriksaan_uuid);
 
         if (!isCategoryPemeriksaanExist) {
-            throw new NotfoundException("Category Pemeriksaan not found");
+            throw new NotfoundException("Category Pemeriksaan tidak ada");
         }
 
         if (isItemPemeriksaanExist) {
-            throw new ConflictException("Item Pemeriksaan already exist");
+            throw new ConflictException("Item Pemeriksaan dengan code tersebut telah digunakan");
         }
         
         const isIoincExist = await LoincRepository.findByUuid(req.loinc_uuid);
         
         if (!isIoincExist) {
             console.log("404")
-            throw new NotfoundException("Loinc not found");
+            throw new NotfoundException("Loinc tidak ada");
         }
 
         if(req.snomed_uuid){
             const isSnomedExist = await SnomedRepository.find(req.snomed_uuid);
             if (!isSnomedExist) {
-                throw new NotfoundException("Snomed not found");
+                throw new NotfoundException("Snomed tidak ada");
             }
         }
 
         if(req.icd9_uuid){
             const isIcd9Exist = await Icd9Repository.find(req.icd9_uuid);
             if (!isIcd9Exist) {
-                throw new NotfoundException("Icd9 not found");
+                throw new NotfoundException("Icd9 tidak ada");
             }
         }
 
         
-        const itemPemeriksaan = await ItemPemeriksaanRepository.create(validData);
-        
-        if(validData.jenis_input === "pilihan"){
-            await PilihanHasilItemPemeriksaanRepository.create({
-                item_pemeriksaan_uuid: itemPemeriksaan.uuid,
-                pilihan_hasil: validData.pilihan_hasil_item_pemeriksaans,
-                "faskes_uuid": validData.faskes_uuid
-            })
-        }
-        return itemPemeriksaan;
+        sequelizeInstance.transaction(async (t) => {
+            const itemPemeriksaan = await ItemPemeriksaanRepository.create(validData, t);
+            if(validData.jenis_input === "pilihan"){
+                await PilihanHasilItemPemeriksaanRepository.create({
+                    item_pemeriksaan_uuid: itemPemeriksaan.uuid,
+                    pilihan_hasil: validData.pilihan_hasil_item_pemeriksaans,
+                    "faskes_uuid": validData.faskes_uuid
+                }, t)
+            }
+        })
+    
     }
 
     static async update(uuid, req) {
         const isItemPemeriksaanExist = await ItemPemeriksaanRepository.findByUuid(uuid);
 
         if (!isItemPemeriksaanExist) {
-            throw new NotfoundException("Item Pemeriksaan not found");
+            throw new NotfoundException("Item Pemeriksaan tidak ada");
         }
 
         const isCategoryPemeriksaanExist = await CategoryPemeriksaanRepository.findByUuid(req.category_pemeriksaan_uuid);
 
         if (!isCategoryPemeriksaanExist) {
-            throw new NotfoundException("Category Pemeriksaan not found");
+            throw new NotfoundException("Category Pemeriksaan tidak ada");
         }
 
         const validData = ZodValidator.validate(ItemPemeriksaanValidation.UPDATE, req);
@@ -81,54 +83,59 @@ export default class ItemPemeriksaanService {
         const isIoincExist = await LoincRepository.findByUuid(req.loinc_uuid);
 
         if (!isIoincExist) {
-            throw new NotfoundException("Loinc not found");
+            throw new NotfoundException("Loinc tidak ada");
         }
 
         if(req.snomed_uuid){
             const isSnomedExist = await SnomedRepository.find(req.snomed_uuid);
             if (!isSnomedExist) {
-                throw new NotfoundException("Snomed not found");
+                throw new NotfoundException("Snomed tidak ada");
             }
         }
 
         if(req.icd9_uuid){
             const isIcd9Exist = await Icd9Repository.find(req.icd9_uuid);
             if (!isIcd9Exist) {
-                throw new NotfoundException("Icd9 not found");
+                throw new NotfoundException("Icd9 tidak ada");
             }
         }
 
         
-        const itemPemeriksaan = await ItemPemeriksaanRepository.update(uuid, validData);
-        
-        if(validData.jenis_input === "pilihan"){
-            await PilihanHasilItemPemeriksaanRepository.deleteByItemPemeriksaan(uuid);
-            await PilihanHasilItemPemeriksaanRepository.create({
-                item_pemeriksaan_uuid: uuid,
-                pilihan_hasil: validData.pilihan_hasil_item_pemeriksaans,
-                "faskes_uuid": validData.faskes_uuid
-            })
-        }
+        sequelizeInstance.transaction(async (t) => {
+            await ItemPemeriksaanRepository.update(uuid, validData, t);
+            if(validData.jenis_input === "pilihan"){
+                await PilihanHasilItemPemeriksaanRepository.deleteByItemPemeriksaan(uuid, t);
+                await PilihanHasilItemPemeriksaanRepository.create({
+                    item_pemeriksaan_uuid: uuid,
+                    pilihan_hasil: validData.pilihan_hasil_item_pemeriksaans,
+                    "faskes_uuid": validData.faskes_uuid
+                }, t)
+            }
+        })
 
-        return itemPemeriksaan;
     }
 
     static async delete(uuid) {
         const isItemPemeriksaanExist = await ItemPemeriksaanRepository.findByUuid(uuid);
 
         if (!isItemPemeriksaanExist) {
-            throw new NotfoundException("Item Pemeriksaan not found");
+            throw new NotfoundException("Item Pemeriksaan tidak ada");
         }
 
-        const itemPemeriksaan = await ItemPemeriksaanRepository.delete(uuid);
-        return itemPemeriksaan;
+        sequelizeInstance.transaction(async (t) => {
+            if(isItemPemeriksaanExist.jenis_input === "pilihan"){
+                await PilihanHasilItemPemeriksaanRepository.deleteByItemPemeriksaan(uuid, t);
+            }
+    
+            await ItemPemeriksaanRepository.delete(uuid, t);
+        })
     }
 
     static async show(uuid) {
         const itemPemeriksaan = await ItemPemeriksaanRepository.findByUuid(uuid);
 
         if (!itemPemeriksaan) {
-            throw new NotfoundException("Item Pemeriksaan not found");
+            throw new NotfoundException("Item Pemeriksaan tidak ada");
         }
 
         return itemPemeriksaan;
@@ -145,7 +152,7 @@ export default class ItemPemeriksaanService {
         const isItemPemeriksaanExist = await ItemPemeriksaanRepository.findByUuid(validItemPemeriksaanUuid);
 
         if (!isItemPemeriksaanExist) {
-            throw new NotfoundException("Item Pemeriksaan not found");
+            throw new NotfoundException("Item Pemeriksaan tidak ada");
         }
 
         let validata
@@ -166,7 +173,7 @@ export default class ItemPemeriksaanService {
         const isItemPemeriksaanExist = await ItemPemeriksaanRepository.findByUuid(item_pemeriksaan_uuid);
 
         if (!isItemPemeriksaanExist) {
-            throw new NotfoundException("Item Pemeriksaan not found");
+            throw new NotfoundException("Item Pemeriksaan tidak ada");
         }
 
         return await NilaiRujukanRepository.findByItemPemeriksaan(item_pemeriksaan_uuid);
@@ -177,7 +184,7 @@ export default class ItemPemeriksaanService {
         const isNilairujukanExist = await NilaiRujukanRepository.findByUuid(uuid);
 
         if (!isNilairujukanExist) {
-            throw new NotfoundException("Nilai Rujukan not found");
+            throw new NotfoundException("Nilai Rujukan tidak ada");
         }
 
         const validPemeriksaanUuid = ZodValidator.validate(NilaiRujukanValidation.PEMERIKSAAN_UUID, req.item_pemeriksaan_uuid);
@@ -185,7 +192,7 @@ export default class ItemPemeriksaanService {
         const isItemPemeriksaanExist = await ItemPemeriksaanRepository.findByUuid(validPemeriksaanUuid);
 
         if (!isItemPemeriksaanExist) {
-            throw new NotfoundException("Item Pemeriksaan not found");
+            throw new NotfoundException("Item Pemeriksaan tidak ada");
         }
 
         let validata
@@ -205,7 +212,7 @@ export default class ItemPemeriksaanService {
         const isNilairujukanExist = await NilaiRujukanRepository.findByUuid(uuid);
 
         if (!isNilairujukanExist) {
-            throw new NotfoundException("Nilai Rujukan not found");
+            throw new NotfoundException("Nilai Rujukan tidak ada");
         }
 
         await NilaiRujukanRepository.delete(uuid);

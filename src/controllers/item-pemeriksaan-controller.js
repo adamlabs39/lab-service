@@ -6,7 +6,7 @@ export default class ItemPemeriksaanController {
         try {
             req.body.faskes_uuid = "faskes_uuid";
             await ItemPemeriksaanService.create(req.body);
-            return res.status(201).json(successResponse("Item Pemeriksaan created"));
+            return res.status(201).json(successResponse("Data berhasil disimpan"));
         } catch (error) {
             next(error);
         }
@@ -18,7 +18,7 @@ export default class ItemPemeriksaanController {
             const uuid = req.params.uuid;
             await ItemPemeriksaanService.update(uuid, req.body);
 
-            res.status(200).json(successResponse("Item Pemeriksaan updated"));
+            res.status(200).json(successResponse("Data berhasil diedit"));
         } catch (error) {
             next(error);
         }
@@ -28,7 +28,7 @@ export default class ItemPemeriksaanController {
         try {
             const uuid = req.params.uuid;
             await ItemPemeriksaanService.delete(uuid);
-            res.status(200).json(successResponse("Item Pemeriksaan deleted"));
+            res.status(200).json(successResponse("Data berhasil dihapus"));
         } catch (error) {
             next(error);
         }
@@ -38,7 +38,7 @@ export default class ItemPemeriksaanController {
         try {
             const uuid = req.params.uuid;
             const itemPemeriksaan = await ItemPemeriksaanService.show(uuid);
-            res.status(200).json(successResponse("Item Pemeriksaan detail", itemPemeriksaan));
+            res.status(200).json(successResponse("Data berhasil ditampilkan", itemPemeriksaan));
         } catch (error) {
             next(error);
         }
@@ -49,7 +49,7 @@ export default class ItemPemeriksaanController {
         try {
             req.body.faskes_uuid = "faskes_uuid";
             const itemPemeriksaan = await ItemPemeriksaanService.findAll(req.body);
-            res.status(200).json(successResponse("Item Pemeriksaan list", itemPemeriksaan));
+            res.status(200).json(successResponse("Data berhasil ditampilkan", itemPemeriksaan));
         } catch (error) {
             next(error);
         }

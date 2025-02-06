@@ -4,15 +4,14 @@ import toEpochDate from "../helpers/date-helper.js";
 import { Op } from "sequelize";
 
 export default class ItemPemeriksaanRepository {
-  static async create(data) {
-    console.log("data", data);
-    return await ItemPemeriksaanModel.create(data);
+  static async create(data, transaction) {
+    return await ItemPemeriksaanModel.create(data, { transaction });
   }
 
-  static async update(uuid, data) {
+  static async update(uuid, data, transaction) {
     return await ItemPemeriksaanModel.update(data, {
       where: { uuid: uuid },
-    });
+    }, { transaction });
   }
 
   static async findByUuids(uuids) {
@@ -29,11 +28,11 @@ export default class ItemPemeriksaanRepository {
   }
 
 
-  static async delete(uuid) {
-    console.log("uuid", uuid);
+  static async delete(uuid, transaction) {
     return await ItemPemeriksaanModel.update(
       { deleted_at: toEpochDate(new Date()) },
-      { where: { uuid: uuid } }
+      { where: { uuid: uuid } },
+      { transaction }
     );
   }
 
