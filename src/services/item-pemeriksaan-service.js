@@ -164,9 +164,9 @@ export default class ItemPemeriksaanService {
             throw new BadRequestException("Jenis input tidak valid");
         }
 
-         await NilaiRujukanRepository.create({
-            ...validata
-         }); 
+        sequelizeInstance.transaction(async (t) => {
+            await NilaiRujukanRepository.create(validata, t);
+        })
     }
 
     static async findAllNilaiRujukan(item_pemeriksaan_uuid){
@@ -205,7 +205,9 @@ export default class ItemPemeriksaanService {
             throw new BadRequestException("Jenis input tidak valid");
         }
 
-        await NilaiRujukanRepository.update(uuid, validata);
+        sequelizeInstance.transaction(async (t) => {
+            await NilaiRujukanRepository.update(uuid, validata, t);
+        })
     }
 
     static async deleteNilaiRujukan(uuid){
@@ -215,6 +217,18 @@ export default class ItemPemeriksaanService {
             throw new NotfoundException("Nilai Rujukan tidak ada");
         }
 
-        await NilaiRujukanRepository.delete(uuid);
+        sequelizeInstance.transaction(async (t) => {
+            await NilaiRujukanRepository.delete(uuid, t);
+        })
+    }
+
+    static async showNilaiRujukan(uuid){
+        const isNilairujukanExist = await NilaiRujukanRepository.findByUuid(uuid);
+
+        if (!isNilairujukanExist) {
+            throw new NotfoundException("Nilai Rujukan tidak ada");
+        }
+
+        return isNilairujukanExist;
     }
 }

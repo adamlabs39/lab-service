@@ -45,6 +45,7 @@ routes.post(`${baseUrl}/nilai-rujukan/`, ItemPemeriksaanController.createNilaiRu
 routes.get(`${baseUrl}/nilai-rujukan/:item_pemeriksaan_uuid`, ItemPemeriksaanController.findAllNilaiRujukan);
 routes.put(`${baseUrl}/nilai-rujukan/:uuid`, ItemPemeriksaanController.updateNilaiRujukan);
 routes.delete(`${baseUrl}/nilai-rujukan/:uuid`, ItemPemeriksaanController.deleteNilaiRujukan);
+routes.get(`${baseUrl}/nilai-rujukan/show/:uuid`, ItemPemeriksaanController.showNilaiRujukan);
 
 
 export default routes;

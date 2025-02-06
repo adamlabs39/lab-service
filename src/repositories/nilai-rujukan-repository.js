@@ -3,8 +3,8 @@ import toEpochDate from "../helpers/date-helper.js";
 import { Op } from "sequelize";
 
 export default class NilaiRujukanRepository {
-    static async create(data) {
-        return await NilaiRujukanModel.create(data);
+    static async create(data,transaction) {
+        return await NilaiRujukanModel.create(data, { transaction });
     }
 
    static async findByUuid(uuid) {
@@ -30,16 +30,17 @@ export default class NilaiRujukanRepository {
         });
     }
 
-    static async update(uuid, data) {
+    static async update(uuid, data, transaction) {
         return await NilaiRujukanModel.update(data, {
             where: { uuid: uuid },
-        });
+        }, {transaction});
     }
 
-    static async delete(uuid) {
+    static async delete(uuid, transaction) {
         return await NilaiRujukanModel.update(
             { deleted_at: toEpochDate(new Date()) },
-            { where: { uuid: uuid } }
+            { where: { uuid: uuid } },
+            { transaction }
         );
     }
 }
