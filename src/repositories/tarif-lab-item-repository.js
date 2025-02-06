@@ -21,14 +21,15 @@ TarifLabItemModel.belongsTo(KelompokPemeriksaanModel, {
 })
 
 export default class TarifLabItemRepository {
-    static async bulkCreate(data) {
-        return await TarifLabItemModel.bulkCreate(data);
+    static async bulkCreate(data, transaction) {
+        return await TarifLabItemModel.bulkCreate(data, { transaction });
     }
 
-    static async deleteByTarifLab(tarif_lab_uuid) {
+    static async deleteByTarifLab(tarif_lab_uuid, transaction) {
         return await TarifLabItemModel.update(
             { deleted_at: toEpochDate(new Date()) },
-            { where: { tarif_lab_uuid: tarif_lab_uuid } }
+            { where: { tarif_lab_uuid: tarif_lab_uuid } },
+            { transaction }
         );
     }
 }

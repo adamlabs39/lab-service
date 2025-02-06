@@ -12,6 +12,7 @@ import NotfoundException from "../exception/notfound-exception.js";
 import TarifLabValidation from "../validations/tarif-lab-validation.js";
 import NameTarifKomponenRepository from "../repositories/name-tarif-komponen-repository.js";
 import PenjaminRepository from "../repositories/penjamin-repository.js";
+import sequelizeInstance from "@adameds/model-sdk/instance";
 
 export default class TarifLabService{
     static async create(req){
@@ -67,62 +68,57 @@ export default class TarifLabService{
             throw new NotfoundException("Komponen Tarif tidak ada");
         }
 
-        const tarifLab = await TarifLabRepository.create({
-            code: validData.code,
-            name: validData.name,
-            status: validData.status,
-            grand_total: validData.grand_total,
-            faskes_uuid: validData.faskes_uuid
-        });
+       sequelizeInstance.transaction(async (t) => {
+            const tarifLab = await TarifLabRepository.create(validData, t);
 
+            const tarifLabPenjamin = validData.penjamin_uuids.map(item =>{
+                return {
+                    tarif_lab_uuid: tarifLab.uuid,
+                    penjamin_uuid: item,
+                    faskes_uuid: validData.faskes_uuid
+                }
+            })
 
-        const tarifLabPenjamin = validData.penjamin_uuids.map(item =>{
-            return {
-                tarif_lab_uuid: tarifLab.uuid,
-                penjamin_uuid: item,
-                faskes_uuid: validData.faskes_uuid
-            }
-        }) 
+            await TarifLabPenjaminRepository.bulkCreate(tarifLabPenjamin, t);
 
-        await TarifLabPenjaminRepository.bulkCreate(tarifLabPenjamin);
+            const tarifLabPelayanan = validData.pelayanans.map(item =>{
+                return {
+                    tarif_lab_uuid: tarifLab.uuid,
+                    pelayanan: item,
+                    faskes_uuid: validData.faskes_uuid
+                }
+            })
 
-        const tarifLabPelayanan = validData.pelayanans.map(item =>{
-            return {
-                tarif_lab_uuid: tarifLab.uuid,
-                pelayanan: item,
-                faskes_uuid: validData.faskes_uuid
-            }
-        })
+            await TarifLabPelayananRepository.bulkCreate(tarifLabPelayanan, t);
 
-        await TarifLabPelayananRepository.bulkCreate(tarifLabPelayanan);
+            const tarifLabItems = validData.tarif_lab_items.map(item =>{
+                return {
+                    tarif_lab_uuid: tarifLab.uuid,
+                    kelompok_pemeriksaan_uuid: item.kelompok_pemeriksaan_uuid,
+                    item_pemeriksaan_uuid: item.item_pemeriksaan_uuid,
+                    faskes_uuid: validData.faskes_uuid
+                }
+            })
 
-        const tarifLabItems = validData.tarif_lab_items.map(item =>{
-            return {
-                tarif_lab_uuid: tarifLab.uuid,
-                kelompok_pemeriksaan_uuid: item.kelompok_pemeriksaan_uuid,
-                item_pemeriksaan_uuid: item.item_pemeriksaan_uuid,
-                faskes_uuid: validData.faskes_uuid
-            }
-        })
+            await TarifLabItemRepository.bulkCreate(tarifLabItems, t);
 
-        await TarifLabItemRepository.bulkCreate(tarifLabItems);
+            const tarifLabKomponenTindakan = []
 
-        const tarifLabKomponenTindakan = []
+            validData.tarif_lab_items.forEach(item => {
+                item.komponen_tindakan_labs.forEach(komponen => {
+                    tarifLabKomponenTindakan.push({
+                        tarif_lab_item_uuid: item.item_pemeriksaan_uuid,
+                        tarif_komponen_uuid: komponen.tarif_komponen_uuid,
+                        diskon: komponen.diskon,
+                        tarif_per_komponen: komponen.tarif_per_komponen,
+                        faskes_uuid: validData.faskes_uuid,
+                        tarif_lab_uuid: tarifLab.uuid
+                    })
+                });
+            })
 
-        validData.tarif_lab_items.forEach(item => {
-            item.komponen_tindakan_labs.forEach(komponen => {
-                tarifLabKomponenTindakan.push({
-                    tarif_lab_item_uuid: item.item_pemeriksaan_uuid,
-                    tarif_komponen_uuid: komponen.tarif_komponen_uuid,
-                    diskon: komponen.diskon,
-                    tarif_per_komponen: komponen.tarif_per_komponen,
-                    faskes_uuid: validData.faskes_uuid,
-                    tarif_lab_uuid: tarifLab.uuid
-                })
-            });
-        })
-
-        await TarifKomponenTindakanLabRepository.bulkCreate(tarifLabKomponenTindakan);
+            await TarifKomponenTindakanLabRepository.bulkCreate(tarifLabKomponenTindakan, t);
+       })
 
     }
 
@@ -136,14 +132,16 @@ export default class TarifLabService{
         if (!isTarifLabExist) {
             throw new NotfoundException("Tarif Lab tidak ada");
         }
-        Promise.all([
-           await TarifLabPenjaminRepository.deleteByTarifLab(uuid),
-           await TarifLabPelayananRepository.deleteByTarifLab(uuid),
-           await TarifLabItemRepository.deleteByTarifLab(uuid),
-           await TarifKomponenTindakanLabRepository.deleteByTarifLab(uuid)
-        ])
-
-        return await TarifLabRepository.delete(uuid);
+        sequelizeInstance.transaction(async (t) => {
+            Promise.all([
+                await TarifLabPenjaminRepository.deleteByTarifLab(uuid, t),
+                await TarifLabPelayananRepository.deleteByTarifLab(uuid, t),
+                await TarifLabItemRepository.deleteByTarifLab(uuid, t),
+                await TarifKomponenTindakanLabRepository.deleteByTarifLab(uuid, t)
+             ])
+     
+             return await TarifLabRepository.delete(uuid, t);
+        })
     }
 
     static async update(uuid, req){
@@ -199,71 +197,60 @@ export default class TarifLabService{
                 throw new NotfoundException("Komponen Tarif tidak ada");
             }
     
-
-        await TarifLabRepository.update(uuid, {
-            code: validData.code,
-            name: validData.name,
-            status: validData.status,
-            grand_total: validData.grand_total,
-            faskes_uuid: validData.faskes_uuid
-        });
-
-       Promise.all([
-        await TarifLabPenjaminRepository.deleteByTarifLab(uuid),
-
-        await TarifLabPelayananRepository.deleteByTarifLab(uuid),
-
-        await TarifLabItemRepository.deleteByTarifLab(uuid),
-
-        await TarifKomponenTindakanLabRepository.deleteByTarifLab(uuid),
-       ])
-
-        const tarifLabPenjamin = validData.penjamin_uuids.map(item =>{
-            return {
-                tarif_lab_uuid: uuid,
-                penjamin_uuid: item,
-                faskes_uuid: validData.faskes_uuid
-            }
-        })
-
-        await TarifLabPenjaminRepository.bulkCreate(tarifLabPenjamin);
-
-        const tarifLabPelayanan = validData.pelayanans.map(item =>{
-            return {
-                tarif_lab_uuid: uuid,
-                pelayanan: item,
-                faskes_uuid: validData.faskes_uuid
-            }
-        })
-
-        await TarifLabPelayananRepository.bulkCreate(tarifLabPelayanan);
-
-        const tarifLabItems = validData.tarif_lab_items.map(item =>{
-            return {
-                tarif_lab_uuid: uuid,
-                kelompok_pemeriksaan_uuid: item.kelompok_pemeriksaan_uuid,
-                item_pemeriksaan_uuid: item.item_pemeriksaan_uuid,
-                faskes_uuid: validData.faskes_uuid
-            }
-        })
-
-        await TarifLabItemRepository.bulkCreate(tarifLabItems);
-
-        const tarifLabKomponenTindakan = []
-
-        validData.tarif_lab_items.forEach(item => {
-            item.komponen_tindakan_labs.forEach(komponen => {
-                tarifLabKomponenTindakan.push({
-                    tarif_lab_item_uuid: item.item_pemeriksaan_uuid,
-                    tarif_komponen_uuid: komponen.tarif_komponen_uuid,
-                    diskon: komponen.diskon,
-                    tarif_per_komponen: komponen.tarif_per_komponen,
-                    faskes_uuid: validData.faskes_uuid,
-                    tarif_lab_uuid: uuid
+            sequelizeInstance.transaction(async (t) => {
+                await TarifLabRepository.update(uuid, validData, t);
+    
+                await TarifLabPenjaminRepository.deleteByTarifLab(uuid, t);
+                const tarifLabPenjamin = validData.penjamin_uuids.map(item =>{
+                    return {
+                        tarif_lab_uuid: uuid,
+                        penjamin_uuid: item,
+                        faskes_uuid: validData.faskes_uuid
+                    }
                 })
-            });
-        })
-
-        await TarifKomponenTindakanLabRepository.bulkCreate(tarifLabKomponenTindakan);
+    
+                await TarifLabPenjaminRepository.bulkCreate(tarifLabPenjamin, t);
+    
+                await TarifLabPelayananRepository.deleteByTarifLab(uuid, t);
+                const tarifLabPelayanan = validData.pelayanans.map(item =>{
+                    return {
+                        tarif_lab_uuid: uuid,
+                        pelayanan: item,
+                        faskes_uuid: validData.faskes_uuid
+                    }
+                })
+    
+                await TarifLabPelayananRepository.bulkCreate(tarifLabPelayanan, t);
+    
+                await TarifLabItemRepository.deleteByTarifLab(uuid, t);
+                const tarifLabItems = validData.tarif_lab_items.map(item =>{
+                    return {
+                        tarif_lab_uuid: uuid,
+                        kelompok_pemeriksaan_uuid: item.kelompok_pemeriksaan_uuid,
+                        item_pemeriksaan_uuid: item.item_pemeriksaan_uuid,
+                        faskes_uuid: validData.faskes_uuid
+                    }
+                })
+    
+                await TarifLabItemRepository.bulkCreate(tarifLabItems, t);
+    
+                await TarifKomponenTindakanLabRepository.deleteByTarifLab(uuid, t);
+                const tarifLabKomponenTindakan = []
+    
+                validData.tarif_lab_items.forEach(item => {
+                    item.komponen_tindakan_labs.forEach(komponen => {
+                        tarifLabKomponenTindakan.push({
+                            tarif_lab_item_uuid: item.item_pemeriksaan_uuid,
+                            tarif_komponen_uuid: komponen.tarif_komponen_uuid,
+                            diskon: komponen.diskon,
+                            tarif_per_komponen: komponen.tarif_per_komponen,
+                            faskes_uuid: validData.faskes_uuid,
+                            tarif_lab_uuid: uuid
+                        })
+                    });
+                })
+    
+                await TarifKomponenTindakanLabRepository.bulkCreate(tarifLabKomponenTindakan, t);
+            })
     }
 }

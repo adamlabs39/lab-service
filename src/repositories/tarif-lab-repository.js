@@ -22,8 +22,8 @@ TarifLabModel.hasMany(TarifLabItemModel, {
 })
 
 export default class TarifLabRepository{
-    static async create(data){
-        return await TarifLabModel.create(data);
+    static async create(data, transaction){
+        return await TarifLabModel.create(data, {transaction});
     }
 
     static async findByCode(code, faskes_uuid){
@@ -47,36 +47,25 @@ export default class TarifLabRepository{
         });
     }
 
-    static async update(uuid, data){
+    static async update(uuid, data, transaction){
         return await TarifLabModel.update(data, {
             where: {
                 uuid: uuid
             }
-        });
+        }, {transaction});
     }
 
-    static async delete(uuid){
+    static async delete(uuid, transaction){
         return await TarifLabModel.update({
             deleted_at: toEpochDate(new Date())
         }, {
             where: {
                 uuid: uuid
             }
-        });
+        }, {transaction});
     }
 
     static async findAll(req){
-        // return await TarifLabModel.findAll({
-        //     include:{
-        //         model: TarifLabItemModel,
-        //         as: "tarif_lab_item",
-        //         where: {
-        //             deleted_at: {
-        //                 [Op.is]: null
-        //             }
-        //         },
-        //     }
-        // })
 
         const options = {
             where: {
@@ -126,21 +115,11 @@ export default class TarifLabRepository{
                         {
                             model: KelompokPemeriksaanModel,
                             as: "kelompok_pemeriksaan",
-                            // where: {
-                            //     deleted_at: {
-                            //         [Op.is]: null
-                            //     }
-                            // },
                             attributes: ["uuid", "name"]
                         },
                         {
                             model:ItemPemeriksaanModel,
                             as: "item_pemeriksaan",
-                            // where: {
-                            //     deleted_at: {
-                            //         [Op.is]: null
-                            //     }
-                            // },
                             attributes: ["uuid", "name"]
                         }
                     ]

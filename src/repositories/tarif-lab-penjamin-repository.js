@@ -9,8 +9,8 @@ TarifLabPenjaminModel.belongsTo(PenjaminModel, {
 })
 
 export default class TarifLabPenjaminRepository {
-    static async bulkCreate(data) {
-        return await TarifLabPenjaminModel.bulkCreate(data);
+    static async bulkCreate(data, transaction) {
+        return await TarifLabPenjaminModel.bulkCreate(data, { transaction });
     }
 
     static async findByUuid(uuid) {
@@ -22,10 +22,11 @@ export default class TarifLabPenjaminRepository {
         });
     }
 
-    static async deleteByTarifLab(tarif_lab_uuid) {
+    static async deleteByTarifLab(tarif_lab_uuid, transaction) {
         return await TarifLabPenjaminModel.update(
             { deleted_at: toEpochDate(new Date()) },
-            { where: { tarif_lab_uuid: tarif_lab_uuid } }
+            { where: { tarif_lab_uuid: tarif_lab_uuid } },
+            { transaction }
         );
     }
 }

@@ -3,8 +3,8 @@ import { Op } from "sequelize";
 import toEpochDate from "../helpers/date-helper.js";
 
 export default class TarifKomponenTindakanLabRepository {
-    static async bulkCreate(data) {
-        return await TarifKomponenTindakanLabModel.bulkCreate(data);
+    static async bulkCreate(data, transaction) {
+        return await TarifKomponenTindakanLabModel.bulkCreate(data, { transaction });
     }
 
     static async findByUuid(uuid) {
@@ -18,10 +18,11 @@ export default class TarifKomponenTindakanLabRepository {
         });
     }
 
-    static deleteByTarifLab(uuid) {
+    static deleteByTarifLab(uuid, transaction) {
         return TarifKomponenTindakanLabModel.update(
             { deleted_at: toEpochDate(new Date()) },
-            { where: { tarif_lab_uuid: uuid } }
+            { where: { tarif_lab_uuid: uuid } },
+            { transaction }
         );
     }
 }
