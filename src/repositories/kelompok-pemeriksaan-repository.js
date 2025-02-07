@@ -1,6 +1,7 @@
 import {CategoryPemeriksaanModel, ItemKelompokPemeriksaanModel, ItemPemeriksaanModel, KelompokPemeriksaanModel } from "@adameds/model-sdk/lab";
 import { Op } from "sequelize";
 import toEpochDate from "../helpers/date-helper.js";
+import pagination from "../helpers/pagination.js";
 
 KelompokPemeriksaanModel.belongsTo(CategoryPemeriksaanModel, {
     foreignKey: "category_pemeriksaan_uuid",
@@ -151,6 +152,6 @@ export default class KelompokPemeriksaanRepository {
             },
         };
 
-        return await KelompokPemeriksaanModel.findAll(options);
+        return await pagination(KelompokPemeriksaanModel, req, options);
     }
 }

@@ -38,6 +38,8 @@ export default class TarifLabController {
             req.body.name = req.query.name;
             req.body.page = req.query.page;
             req.body.limit = req.query.limit;
+            req.body.penjamin_uuids = req.query.penjamin_uuids;
+            req.body.pelayanans = req.query.pelayanans;
             req.body.faskes_uuid = "faskes_uuid";
 
             const tarifLabs = await TarifLabService.findAll(req.body);

@@ -9,6 +9,8 @@ export default class  CategoryPemeriksaanValidation {
         faskes_uuid : z.string().min(1).max(255)
     })
 
+    static IMPORT = z.array(this.CREATE)
+
     static UPDATE = z.object({
         code : z.string().min(1).max(255),
         name : z.string().min(1).max(255),

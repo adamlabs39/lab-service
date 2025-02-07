@@ -2,6 +2,7 @@ import {  ItemPemeriksaanModel, KelompokPemeriksaanModel, TarifLabItemModel, Tar
 import { Op } from "sequelize";
 import toEpochDate from "../helpers/date-helper.js";
 import { PenjaminModel } from "@adameds/model-sdk/datamaster";
+import pagination from "../helpers/pagination.js";
 
 TarifLabModel.hasMany(TarifLabPenjaminModel, {
     foreignKey: "tarif_lab_uuid",
@@ -118,6 +119,22 @@ export default class TarifLabRepository{
 
     static async findAll(req){
 
+        const buildWhereCondition = (uuids) => {
+            const condition = {
+                deleted_at: { [Op.is]: null }
+            };
+        
+            if (uuids && uuids.length > 0) {
+                condition.uuid = { [Op.in]: uuids };
+            }
+        
+            return condition;
+        };
+        
+        const wherePenjamInCondition = buildWhereCondition(req.penjamin_uuids);
+        const wherePelayananInCondition = buildWhereCondition(req.pelayanans);
+        
+
         const options = {
             where: {
                 faskes_uuid: req.faskes_uuid,
@@ -132,11 +149,7 @@ export default class TarifLabRepository{
                 {
                     model: TarifLabPenjaminModel,
                     as: "tarif_lab_penjamin",
-                    where: {
-                        deleted_at: {
-                            [Op.is]: null
-                        }
-                    },
+                    where: wherePenjamInCondition,
                     
                     include: {
                         model:PenjaminModel,
@@ -152,11 +165,7 @@ export default class TarifLabRepository{
                 {
                     model: TarifLabPelayananModel,
                     as: "pelayanan",
-                    where: {
-                        deleted_at: {
-                            [Op.is]: null
-                        }
-                    },
+                    where: wherePelayananInCondition,
                     attributes: ["uuid", "pelayanan"]
                 },
                 {
@@ -181,6 +190,6 @@ export default class TarifLabRepository{
             }
         };
 
-        return await TarifLabModel.findAll(options);
+        return await pagination(TarifLabModel, req, options);
     }
 }
