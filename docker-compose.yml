@@ -1,13 +1,25 @@
-version: "3.8"
 services:
-  postgres:
-    image: postgres:latest
+  adameds-lab:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      no_cache: true
+    image: adameds/lab-service:dev
+    container_name: adameds-lab
     ports:
-      - 5432:5432
+      - 8090:8090
+    restart: always
+    networks:
+      - lab-network
     environment:
-      - POSTGRES_PASSWORD=sample_pass
-      - POSTGRES_USER=alliano-dev
+      DOTENV_KEY: ${DOTENV_KEY}
+      API_BASE: ${API_BASE}
+      API_VERSION: ${API_VERSION}
+      BASE_URL: ${BASE_URL}
     volumes:
-      - pg_volume:/var/lib/postgresql/data
-volumes:
-  pg_volume: {}
+      - type: bind
+        source: /home/engineer/adameds/.env.vault
+        target: /adameds-lab/.env.vault
+networks:
+  lab-network:
+    driver: bridge
