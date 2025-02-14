@@ -1,3 +1,4 @@
+import { SpesimenModel } from "@adameds/model-sdk/lab"
 import successResponse from "../response/success-response.js"
 import SpesimenSevice from "../services/spesimen-service.js"
 

@@ -165,10 +165,8 @@ export default class KelompokPemeriksaanService {
     }
 
     static async getAll(req) {
-        const kelompokPemerikasan = await KelompokPemeriksaanRepository.findAll(req);
-        // return kelompokPemerikasan      
-
-        const formatedKelompokPemeriksaan = kelompokPemerikasan.map(kelompokPemeriksaan => {
+        const kelompokPemerikasan = await KelompokPemeriksaanRepository.findAll(req);    
+        const formatedKelompokPemeriksaan = kelompokPemerikasan.data.map(kelompokPemeriksaan => {
             return {
                 id: kelompokPemeriksaan.id,
                 name: kelompokPemeriksaan.name,
