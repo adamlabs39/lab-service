@@ -50,6 +50,7 @@ routes.delete(`${baseUrl}/nilai-rujukan/:uuid`, ItemPemeriksaanController.delete
 routes.get(`${baseUrl}/nilai-rujukan/show/:uuid`, ItemPemeriksaanController.showNilaiRujukan);
 
 routes.post(`${baseUrl}/order-lab`, OrderLabController.create);
+routes.get(`${baseUrl}/order-lab/:uuid`, OrderLabController.show);
 
 
 export default routes;

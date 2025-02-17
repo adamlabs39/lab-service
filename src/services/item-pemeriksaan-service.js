@@ -123,11 +123,13 @@ export default class ItemPemeriksaanService {
         }
 
         sequelizeInstance.transaction(async (t) => {
+            await ItemPemeriksaanRepository.delete(uuid, t);
+            
             if(isItemPemeriksaanExist.jenis_input === "pilihan"){
                 await PilihanHasilItemPemeriksaanRepository.deleteByItemPemeriksaan(uuid, t);
             }
-    
-            await ItemPemeriksaanRepository.delete(uuid, t);
+            
+
         })
     }
 

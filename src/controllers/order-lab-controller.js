@@ -13,4 +13,14 @@ export default class OrderLabController{
             next(error);
         }
     }
+
+    static async show(req, res, next){
+        try {
+            const faskesUuid = "faskes_uuid";
+            const data = await OrderLabService.findOne(req.params.uuid, faskesUuid);
+            res.status(200).json(successResponse("Data berhasil ditampilkan",data));
+        } catch (error) {
+            next(error);
+        }
+    }
 }

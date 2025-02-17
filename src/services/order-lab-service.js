@@ -153,4 +153,14 @@ export default class OrderLabService {
         })
         
     }
+
+    static async findOne(uuid, faskes_uuid){
+        const order = await OrderLabRepository.findByUuid(uuid, faskes_uuid);
+
+        if(!order){
+            throw new NotfoundException("Order tidak ada");
+        }
+
+        return order;
+    }
 }

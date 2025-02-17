@@ -29,7 +29,8 @@ export default class ItemPemeriksaanRepository {
 
 
   static async delete(uuid, transaction) {
-    return await ItemPemeriksaanModel.update(
+    console.log("uuid", uuid);
+    const res = await ItemPemeriksaanModel.update(
       { deleted_at: toEpochDate(new Date()) },
       { where: { uuid: uuid } },
       { transaction }
