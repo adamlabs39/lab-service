@@ -163,4 +163,8 @@ export default class OrderLabService {
 
         return order;
     }
+
+    static async findAll(req){
+        return await OrderLabRepository.findAll(req);
+    }
 }

@@ -23,4 +23,15 @@ export default class OrderLabController{
             next(error);
         }
     }
+
+    static async findAll(req, res, next){
+        try {
+            const data = req.query;
+            data.faskes_uuid = "faskes_uuid";
+            const result = await OrderLabService.findAll(data);
+            res.status(200).json(successResponse("Data berhasil ditampilkan", result));
+        } catch (error) {
+            next(error);
+        }
+    }
 }
