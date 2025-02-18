@@ -149,7 +149,12 @@ export default class OrderLabService {
              )
 
             await OrderLabPemeriksaanRepository.bulkCreate(orderItemsData, t);
-
+            
+             const observationItemdata = itemPemeriksaanUuids.map(item_pemeriksaan_uuid => {
+                return {
+                    noreg : noReg,
+                }
+             })
         })
         
     }
@@ -166,5 +171,85 @@ export default class OrderLabService {
 
     static async findAll(req){
         return await OrderLabRepository.findAll(req);
+    }
+
+    static async update(uuid, req){
+        const validata = ZodValidator.validate(OrderLabValidation.UPDATE, req);
+        const order = await OrderLabRepository.findByUuid(uuid, validata.faskes_uuid);
+
+        if(!order){
+            throw new NotfoundException("Order tidak ada");
+        }
+
+       await sequelizeInstance.transaction(async (t) => {
+        await OrderLabRepository.update(uuid, {
+            cito : req.cito,
+            tgl_pemeriksaan : req.tgl_pemeriksaan,
+            status_puasa : req.status_puasa,
+        }, t);
+
+        if(validata.tarif_lab_uuids){
+            const tarifs = await TarifLabRepository.findByUuids(validata.tarif_lab_uuids);
+
+            if(tarifs.length !== validata.tarif_lab_uuids.length){
+                throw new NotfoundException("Tarif lab tidak ada");
+            }
+
+            const itemPemeriksaanUuids = []
+
+            tarifs.forEach(tarif => {
+                tarif.tarif_lab_item.forEach(item => {
+                    if(item.item_pemeriksaan_uuid){
+                        itemPemeriksaanUuids.push(item.item_pemeriksaan.uuid)
+                    }
+    
+                    if(item.kelompok_pemeriksaan_uuid){
+                        item.kelompok_pemeriksaan.item_kelompok_pemeriksaan.forEach(item_kelompok => {
+                            itemPemeriksaanUuids.push(item_kelompok.item_pemeriksaan.uuid)
+                        })
+                    }
+                })
+            })
+    
+            const duplicates = itemPemeriksaanUuids.filter((uuid, index, self) => 
+                uuid !== null && self.indexOf(uuid) !== index
+            );
+            
+            if(duplicates.length > 0){
+                throw new NotfoundException("Item pemeriksaan tidak boleh duplikat");
+            }
+
+            await OrderLabPemeriksaanRepository.deleteByOrderLab(uuid, validata.faskes_uuid, t);
+
+            const orderItemsData = validata.tarif_lab_uuids.map(tarif_uuid =>
+                {
+                   return {
+                        order_lab_uuid: order.uuid,
+                        tarif_lab_uuid: tarif_uuid,
+                        faskes_uuid: validata.faskes_uuid
+                   }
+                }
+             )
+
+            await OrderLabPemeriksaanRepository.bulkCreate(orderItemsData, t);
+        }
+       })
+    }
+
+    static async updateBatalOrder(req){
+        // console.log(req)
+        const validata = ZodValidator.validate(OrderLabValidation.BATAL_ORDER, req);
+        const orders = await OrderLabRepository.findByUuids(validata.order_lab_uuids, validata.faskes_uuid);
+
+        if(orders.length !== validata.order_lab_uuids.length){
+            throw new NotfoundException("Order tidak ada");
+        }
+
+        await sequelizeInstance.transaction(async (t) => {
+            await OrderLabRepository.updateBatalOrder(validata.order_lab_uuids, {
+                alasan_batal_order : req.alasan_batal_order,
+                faskes_uuid : validata.faskes_uuid
+            }, t);
+        })
     }
 }

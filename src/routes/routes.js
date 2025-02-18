@@ -52,6 +52,8 @@ routes.get(`${baseUrl}/nilai-rujukan/show/:uuid`, ItemPemeriksaanController.show
 routes.post(`${baseUrl}/order-lab`, OrderLabController.create);
 routes.get(`${baseUrl}/order-lab/:uuid`, OrderLabController.show);
 routes.get(`${baseUrl}/order-lab`, OrderLabController.findAll);
+routes.put(`${baseUrl}/order-lab/:uuid`, OrderLabController.update);
+routes.put(`${baseUrl}/order-lab-batal`, OrderLabController.updateBatalOrder);
 
 
 export default routes;

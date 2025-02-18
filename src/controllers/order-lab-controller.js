@@ -34,4 +34,26 @@ export default class OrderLabController{
             next(error);
         }
     }
+
+    static async update(req, res, next){
+        try {
+            const data = req.body;
+            data.faskes_uuid = "faskes_uuid";
+            await OrderLabService.update(req.params.uuid, data);
+            res.status(200).json(successResponse("Data berhasil diupdate"));
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    static async updateBatalOrder(req, res, next){
+        try {
+            const data = req.body;
+            data.faskes_uuid = "faskes_uuid";
+            await OrderLabService.updateBatalOrder(data);
+            res.status(200).json(successResponse("Data berhasil diupdate"));
+        } catch (error) {
+            next(error);
+        }
+    }
 }

@@ -260,12 +260,20 @@ export default class OrderLabRepository {
         },
       ];
     }
+
+    const wherePayemntMethod = {}
+
+    if (req.payment_method) {
+      wherePayemntMethod.payment_method = req.payment_method;
+    }
+
     const options = {
       where: {
         faskes_uuid: req.faskes_uuid,
         ...whereSearch,
         ...whereOrderStatus,
         ...whereDate,
+        ...wherePayemntMethod,
         deleted_at: {
           [Op.is]: null,
         },
@@ -418,5 +426,38 @@ export default class OrderLabRepository {
     };
 
     return await pagination(OrderlabModel, req, options);
+  }
+
+  static async updateBatalOrder(uuids, data, transaction) {
+    return await OrderlabModel.update(data, {
+      where: { 
+        uuid: {
+          [Op.in]: uuids,
+        },
+        deleted_at: {
+          [Op.is]: null,
+        },
+       },
+    }, { transaction });
+  }
+
+  static async findByUuids(uuids, faskes_uuid) {
+    return await OrderlabModel.findAll({
+      where: {
+        uuid: {
+          [Op.in]: uuids,
+        },
+        faskes_uuid: faskes_uuid,
+        deleted_at: {
+          [Op.is]: null,
+        },
+      },
+    });
+  }
+
+  static async update(uuid, data, transaction) {
+    return await OrderlabModel.update(data, {
+      where: { uuid: uuid },
+    }, { transaction });
   }
 }

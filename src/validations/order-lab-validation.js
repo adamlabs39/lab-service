@@ -49,4 +49,18 @@ export default class OrderLabValidation{
         message: "Pasien harus diisi",
         path : ["patient"]
     })
+
+    static UPDATE = z.object({
+        tgl_pemeriksaan: z.string().min(1),
+        cito : z.boolean(),
+        status_puasa : z.boolean(),
+        tarif_lab_uuids: z.array(z.string().uuid()),
+        faskes_uuid : z.string().min(1),
+    })
+
+    static BATAL_ORDER = z.object({
+        alasan_batal_order : z.string().min(1).max(255),
+        order_lab_uuids: z.array(z.string().uuid()),
+        faskes_uuid : z.string().min(1),
+    })
 }
