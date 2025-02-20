@@ -53,7 +53,7 @@ export default class KelompokPemeriksaanService {
             throw new ConflictException("Kelompok Pemeriksaan dengan code tersebut telah digunakan");
         }
 
-        sequelizeInstance.transaction(async (t) => {
+       await sequelizeInstance.transaction(async (t) => {
             const kelompokPemeriksaan = await KelompokPemeriksaanRepository.create(validData, t);
 
             const itemKelompokPemeriksaans = validData.item_pemeriksaans.map(item =>{
@@ -165,10 +165,8 @@ export default class KelompokPemeriksaanService {
     }
 
     static async getAll(req) {
-        const kelompokPemerikasan = await KelompokPemeriksaanRepository.findAll(req);
-        // return kelompokPemerikasan      
-
-        const formatedKelompokPemeriksaan = kelompokPemerikasan.map(kelompokPemeriksaan => {
+        const kelompokPemerikasan = await KelompokPemeriksaanRepository.findAll(req);    
+        const formatedKelompokPemeriksaan = kelompokPemerikasan.data.map(kelompokPemeriksaan => {
             return {
                 id: kelompokPemeriksaan.id,
                 name: kelompokPemeriksaan.name,

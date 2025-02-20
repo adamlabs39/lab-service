@@ -1,4 +1,4 @@
-import {  ItemPemeriksaanModel, KelompokPemeriksaanModel, TarifLabItemModel, TarifLabModel, TarifLabPelayananModel, TarifLabPenjaminModel } from "@adameds/model-sdk/lab";
+import {  ItemKelompokPemeriksaanModel, ItemPemeriksaanModel, KelompokPemeriksaanModel, TarifLabItemModel, TarifLabModel, TarifLabPelayananModel, TarifLabPenjaminModel } from "@adameds/model-sdk/lab";
 import { Op } from "sequelize";
 import toEpochDate from "../helpers/date-helper.js";
 import { PenjaminModel } from "@adameds/model-sdk/datamaster";
@@ -96,6 +96,90 @@ export default class TarifLabRepository{
             attributes: {
                 exclude: ["created_at", "updated_at", "deleted_at"]
             }
+        });
+    }
+
+    static async findByUuids(uuids){
+        return await TarifLabModel.findAll({
+            where: {
+                uuid: {
+                    [Op.in]: uuids
+                },
+                deleted_at: {
+                    [Op.is]: null
+                }
+            },
+            include: [
+                {
+                    model: TarifLabPenjaminModel,
+                    as: "tarif_lab_penjamin",
+                    where: {
+                        deleted_at: {
+                            [Op.is]: null
+                        }
+                    },
+                    
+                    include: {
+                        model:PenjaminModel,
+                        as: "penjamin",
+                        where: {
+                            deleted_at: {
+                                [Op.is]: null
+                            }
+                        },
+                        attributes: ["uuid", "name"]
+                    }
+                },
+                {
+                    model: TarifLabPelayananModel,
+                    as: "pelayanan",
+                    where: {
+                        deleted_at: {
+                            [Op.is]: null
+                        }
+                    },
+                    attributes: ["uuid", "pelayanan"]
+                },
+                {
+                    model: TarifLabItemModel,
+                    as: "tarif_lab_item",
+                    include : [
+                        {
+                            model: KelompokPemeriksaanModel,
+                            as: "kelompok_pemeriksaan",
+                            attributes: ["uuid", "name"],
+                            include:[
+                                {
+                                    model : ItemKelompokPemeriksaanModel,
+                                    as : "item_kelompok_pemeriksaan",
+                                    where:{
+                                        deleted_at:{
+                                            [Op.is] : null
+                                        }
+                                    },
+                                    separate:true,
+                                    include:[
+                                        {
+                                            model:ItemPemeriksaanModel,
+                                            as:"item_pemeriksaan",
+                                            where:{
+                                                deleted_at:{
+                                                    [Op.is]:null
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            model:ItemPemeriksaanModel,
+                            as: "item_pemeriksaan",
+                            attributes: ["uuid", "name"]
+                        }
+                    ]
+                }
+            ],
         });
     }
 

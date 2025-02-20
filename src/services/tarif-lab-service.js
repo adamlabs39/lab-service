@@ -13,13 +13,12 @@ import TarifLabValidation from "../validations/tarif-lab-validation.js";
 import NameTarifKomponenRepository from "../repositories/name-tarif-komponen-repository.js";
 import PenjaminRepository from "../repositories/penjamin-repository.js";
 import sequelizeInstance from "@adameds/model-sdk/instance";
+import { uuidv7 } from "uuidv7";
 
 export default class TarifLabService{
     static async create(req){
         const validData = ZodValidator.validate(TarifLabValidation.CREATE, req);
-    
         const isCodeExist = await TarifLabRepository.findByCode(validData.code, validData.faskes_uuid);
-
         if (isCodeExist) {
             throw new ConflictException("Code sudah terdaftarkan");
         }
@@ -91,7 +90,12 @@ export default class TarifLabService{
 
             await TarifLabPelayananRepository.bulkCreate(tarifLabPelayanan, t);
 
-            const tarifLabItems = validData.tarif_lab_items.map(item =>{
+            const tarifLabItems = validData.tarif_lab_items.map((item,i) =>{
+                let uuid = uuidv7();
+                validData.tarif_lab_items[i] = {
+                    ...validData.tarif_lab_items[i],
+                    uuid: uuid
+                };
                 return {
                     tarif_lab_uuid: tarifLab.uuid,
                     kelompok_pemeriksaan_uuid: item.kelompok_pemeriksaan_uuid,
@@ -105,9 +109,9 @@ export default class TarifLabService{
             const tarifLabKomponenTindakan = []
 
             validData.tarif_lab_items.forEach(item => {
-                item.komponen_tindakan_labs.forEach(komponen => {
+                item.komponen_tindakan_labs.map(komponen => {
                     tarifLabKomponenTindakan.push({
-                        tarif_lab_item_uuid: item.item_pemeriksaan_uuid,
+                        tarif_lab_item_uuid: item.uuid,
                         tarif_komponen_uuid: komponen.tarif_komponen_uuid,
                         diskon: komponen.diskon,
                         tarif_per_komponen: komponen.tarif_per_komponen,

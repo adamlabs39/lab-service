@@ -4,6 +4,7 @@ import ItemPemeriksaanController from "../controllers/item-pemeriksaan-controlle
 import SpesimenController from "../controllers/spesimen-controller.js";
 import KelompokPemeriksaanController from "../controllers/keloompok-pemeriksaan-controller.js";
 import TarifLabController from "../controllers/tarif-lab-controller.js";
+import OrderLabController from "../controllers/order-lab-controller.js";
 
 const apiBase = process.env.API_BASE || "api";
 const apiVersion = process.env.API_VERSION || "v1";
@@ -47,6 +48,12 @@ routes.get(`${baseUrl}/nilai-rujukan/:item_pemeriksaan_uuid`, ItemPemeriksaanCon
 routes.put(`${baseUrl}/nilai-rujukan/:uuid`, ItemPemeriksaanController.updateNilaiRujukan);
 routes.delete(`${baseUrl}/nilai-rujukan/:uuid`, ItemPemeriksaanController.deleteNilaiRujukan);
 routes.get(`${baseUrl}/nilai-rujukan/show/:uuid`, ItemPemeriksaanController.showNilaiRujukan);
+
+routes.post(`${baseUrl}/order-lab`, OrderLabController.create);
+routes.get(`${baseUrl}/order-lab/:uuid`, OrderLabController.show);
+routes.get(`${baseUrl}/order-lab`, OrderLabController.findAll);
+routes.put(`${baseUrl}/order-lab/:uuid`, OrderLabController.update);
+routes.put(`${baseUrl}/order-lab-batal`, OrderLabController.updateBatalOrder);
 
 
 export default routes;
