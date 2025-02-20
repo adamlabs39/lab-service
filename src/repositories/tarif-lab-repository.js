@@ -100,6 +100,8 @@ export default class TarifLabRepository{
     }
 
     static async findByUuids(uuids){
+        console.log("=====");
+        console.log(uuids);
         return await TarifLabModel.findAll({
             where: {
                 uuid: {
@@ -117,8 +119,7 @@ export default class TarifLabRepository{
                         deleted_at: {
                             [Op.is]: null
                         }
-                    },
-                    
+                    },              
                     include: {
                         model:PenjaminModel,
                         as: "penjamin",
@@ -143,6 +144,7 @@ export default class TarifLabRepository{
                 {
                     model: TarifLabItemModel,
                     as: "tarif_lab_item",
+                    required: false,
                     include : [
                         {
                             model: KelompokPemeriksaanModel,

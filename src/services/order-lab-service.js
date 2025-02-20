@@ -15,6 +15,7 @@ import generateCode from "../helpers/generate-code.js";
 import AddressRepository from "../repositories/address-repository.js";
 import BirthDetailRepository from "../repositories/birth-detail-repository.js";
 import ConflictException from "../exception/conflict-exception.js";
+import ObservationItemRepository from "../repositories/observation-item-repository.js";
 
 export default class OrderLabService {
     static async create(req){
@@ -53,7 +54,6 @@ export default class OrderLabService {
         }
         
         const tarifs = await TarifLabRepository.findByUuids(validata.tarif_lab_uuids);
-
         if(tarifs.length !== validata.tarif_lab_uuids.length){
             throw new NotfoundException("Tarif lab tidak ada");
         }
@@ -147,7 +147,7 @@ export default class OrderLabService {
                    return {
                         order_lab_uuid: order.uuid,
                         tarif_lab_uuid: tarif_uuid,
-                        faskes_uuid: validata.faskes_uuid
+                        faskes_uuid: validata.faskes_uuid,
                    }
                 }
              )
@@ -159,11 +159,12 @@ export default class OrderLabService {
                     order_lab_uuid: order.uuid,
                     item_pemeriksaan_uuid: item_pemeriksaan_uuid,
                     faskes_uuid: validata.faskes_uuid,
+                    status_periksa : false,
                     waktu_periksa : toEpochDate(new Date())
                 }
              })
 
-            await OrderLabPemeriksaanRepository.bulkCreate(observationItemdata, t);
+            await ObservationItemRepository.bulkCreate(observationItemdata, t);
         })
         
     }

@@ -211,7 +211,7 @@ export default class TarifLabService{
                 throw new NotfoundException("Komponen Tarif tidak ada");
             }
     
-            sequelizeInstance.transaction(async (t) => {
+           await sequelizeInstance.transaction(async (t) => {
                 await TarifLabRepository.update(uuid, validData, t);
     
                 await TarifLabPenjaminRepository.deleteByTarifLab(uuid, t);

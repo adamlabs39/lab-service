@@ -1,10 +1,12 @@
-import ObservationItemModel from "../../../model-sdk/models/lab/observation-item-model";
 
-ObservationItemModel.belongsTo(ObservationModel, {
-    foreignKey: "observation_uuid",
-    as: "observation",
-    constraints: false
-});
+
+// ObservationItemModel.belongsTo(ObservationModel, {
+//     foreignKey: "observation_uuid",
+//     as: "observation",
+//     constraints: false
+// });
+
+import { ObservationItemModel } from "@adameds/model-sdk/lab";
 
 export default class ObservationItemRepository {
     static async bulkCreate(data, transaction){
