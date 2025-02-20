@@ -1,12 +1,13 @@
 import { z } from "zod";
 
 const OPERATOR = ["<", "<=", ">", ">="];
+const JENIS_KELAMIN = ["L", "P", "G"];
 
 export default class NilaiRujukanValidation {
   static CREATE_ANGKA = z
     .object({
       item_pemeriksaan_uuid: z.string().uuid(1),
-      jenis_kelamin: z.string().min(1).max(15),
+      jenis_kelamin: z.enum(JENIS_KELAMIN),
       umur_bawah_tahun: z.number(),
       umur_bawah_bulan: z.number(),
       umur_bawah_hari: z.number(),
@@ -15,11 +16,11 @@ export default class NilaiRujukanValidation {
       umur_atas_hari: z.number(),
       batas_bawah_nilai_normal: z.number().optional(),
       batas_atas_nilai_normal: z.number().optional(),
-      operator_nilai_normal: z.enum(OPERATOR).min(1).max(15),
+      operator_nilai_normal: z.enum(OPERATOR),
       kritis_bawah: z.number().optional(),
       kritis_atas: z.number().optional(),
-      operator_kritis_bawah: z.string(OPERATOR).min(1).max(15).optional(),
-      operator_kritis_atas: z.string(OPERATOR).min(1).max(15).optional(),
+      operator_kritis_bawah: z.enum(OPERATOR).optional(),
+      operator_kritis_atas: z.enum(OPERATOR).optional(),
       status: z.boolean(),
       faskes_uuid: z.string().min(1).max(255),
       tampilan: z.string().min(1).max(255),

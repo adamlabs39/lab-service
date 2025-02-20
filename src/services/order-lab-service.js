@@ -14,6 +14,7 @@ import generateregistrationNumber from "../helpers/generate-registration-number.
 import generateCode from "../helpers/generate-code.js";
 import AddressRepository from "../repositories/address-repository.js";
 import BirthDetailRepository from "../repositories/birth-detail-repository.js";
+import ConflictException from "../exception/conflict-exception.js";
 
 export default class OrderLabService {
     static async create(req){
@@ -83,6 +84,8 @@ export default class OrderLabService {
         }
 
          await sequelizeInstance.transaction(async (t) => {
+            let newPatient ;
+           if(validata.patient){
             const {patient} = validata
 
             const address = await AddressRepository.create({
@@ -105,7 +108,7 @@ export default class OrderLabService {
                 faskesUuid : validata.faskes_uuid
             },t)
 
-            const nePatient = await PatientRepository.create({
+            newPatient = await PatientRepository.create({
                 noRm : patient.no_rm,
                 title : patient.title,
                 name : patient.name,
@@ -122,6 +125,7 @@ export default class OrderLabService {
                 maritalStatus : patient.marital_status,
                 faskesUuid : validata.faskes_uuid
             })
+           }
 
             const noReg = await generateregistrationNumber("REG");
             const noOrder = generateCode("LPK");
@@ -133,7 +137,7 @@ export default class OrderLabService {
                 faskes_uuid: validata.faskes_uuid,
                 order_status: 1,
                 tgl_order: toEpochDate(new Date()), 
-                patient_uuid: validata.patient_uuid ? validata.patient_uuid : nePatient.uuid,
+                patient_uuid: validata.patient_uuid ? validata.patient_uuid : newPatient.uuid,
             }
     
             const order = await OrderLabRepository.create(orderLabData);
@@ -152,9 +156,14 @@ export default class OrderLabService {
             
              const observationItemdata = itemPemeriksaanUuids.map(item_pemeriksaan_uuid => {
                 return {
-                    noreg : noReg,
+                    order_lab_uuid: order.uuid,
+                    item_pemeriksaan_uuid: item_pemeriksaan_uuid,
+                    faskes_uuid: validata.faskes_uuid,
+                    waktu_periksa : toEpochDate(new Date())
                 }
              })
+
+            await OrderLabPemeriksaanRepository.bulkCreate(observationItemdata, t);
         })
         
     }
@@ -243,6 +252,10 @@ export default class OrderLabService {
 
         if(orders.length !== validata.order_lab_uuids.length){
             throw new NotfoundException("Order tidak ada");
+        }
+
+        if(orders.status === 3){
+            throw new ConflictException("Order sudah selesai tidak bisa dibatalkan");
         }
 
         await sequelizeInstance.transaction(async (t) => {
