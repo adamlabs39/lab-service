@@ -11,6 +11,8 @@ export default class PatientValidation {
         birth_date: z.coerce.date(),
         birth_place: z.string().min(1).max(255),
         age_year: z.number().min(1),
+        age_month: z.number().min(1),
+        age_day: z.number().min(1),
         gender: z.string().min(1).max(255),
         phone : z.string().min(1).max(255),
         religion: z.string().min(1).max(255),

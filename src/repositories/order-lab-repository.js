@@ -270,10 +270,10 @@ export default class OrderLabRepository {
     const options = {
       where: {
         faskes_uuid: req.faskes_uuid,
-        ...whereSearch,
-        ...whereOrderStatus,
-        ...whereDate,
-        ...wherePayemntMethod,
+        // ...whereSearch,
+        // ...whereOrderStatus,
+        // ...whereDate,
+        // ...wherePayemntMethod,
         deleted_at: {
           [Op.is]: null,
         },
@@ -331,6 +331,7 @@ export default class OrderLabRepository {
                 {
                   model: TarifLabItemModel,
                   as: "tarif_lab_item",
+                  require : false,
                   include: [
                     {
                       model: KelompokPemeriksaanModel,

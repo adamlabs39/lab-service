@@ -52,7 +52,7 @@ export default class ItemPemeriksaanService {
         }
 
         
-        sequelizeInstance.transaction(async (t) => {
+        await sequelizeInstance.transaction(async (t) => {
             const itemPemeriksaan = await ItemPemeriksaanRepository.create(validData, t);
             if(validData.jenis_input === "pilihan"){
                 await PilihanHasilItemPemeriksaanRepository.create({
@@ -101,7 +101,7 @@ export default class ItemPemeriksaanService {
         }
 
         
-        sequelizeInstance.transaction(async (t) => {
+       await sequelizeInstance.transaction(async (t) => {
             await ItemPemeriksaanRepository.update(uuid, validData, t);
             if(validData.jenis_input === "pilihan"){
                 await PilihanHasilItemPemeriksaanRepository.deleteByItemPemeriksaan(uuid, t);
@@ -122,7 +122,7 @@ export default class ItemPemeriksaanService {
             throw new NotfoundException("Item Pemeriksaan tidak ada");
         }
 
-        sequelizeInstance.transaction(async (t) => {
+       await sequelizeInstance.transaction(async (t) => {
             await ItemPemeriksaanRepository.delete(uuid, t);
             
             if(isItemPemeriksaanExist.jenis_input === "pilihan"){
@@ -166,7 +166,7 @@ export default class ItemPemeriksaanService {
             throw new BadRequestException("Jenis input tidak valid");
         }
 
-        sequelizeInstance.transaction(async (t) => {
+       await sequelizeInstance.transaction(async (t) => {
             await NilaiRujukanRepository.create(validata, t);
         })
     }
@@ -207,7 +207,7 @@ export default class ItemPemeriksaanService {
             throw new BadRequestException("Jenis input tidak valid");
         }
 
-        sequelizeInstance.transaction(async (t) => {
+        await sequelizeInstance.transaction(async (t) => {
             await NilaiRujukanRepository.update(uuid, validata, t);
         })
     }
@@ -219,7 +219,7 @@ export default class ItemPemeriksaanService {
             throw new NotfoundException("Nilai Rujukan tidak ada");
         }
 
-        sequelizeInstance.transaction(async (t) => {
+       await sequelizeInstance.transaction(async (t) => {
             await NilaiRujukanRepository.delete(uuid, t);
         })
     }

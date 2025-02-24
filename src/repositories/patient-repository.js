@@ -1,4 +1,4 @@
-import { PatientModel } from "@adameds/model-sdk/admisi";
+import { BirthDetailModel, PatientModel } from "@adameds/model-sdk/admisi";
 import { Op } from "sequelize";
 
 export default class PatientRepository {
@@ -9,6 +9,15 @@ export default class PatientRepository {
                 faskes_uuid,
                 deleted_at: {
                     [Op.is]: null
+                }
+            },
+            include:{
+                model: BirthDetailModel,
+                as : 'birth_detail',
+                where:{
+                    deleted_at: {
+                        [Op.is]: null
+                    }
                 }
             }
         })

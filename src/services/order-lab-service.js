@@ -29,7 +29,6 @@ export default class OrderLabService {
                 throw new NotfoundException("Pasien tidak ada");
             }
         }
-        console.log("OrderLabService -> create -> req", req)
 
         
         if(validata.penjamin_uuid ){
@@ -105,6 +104,8 @@ export default class OrderLabService {
                 birthPlace : patient.birth_place,
                 birthDate : patient.birth_date,
                 ageYear : patient.age_year,
+                ageMonth : patient.age_month,
+                ageDay : patient.age_day,
                 faskesUuid : validata.faskes_uuid
             },t)
 

@@ -30,6 +30,23 @@ export default class NilaiRujukanRepository {
         });
     }
 
+    static async findByItemPemeriksaans(item_pemeriksaan_uuids, faskes_uuid) {
+        return await NilaiRujukanModel.findAll({
+            where: {
+                item_pemeriksaan_uuid: {
+                    [Op.in]: item_pemeriksaan_uuids
+                },
+                faskes_uuid: faskes_uuid,
+                deleted_at: {
+                    [Op.is]: null
+                }
+            },
+            attributes: {
+                exclude: ["created_at", "updated_at", "deleted_at"]
+            }
+        })
+    }
+
     static async update(uuid, data, transaction) {
         return await NilaiRujukanModel.update(data, {
             where: { uuid: uuid },
@@ -43,4 +60,5 @@ export default class NilaiRujukanRepository {
             { transaction }
         );
     }
+
 }
