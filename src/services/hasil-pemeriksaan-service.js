@@ -6,6 +6,7 @@ import PatientRepository from "../repositories/patient-repository.js";
 import HasilPemeriksaanValidation from "../validations/hasil-pemeriksaan-validation.js";
 import ZodValidator from "../validations/zod-validator.js";
 import ExpertiseValidation from "../validations/expertise-validation.js";
+import toEpochDate from "../helpers/date-helper.js";
 
 export default class HasilPemeriksaanService {
   static async inputHasilPemeriksaan(req) {
@@ -66,6 +67,10 @@ export default class HasilPemeriksaanService {
 
     await sequelizeInstance.transaction(async (t) => {
       for (const flag of flags) {
+        const data = flag
+        flag.waltu_periksan =  toEpochDate(new Date())
+        flag.status_periksa = true
+
         await ObservationItemRepository.updateResult(
           flag.observation_item_uuid,
           validdata.faskes_uuid,
@@ -97,10 +102,28 @@ export default class HasilPemeriksaanService {
         validata.faskes_uuid,
         { 
             catatan_expertise: validata.catatan_expertise,
-            expertise : true
+            expertise : true,
         },
         t
       );
     });
   }
+
+  static async getPemeriksaan(req, order_lab_uuid){
+    const orderLabExist = await OrderLabRepository.findByUuid(
+      order_lab_uuid,
+      req.faskes_uuid
+    );
+
+    if (!orderLabExist) {
+      throw new NotfoundException("Order Lab tidak ada");
+    }
+
+    const hasilPemeriksaan = await ObservationItemRepository.findByOrderLabUuid(
+      order_lab_uuid,
+      req.faskes_uuid
+    );
+
+    return hasilPemeriksaan
+  } 
 }

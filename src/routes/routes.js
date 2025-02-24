@@ -55,8 +55,10 @@ routes.get(`${baseUrl}/order-lab/:uuid`, OrderLabController.show);
 routes.get(`${baseUrl}/order-lab`, OrderLabController.findAll);
 routes.put(`${baseUrl}/order-lab/:uuid`, OrderLabController.update);
 routes.put(`${baseUrl}/order-lab-batal`, OrderLabController.updateBatalOrder);
+routes.put(`${baseUrl}/order-lab-selesai-periksa/:uuid`, OrderLabController.selesaiPeriksa);
 
 routes.post(`${baseUrl}/hasil-pemeriksaan`, HasilPemeriksaanController.inputHasilPemeriksaan);
+routes.get(`${baseUrl}/hasil-pemeriksaan/:uuid`, HasilPemeriksaanController.getHasilPemeriksaan);
 
 routes.post(`${baseUrl}/expertise/:uuid`, HasilPemeriksaanController.expertise);
 

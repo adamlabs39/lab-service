@@ -47,4 +47,53 @@ export default class ObservationItemRepository {
             transaction
         });
     }
+
+    static async findByOrderLabUuid(order_lab_uuid, faskes_uuid){
+        return await ObservationItemModel.findAll({
+            where: {
+                order_lab_uuid: order_lab_uuid,
+                faskes_uuid: faskes_uuid,
+                deleted_at: {
+                    [Op.is]: null
+                }
+            },
+            include:{
+                model: ItemPemeriksaanModel,
+                as: "item_pemeriksaan",
+                where: {
+                    deleted_at: {
+                        [Op.is]: null
+                    }
+                },
+                attributes: {
+                    exclude: ["created_at", "updated_at", "deleted_at"]
+                }
+            }
+        });
+    }
+
+    static async findByOrderLabUuidAndStatusSudahPeriksa(order_lab_uuid, faskes_uuid){
+        return await ObservationItemModel.findAll({
+            where: {
+                order_lab_uuid: order_lab_uuid,
+                faskes_uuid: faskes_uuid,
+                deleted_at: {
+                    [Op.is]: null
+                },
+                status_periksa: true
+            },
+            include:{
+                model: ItemPemeriksaanModel,
+                as: "item_pemeriksaan",
+                where: {
+                    deleted_at: {
+                        [Op.is]: null
+                    }
+                },
+                attributes:{
+                    exclude: ["created_at", "updated_at", "deleted_at"]
+                }
+            }
+        });
+    }
 }

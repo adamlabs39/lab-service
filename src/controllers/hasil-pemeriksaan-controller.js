@@ -6,7 +6,7 @@ export default class HasilPemeriksaanController {
         try {
             const data = req.body;
             data.faskes_uuid = "faskes_uuid";
-            const result = await HasilPemeriksaanService.inputHasilPemeriksaan(data);
+            await HasilPemeriksaanService.inputHasilPemeriksaan(data);
             res.status(201).json(successResponse("Data berhasil disimpan"));
         } catch (error) {
             next(error);
@@ -19,8 +19,20 @@ export default class HasilPemeriksaanController {
             const data = req.body;
             data.faskes_uuid = "faskes_uuid"
             data.order_lab_uuid = req.params.uuid
-            await HasilPemeriksaanService.expertise(data);
-            res.status(200).json(successResponse("Data berhasil disimpan"));
+            const result = await HasilPemeriksaanService.expertise(data);
+            res.status(200).json(successResponse("Data berhasil ditampilkan", result));
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    static async getHasilPemeriksaan(req, res, next) {
+        try {
+            const data = req.body;
+            data.faskes_uuid = "faskes_uuid"
+            const order_lab_uuid = req.params.uuid
+            const result = await HasilPemeriksaanService.getPemeriksaan(data, order_lab_uuid);
+            res.status(200).json(successResponse("Data berhasil ditampilkan", result));
         } catch (error) {
             next(error);
         }
