@@ -58,5 +58,7 @@ routes.put(`${baseUrl}/order-lab-batal`, OrderLabController.updateBatalOrder);
 
 routes.post(`${baseUrl}/hasil-pemeriksaan`, HasilPemeriksaanController.inputHasilPemeriksaan);
 
+routes.post(`${baseUrl}/expertise/:uuid`, HasilPemeriksaanController.expertise);
+
 
 export default routes;

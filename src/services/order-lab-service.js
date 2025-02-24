@@ -193,7 +193,7 @@ export default class OrderLabService {
         }
 
        await sequelizeInstance.transaction(async (t) => {
-        await OrderLabRepository.update(uuid, {
+        await OrderLabRepository.update(uuid,req.faskes_uuid ,{
             cito : req.cito,
             tgl_pemeriksaan : req.tgl_pemeriksaan,
             status_puasa : req.status_puasa,

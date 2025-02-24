@@ -456,9 +456,11 @@ export default class OrderLabRepository {
     });
   }
 
-  static async update(uuid, data, transaction) {
+  static async update(uuid, faskes_uuid,data,transaction) {
     return await OrderlabModel.update(data, {
-      where: { uuid: uuid },
+      where: { uuid: uuid, deleted_at : {
+        [Op.is]: null,
+      } },
     }, { transaction });
   }
 }
