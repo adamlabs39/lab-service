@@ -9,7 +9,6 @@ import {
   TarifLabPelayananModel,
   TarifLabPenjaminModel,
 } from "@adameds/model-sdk/lab";
-import OrderlabModel from "../../../model-sdk/models/lab/order-lab-model.js";
 import { Op } from "sequelize";
 import {
   LokasiModel,
