@@ -335,4 +335,26 @@ export default class OrderLabService {
             }, t);
         })
     }   
+
+    static async batalValidasi(req){
+        const validata = ZodValidator.validate(OrderLabValidation.BATAL_VALIDASI, req);
+        const orders = await OrderLabRepository.findByUuids(validata.order_lab_uuids, validata.faskes_uuid);
+
+        if(orders.length !== validata.order_lab_uuids.length){
+            throw new NotfoundException("Order tidak ada");
+        }
+
+        orders.map(order => {
+            if(order.order_status !== 2){
+                throw new ConflictException("Hanya order dengan status periksa yang bisa dibatal validasi");
+            }
+        })
+
+        await sequelizeInstance.transaction(async (t) => {
+            await OrderLabRepository.update(validata.order_lab_uuids, validata.faskes_uuid, {
+                order_status : status.REQUEST,
+                alasan_batal_validasi : req.alasan_batal_validasi
+            }, t);
+        })
+    }
 }

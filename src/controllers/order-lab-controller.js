@@ -79,4 +79,15 @@ export default class OrderLabController{
             next(error);
         }
     }
+
+    static async batalValidasi(req,res,next){
+        try {
+            const data = req.body;
+            data.faskes_uuid = "faskes_uuid";
+            await OrderLabService.batalValidasi(data);
+            res.status(200).json(successResponse("Data berhasil diupdate"));
+        } catch (error) {
+            next(error);
+        }
+    }
 }

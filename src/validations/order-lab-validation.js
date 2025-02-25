@@ -70,10 +70,6 @@ export default class OrderLabValidation{
         faskes_uuid : z.string().min(1),
     })
 
-    static BATAL_PERIKSA = z.object({
-        
-    })
-
     static VALIDASI = z.object({
         faskes_uuid : z.string().min(1),
         spesimen_uuids : z.array(z.string().uuid()).optional(),
