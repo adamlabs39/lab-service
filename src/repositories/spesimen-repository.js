@@ -65,4 +65,14 @@ export default class SpesimenRepository {
 
         return pagination(SpesimenModel, req, options);
     }
+
+    static async findByUuids(uuids) {
+        return await SpesimenModel.findAll({
+            where: {
+                uuid: {
+                    [Op.in]: uuids
+                }
+            }
+        });
+    }
 }

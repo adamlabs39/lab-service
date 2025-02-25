@@ -16,8 +16,17 @@ import AddressRepository from "../repositories/address-repository.js";
 import BirthDetailRepository from "../repositories/birth-detail-repository.js";
 import ConflictException from "../exception/conflict-exception.js";
 import ObservationItemRepository from "../repositories/observation-item-repository.js";
+import SpesimenRepository from "../repositories/spesimen-repository.js";
+
+const status = {
+   CANCEL: 0,
+   REQUEST : 1,
+   PERIKSA : 2,
+   SELESAI : 3
+}
 
 export default class OrderLabService {
+
     static async create(req){
 
         const validata = ZodValidator.validate(OrderLabValidation.CREATE, req);
@@ -290,4 +299,40 @@ export default class OrderLabService {
             status : 3
         })
     }
+
+    static async validasi(uuid, req){
+        console.log(req)
+        const validata = ZodValidator.validate(OrderLabValidation.VALIDASI, req);
+        const order = await OrderLabRepository.findByUuid(uuid, validata.faskes_uuid);
+
+        if(!order){
+            throw new NotfoundException("Order tidak ada");
+        }
+
+        if(order.order_status != 1){
+            throw new ConflictException("Order sudah divalidasi dan sudah selesai tidak bisa divalidasi");
+        }
+
+        const isDokterExist = await PractitionerRepository.findByUuidDokter(validata.practitioner_uuid, validata.faskes_uuid);
+
+        if(!isDokterExist){
+            throw new NotfoundException("Dokter tidak ada");
+        }
+
+        if(validata.spesimen_uuids){
+            const spesimens = await SpesimenRepository.findByUuids(validata.spesimen_uuids);
+
+            if(spesimens.length !== validata.spesimen_uuids.length){
+                throw new NotfoundException("Spesimen tidak ada");
+            }
+        }
+
+        await sequelizeInstance.transaction(async (t) => {
+            await OrderLabRepository.update(uuid, validata.faskes_uuid, {
+                spesimen_uuids : validata.spesimen_uuids,
+                practitioner_uuid : validata.practitioner_uuid,
+                order_status : status.PERIKSA,
+            }, t);
+        })
+    }   
 }

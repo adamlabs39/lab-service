@@ -63,4 +63,16 @@ export default class OrderLabValidation{
         order_lab_uuids: z.array(z.string().uuid()),
         faskes_uuid : z.string().min(1),
     })
+
+    static BATAL_VALIDASI = z.object({
+        alasan_batal_validasi : z.string().min(1).max(255),
+        order_lab_uuids: z.array(z.string().uuid()),
+        faskes_uuid : z.string().min(1),
+    })
+
+    static VALIDASI = z.object({
+        faskes_uuid : z.string().min(1),
+        spesimen_uuids : z.array(z.string().uuid()).optional(),
+        practitioner_uuid : z.string().uuid(),
+    })
 }
