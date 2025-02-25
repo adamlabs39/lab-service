@@ -7,6 +7,7 @@ import HasilPemeriksaanValidation from "../validations/hasil-pemeriksaan-validat
 import ZodValidator from "../validations/zod-validator.js";
 import ExpertiseValidation from "../validations/expertise-validation.js";
 import toEpochDate from "../helpers/date-helper.js";
+import { status } from "./order-lab-service.js";
 
 export default class HasilPemeriksaanService {
   static async inputHasilPemeriksaan(req) {
@@ -23,6 +24,10 @@ export default class HasilPemeriksaanService {
 
     if (!orderLabExist) {
       throw new NotfoundException("Order Lab tidak ada");
+    }
+
+    if(orderLabExist.order_status !== status.PERIKSA ){
+      throw new BadRequestException("Order Lab belum diperiksa");
     }
 
     const observationItemUuids = validdata.hasil_pemeriksaan.map(
@@ -66,15 +71,26 @@ export default class HasilPemeriksaanService {
     );
 
     await sequelizeInstance.transaction(async (t) => {
+      if(validdata.catatan_analis){
+        await OrderLabRepository.update(
+          validdata.order_lab_uuid,
+          validdata.faskes_uuid,
+          { 
+              catatan_analis: validdata.catatan_analis,
+          },
+          t
+        );
+      }
+
       for (const flag of flags) {
         const data = flag
-        flag.waltu_periksan =  toEpochDate(new Date())
-        flag.status_periksa = true
+        data.waltu_periksan =  toEpochDate(new Date())
+        data.status_periksa = true
 
         await ObservationItemRepository.updateResult(
-          flag.observation_item_uuid,
+          data.observation_item_uuid,
           validdata.faskes_uuid,
-          flag,
+          data,
           t
         );
       }

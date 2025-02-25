@@ -18,7 +18,7 @@ import ConflictException from "../exception/conflict-exception.js";
 import ObservationItemRepository from "../repositories/observation-item-repository.js";
 import SpesimenRepository from "../repositories/spesimen-repository.js";
 
-const status = {
+export const status = {
    CANCEL: 0,
    REQUEST : 1,
    PERIKSA : 2,
@@ -283,8 +283,8 @@ export default class OrderLabService {
             throw new NotfoundException("Order tidak ada");
         }
 
-        if(order.status === 3){
-            throw new ConflictException("Order sudah selesai");
+        if(order.status !== 2){
+            throw new ConflictException("Order tidak dalam status pemeriksaan");
         }
 
         const itemPemeriksaan = await ObservationItemRepository.findByOrderLabUuid(uuid, faskes_uuid);
