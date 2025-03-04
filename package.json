@@ -14,7 +14,7 @@
   "license": "ISC",
   "dependencies": {
     "@adameds/authorization-sdk": "^1.0.5",
-    "@adameds/model-sdk": "^1.0.68",
+    "@adameds/model-sdk": "^1.0.69",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "exceljs": "^4.4.0",

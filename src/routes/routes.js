@@ -6,6 +6,7 @@ import KelompokPemeriksaanController from "../controllers/keloompok-pemeriksaan-
 import TarifLabController from "../controllers/tarif-lab-controller.js";
 import OrderLabController from "../controllers/order-lab-controller.js";
 import HasilPemeriksaanController from "../controllers/hasil-pemeriksaan-controller.js";
+import LaporanController from "../controllers/Laporan-controller.js";
 
 const apiBase = process.env.API_BASE || "api";
 const apiVersion = process.env.API_VERSION || "v1";
@@ -63,6 +64,8 @@ routes.post(`${baseUrl}/hasil-pemeriksaan`, HasilPemeriksaanController.inputHasi
 routes.get(`${baseUrl}/hasil-pemeriksaan/:uuid`, HasilPemeriksaanController.getHasilPemeriksaan);
 
 routes.post(`${baseUrl}/expertise/:uuid`, HasilPemeriksaanController.expertise);
+
+routes.get(`${baseUrl}/laporan-kunjungan`, LaporanController.getKunjungan);
 
 
 export default routes;
