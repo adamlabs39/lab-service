@@ -77,23 +77,12 @@ export default class ObservationItemRepository {
             where: {
                 order_lab_uuid: order_lab_uuid,
                 faskes_uuid: faskes_uuid,
+                status_periksa: true,
                 deleted_at: {
                     [Op.is]: null
-                },
-                status_periksa: true
-            },
-            include:{
-                model: ItemPemeriksaanModel,
-                as: "item_pemeriksaan",
-                where: {
-                    deleted_at: {
-                        [Op.is]: null
-                    }
-                },
-                attributes:{
-                    exclude: ["created_at", "updated_at", "deleted_at"]
                 }
-            }
-        });
+            },
+        })
+          
     }
 }

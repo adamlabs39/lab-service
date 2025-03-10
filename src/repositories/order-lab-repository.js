@@ -2,6 +2,7 @@ import {
   ItemKelompokPemeriksaanModel,
   ItemPemeriksaanModel,
   KelompokPemeriksaanModel,
+  ObservationItemModel,
   OrderLabModel,
   OrderLabPemeriksaanModel,
   TarifLabItemModel,
@@ -21,9 +22,6 @@ import { BirthDetailModel, PatientModel } from "@adameds/model-sdk/admisi";
 import { AddressModel } from "@adameds/model-sdk/setting";
 import OrderlabModel from "../../../model-sdk/models/lab/order-lab-model.js";
 import { status } from "../services/order-lab-service.js";
-import sequelizeInstance from "@adameds/model-sdk/instance";
-import {Sequelize} from "sequelize"
-import { raw } from "express";
 
 OrderLabModel.belongsTo(LokasiModel, {
   foreignKey: "lokasi_uuid",
@@ -68,6 +66,12 @@ OrderLabModel.belongsTo(PenjaminModel,{
   constraints: false
 })
 
+OrderlabModel.hasMany(ObservationItemModel, {
+  foreignKey: "order_lab_uuid",
+  as: "observation_items",
+  constraints: false,
+})
+
 export default class OrderLabRepository {
   static async create(data, transaction) {
     return await OrderLabModel.create(data, { transaction });
@@ -89,6 +93,7 @@ export default class OrderLabRepository {
   }
 
   static async findByUuid(uuid, faskes_uuid) {
+   
     return await OrderLabModel.findOne({
       where: {
         uuid: uuid,
@@ -241,7 +246,7 @@ export default class OrderLabRepository {
       attributes: {
         exclude: ["created_at", "updated_at", "deleted_at"],
       },
-    });
+    });;
   }
 
   static async findAll(req) {
@@ -479,6 +484,7 @@ export default class OrderLabRepository {
   }
 
   static async update(uuid, faskes_uuid,data,transaction) {
+    console.log(data)
     return await OrderLabModel.update(data, {
       where: { uuid: uuid, deleted_at : {
         [Op.is]: null,
@@ -687,14 +693,47 @@ export default class OrderLabRepository {
         exclude: ["created_at", "updated_at", "deleted_at"],
       },
     ],
-    attributes: [
-      "uuid", "faskes_uuid", "no_order", "noreg", "no_rm", "rekam_medis_date",
-      "payment_method", "penjamin_uuid", "pelayanan", "lokasi_uuid",
-      "dokter_pengirim_uuid", "dokter_pengirim", "pasien_maternitas",
-      "keluhan_utama", "practitioner_uuid",
-    ],
+    attributes: {
+      exclude: ["created_at", "updated_at", "deleted_at"],
+    },
   }
 
     return await pagination(OrderlabModel, req, options);
+  }
+
+  static async findRekapPemeriksaan(req){
+    
+    
+    const whereOrderStatus = {};
+
+    if (req.order_status) {
+      whereOrderStatus.order_status = req.order_status;
+    }
+
+    const whereDate = {};
+
+    if (req.start_date || req.end_date) {
+      whereDate.tgl_order = {};
+
+      if (req.start_date) {
+        whereDate.tgl_order[Op.gte] = req.start_date;
+      }
+
+      if (req.end_date) {
+        whereDate.tgl_order[Op.lte] = req.end_date;
+      }
+    }
+
+    const options = {
+      where :{
+        faskes_uuid : req.faskes_uuid,
+        order_status : status.SELESAI,
+        ...whereDate,
+        deleted_at :{
+          [Op.is] : null
+        }
+      },
+
+    }
   }
 }

@@ -67,5 +67,9 @@ routes.post(`${baseUrl}/expertise/:uuid`, HasilPemeriksaanController.expertise);
 
 routes.get(`${baseUrl}/laporan-kunjungan`, LaporanController.getKunjungan);
 
+routes.get(`${baseUrl}/laporan-tat`, LaporanController.getTat);
+
+routes.get(`${baseUrl}/laporan-rekap-kunjungan`, LaporanController.getRekapKunjungan);
+
 
 export default routes;

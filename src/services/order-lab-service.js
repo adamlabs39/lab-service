@@ -278,25 +278,28 @@ export default class OrderLabService {
     }
 
     static async selesaiPeriksa(uuid, faskes_uuid){
+
         const order = await OrderLabRepository.findByUuid(uuid, faskes_uuid);
         if(!order){
             throw new NotfoundException("Order tidak ada");
         }
-
-        if(order.status !== 2){
+        console.log(order.order_status)
+        console.log(status.PERIKSA)
+        if(order.order_status !== status.PERIKSA){
             throw new ConflictException("Order tidak dalam status pemeriksaan");
         }
-
+        
         const itemPemeriksaan = await ObservationItemRepository.findByOrderLabUuid(uuid, faskes_uuid);
-
+        
         const itemPeriksaSeleesai = await ObservationItemRepository.findByOrderLabUuidAndStatusSudahPeriksa(uuid, faskes_uuid);
-
+        
         if(itemPemeriksaan.length !== itemPeriksaSeleesai.length){
             throw new ConflictException("Item pemeriksaan belum selesai");
         }
-
+        
         await OrderLabRepository.update(uuid, faskes_uuid, {
-            status : 3
+            order_status : status.SELESAI,
+            waktu_selsai : toEpochDate(new Date())
         })
     }
 
@@ -332,6 +335,7 @@ export default class OrderLabService {
                 spesimen_uuids : validata.spesimen_uuids,
                 practitioner_uuid : validata.practitioner_uuid,
                 order_status : status.PERIKSA,
+                waktu_validasi : toEpochDate(new Date())
             }, t);
         })
     }   
