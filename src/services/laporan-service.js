@@ -1,7 +1,9 @@
-import convertSecodToTime from "../helpers/time-converter.js";
+
 import OrderLabRepository from "../repositories/order-lab-repository.js";
 import Laporanvalidation from "../validations/laporan-validation.js";
 import ZodValidator from "../validations/zod-validator.js";
+import ObservationItemRepository from "../repositories/observation-item-repository.js";
+import formatPemeriksaan from "../helpers/format-rekap-pemeriksaan.js";
 
 export default class LaporanService{
     static async getKunjungan(req){
@@ -39,6 +41,9 @@ export default class LaporanService{
     } 
 
     static async getRekapKunjungan(req){
-        return await OrderLabRepository.findRekapPemeriksaan(req)
+        const result = await ObservationItemRepository.findRekapPemeriksaan(req)
+        
+        return formatPemeriksaan(result.data)
     }
 }
+

@@ -700,7 +700,7 @@ export default class OrderLabRepository {
     return await pagination(OrderlabModel, req, options);
   }
 
-  static async findRekapPemeriksaan(req){
+  // static async findRekapPemeriksaan(req){
 
-  }
+  // }
 }
