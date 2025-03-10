@@ -20,7 +20,6 @@ import {
 import pagination from "../helpers/pagination.js";
 import { BirthDetailModel, PatientModel } from "@adameds/model-sdk/admisi";
 import { AddressModel } from "@adameds/model-sdk/setting";
-import OrderlabModel from "../../../model-sdk/models/lab/order-lab-model.js";
 import { status } from "../services/order-lab-service.js";
 
 OrderLabModel.belongsTo(LokasiModel, {
@@ -48,13 +47,13 @@ OrderLabModel.hasMany(OrderLabPemeriksaanModel, {
 });
 
 
-OrderlabModel.belongsTo(PractitionerModel, {
+OrderLabModel.belongsTo(PractitionerModel, {
   foreignKey: "petugas_order",
   as: "petugasOrder",
   constraints: false,
 })
 
-OrderlabModel.belongsTo(PractitionerModel, {
+OrderLabModel.belongsTo(PractitionerModel, {
   foreignKey: "practitioner_uuid",
   as: "practitioner",
   constraints: false,
@@ -66,7 +65,7 @@ OrderLabModel.belongsTo(PenjaminModel,{
   constraints: false
 })
 
-OrderlabModel.hasMany(ObservationItemModel, {
+OrderLabModel.hasMany(ObservationItemModel, {
   foreignKey: "order_lab_uuid",
   as: "observation_items",
   constraints: false,
@@ -702,38 +701,6 @@ export default class OrderLabRepository {
   }
 
   static async findRekapPemeriksaan(req){
-    
-    
-    const whereOrderStatus = {};
 
-    if (req.order_status) {
-      whereOrderStatus.order_status = req.order_status;
-    }
-
-    const whereDate = {};
-
-    if (req.start_date || req.end_date) {
-      whereDate.tgl_order = {};
-
-      if (req.start_date) {
-        whereDate.tgl_order[Op.gte] = req.start_date;
-      }
-
-      if (req.end_date) {
-        whereDate.tgl_order[Op.lte] = req.end_date;
-      }
-    }
-
-    const options = {
-      where :{
-        faskes_uuid : req.faskes_uuid,
-        order_status : status.SELESAI,
-        ...whereDate,
-        deleted_at :{
-          [Op.is] : null
-        }
-      },
-
-    }
   }
 }
