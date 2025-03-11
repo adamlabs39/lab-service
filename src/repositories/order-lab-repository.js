@@ -492,6 +492,7 @@ export default class OrderLabRepository {
   }
 
   static async findAllSelesai(req){
+    console.log(req)
     const whereOrderStatus = {};
 
     if (req.order_status) {
@@ -515,18 +516,21 @@ export default class OrderLabRepository {
     const whereSearch = {};
 
     if(req.search){
+      console.log(req.search)
       whereSearch[Op.or] = [
         {
           no_rm: {
             [Op.iLike]: `%${req.search}%`,
           },
-        //   '$patient.name$': {
-        //     [Op.iLike]: `%${req.search}%`,
-        //   },
-        //   '$patient.address.full_address$': {
-        //     [Op.iLike]: `%${req.search}%`,
-        //   }
         },
+        {
+          noreg: {
+            [Op.iLike]: `%${req.search}%`,
+          },
+        },
+          {'$patient.name$': {
+            [Op.iLike]: `%${req.search}%`,
+          },}
       ];
     }
 
@@ -536,12 +540,14 @@ export default class OrderLabRepository {
       wherePelayanan.pelayanan = req.pelayanan
     }
 
+
    const options = {
     where :{
       faskes_uuid : req.faskes_uuid,
       order_status : status.SELESAI,
       ...whereDate,
       ...wherePelayanan,
+      ...whereSearch,
       deleted_at :{
         [Op.is] : null
       }

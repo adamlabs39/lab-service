@@ -7,7 +7,6 @@ import formatPemeriksaan from "../helpers/format-rekap-pemeriksaan.js";
 
 export default class LaporanService{
     static async getKunjungan(req){
-        console.log(req)
         const validdata = ZodValidator.validate(Laporanvalidation.GET_KUNJUNGAN, req)
 
         const laporan = await OrderLabRepository.findAllSelesai(validdata)
@@ -51,7 +50,12 @@ export default class LaporanService{
     } 
 
     static async getRekapKunjungan(req){
-        const result = await ObservationItemRepository.findRekapPemeriksaan(req)
+
+        const validData = ZodValidator.validate(Laporanvalidation.GET_REKAP_KUNJUNGAN, req)
+
+        console.log(validData)
+
+        const result = await ObservationItemRepository.findRekapPemeriksaan(validData)
         
         return formatPemeriksaan(result.data)
     }

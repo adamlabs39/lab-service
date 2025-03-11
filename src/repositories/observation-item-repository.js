@@ -94,55 +94,42 @@ export default class ObservationItemRepository {
     }
 
     static async findRekapPemeriksaan(req){
-        const whereOrderStatus = {};
-
-        if (req.order_status) {
-          whereOrderStatus.order_status = req.order_status;
-        }
     
         const whereDate = {};
     
         if (req.start_date || req.end_date) {
-          whereDate.tgl_order = {};
+        whereDate['$order_lab.tgl_order$'] = {};
     
           if (req.start_date) {
-            whereDate.tgl_order[Op.gte] = req.start_date;
+            whereDate['$order_lab.tgl_order$'][Op.gte] = req.start_date;
           }
     
           if (req.end_date) {
-            whereDate.tgl_order[Op.lte] = req.end_date;
+            whereDate['$order_lab.tgl_order$'][Op.lte] = req.end_date;
           }
         }
     
-        const whereSearch = {};
+        let whereSearch = {};
     
         if(req.search){
-          whereSearch[Op.or] = [
-            {
-              no_rm: {
-                [Op.iLike]: `%${req.search}%`,
-              },
-            //   '$patient.name$': {
-            //     [Op.iLike]: `%${req.search}%`,
-            //   },
-            //   '$patient.address.full_address$': {
-            //     [Op.iLike]: `%${req.search}%`,
-            //   }
-            },
-          ];
+          whereSearch ={
+            '$item_pemeriksaan.name$': {
+                [Op.iLike]: `%${req.search || ""}%`
+            }
         }
+          }
     
         const wherePelayanan = {}
     
         if(req.pelayanan){
           wherePelayanan.pelayanan = req.pelayanan
-        }
-        
-        
+        }  
 
         const options = {
             where: {
                 faskes_uuid: req.faskes_uuid,
+                ...whereDate,
+                ...whereSearch,
                 deleted_at: { [Op.is]: null }
             },
             include: [

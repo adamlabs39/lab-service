@@ -6,7 +6,15 @@ export default class Laporanvalidation{
         faskes_uuid : z.string().min(1).max(255),
         start_date : z.string().min(1).max(255).optional(),
         end_date : z.string().min(1).max(255).optional(),
+        search : z.string().min(1).max(255).optional(),
         pelayanan : z.enum(["rajal", "ranap","igd","aps"]).optional(),
+        ...PageValidation.PAGINATION.shape
+    })
+    static GET_REKAP_KUNJUNGAN = z.object({
+        faskes_uuid : z.string().min(1).max(255),
+        start_date : z.string().min(1).max(255).optional(),
+        end_date : z.string().min(1).max(255).optional(),
+        search : z.string().min(1).max(255).optional(),
         ...PageValidation.PAGINATION.shape
     })
 }
