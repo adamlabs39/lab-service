@@ -13,12 +13,22 @@ export default class LaporanService{
         const laporan = await OrderLabRepository.findAllSelesai(validdata)
       
         const laporanWithGrandTotalLab = laporan.data.map((item) => {
-            const grandTotalLab = item.order_lab_pemeriksaan.reduce((acc, curr) => acc + curr.tarif_lab.grand_total, 0)
+           let grandTotalLab
+
+            if(item.is_mcu){
+                item.order_lab_pemeriksaan.map((i) => {
+                    i.tarif_lab.grand_total = 0
+                })
+            }                         
+            grandTotalLab = item.order_lab_pemeriksaan.reduce((acc, curr) => acc + curr.tarif_lab.grand_total, 0)
+
             return {
                 ...item,
                grand_total_lab : grandTotalLab
             }
         })
+
+
 
         return laporanWithGrandTotalLab
     }
