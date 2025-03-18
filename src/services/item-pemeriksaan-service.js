@@ -12,6 +12,8 @@ import NilaiRujukanValidation from "../validations/nilai-rujukan-validation.js";
 import NilaiRujukanRepository from "../repositories/nilai-rujukan-repository.js";
 import BadRequestException from "../exception/bad-request-exception.js";
 import sequelizeInstance from "@adameds/model-sdk/instance";
+import extractExcel from "../helpers/extract-excel.js";
+import checkDuplicate from "../helpers/check-duplicate.js";
 
 
 export default class ItemPemeriksaanService {
@@ -232,5 +234,86 @@ export default class ItemPemeriksaanService {
         }
 
         return isNilairujukanExist;
+    }
+
+    static async import(path, faskesUuid){
+        const data = []
+
+        const workSheet =await extractExcel(path)
+
+        workSheet.eachRow((row, rowNumber) => {
+            if (rowNumber === 1) return
+            data.push({
+                code: row.values[2],
+                name: row.values[3],
+                no_urut: row.values[4],
+                category_pemeriksaan: row.values[5],
+                satuan : row.values[6],
+                metode : row.values[7],
+                jenis_input : String(row.values[8]).trim(),
+                pilihan_hasil_item_pemeriksaans: row.values[9] ? String(row.values[9]).split(",") : [],
+                snomed: row.values[10],
+                icd9: row.values[11],
+                loinc: row.values[12],
+                status_nilai_rujukan: row.values[13] ? Boolean(row.values[13]) : false,
+                status: true,
+                faskes_uuid: faskesUuid
+            })
+        })
+
+        const loincNames = data.map(item => item.loinc).filter(Boolean);
+        const snomedNames = data.map(item => item.snomed).filter(Boolean);
+        const icd9Names = data.map(item => item.icd9).filter(Boolean);
+        const categoryPemeriksaanCodes = data.map(item => item.category_pemeriksaan);
+
+        const [loincList, snomedList, icd9List, categoryPemeriksaanList] = await Promise.all([
+            LoincRepository.findByNameIn(loincNames),
+            SnomedRepository.findByNameIn(snomedNames),
+            Icd9Repository.findByNameIn(icd9Names),
+            CategoryPemeriksaanRepository.findByCodeIn(categoryPemeriksaanCodes, faskesUuid)
+        ]);
+
+        // Buat lookup table untuk pencarian cepat
+        const loincMap = new Map(loincList.map(item => [item.name, item.uuid]));
+        const snomedMap = new Map(snomedList.map(item => [item.name, item.uuid]));
+        const icd9Map = new Map(icd9List.map(item => [item.name, item.uuid]));
+        const categoryMap = new Map(categoryPemeriksaanList.map(item => [item.code, item.uuid]));
+
+        // Update data dengan UUID yang sesuai
+        data.forEach(item => {
+            if (item.loinc) {
+                if (!loincMap.has(item.loinc)) throw new NotfoundException("Loinc tidak ada");
+                item.loinc_uuid = loincMap.get(item.loinc);
+                delete item.loinc;
+            }
+
+            if (item.snomed) {
+                if (!snomedMap.has(item.snomed)) throw new NotfoundException("Snomed tidak ada");
+                item.snomed_uuid = snomedMap.get(item.snomed);
+                delete item.snomed;
+            }
+
+            if (item.icd9) {
+                if (!icd9Map.has(item.icd9)) throw new NotfoundException("Icd9 tidak ada");
+                item.icd9_uuid = icd9Map.get(item.icd9);
+                delete item.icd9;
+            }
+
+            if (item.category_pemeriksaan) {
+                if (!categoryMap.has(item.category_pemeriksaan)) throw new NotfoundException("Category Pemeriksaan tidak ada");
+                item.category_pemeriksaan_uuid = categoryMap.get(item.category_pemeriksaan);
+                delete item.category_pemeriksaan;
+            }
+        });
+
+        checkDuplicate(data)
+
+        data.map((item) => {
+            ZodValidator.validate(ItemPemeriksaanValidation.CREATE, item)
+        }) 
+
+        await sequelizeInstance.transaction(async (t) => {
+            await ItemPemeriksaanRepository.bulckCreate(data, t);
+        })
     }
 }

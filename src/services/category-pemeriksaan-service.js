@@ -5,6 +5,7 @@ import CategoryPemeriksaanRepository from "../repositories/category-pemeriksaan-
 import CategoryPemeriksaanValidation from "../validations/category-pemeriksaan-validation.js";
 import ZodValidator from "../validations/zod-validator.js";
 import extractExcel from "../helpers/extract-excel.js";
+import checkDuplicate from "../helpers/check-duplicate.js";
 
 export default class CategoryPemeriksaanService {
   static async create(req) {
@@ -94,6 +95,8 @@ export default class CategoryPemeriksaanService {
         faskes_uuid: "faskes_uuid"
       })
     })
+
+    checkDuplicate(data)
 
     data.map((item) => {
       ZodValidator.validate(CategoryPemeriksaanValidation.CREATE, item)

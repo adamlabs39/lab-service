@@ -62,4 +62,16 @@ export default class CategoryPemeriksaanRepository {
   static async bulkCreate(data, transaction) {
     return await CategoryPemeriksaanModel.bulkCreate(data, { transaction });
   }
+
+  static async findByCodeIn(codes, faskes_uuid) {
+    return await CategoryPemeriksaanModel.findAll({
+      where: {
+        faskes_uuid: faskes_uuid,
+        code: {
+          [Op.in]: codes,
+        },
+        deleted_at: { [Op.is]: null }
+      }
+    });
+  }
 }

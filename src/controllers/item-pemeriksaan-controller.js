@@ -1,3 +1,5 @@
+import deletefile from "../helpers/file.js";
+import validateExcel from "../helpers/validator-excel.js";
 import successResponse from "../response/success-response.js";
 import ItemPemeriksaanService from "../services/item-pemeriksaan-service.js";
 
@@ -101,6 +103,18 @@ export default class ItemPemeriksaanController {
             const uuid = req.params.uuid;
             const itemPemeriksaan = await ItemPemeriksaanService.showNilaiRujukan(uuid);
             res.status(200).json(successResponse("Data berhasil ditampilkan", itemPemeriksaan));
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    static async import(req, res, next) {
+        try {
+            validateExcel(req.file);
+           const result = await ItemPemeriksaanService.import(req.file.path, 'faskes_uuid');
+           return res.json(result)
+            deletefile(req.file.path);
+            res.status(201).json(successResponse("Data berhasil diimport"));
         } catch (error) {
             next(error);
         }

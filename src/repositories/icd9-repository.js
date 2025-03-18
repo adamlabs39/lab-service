@@ -10,4 +10,15 @@ export default class Icd9Repository {
             }
         });
     }
+
+    static async findByNameIn(names) {
+        return await Icd9Model.findAll({
+            where: {
+                name: {
+                    [Op.in]: names,
+                },
+                deleted_at: { [Op.is]: null }
+            }
+        });
+    }
 }

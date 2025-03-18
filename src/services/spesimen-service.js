@@ -6,6 +6,7 @@ import SpesimenValidation from "../validations/spesimen-validation.js";
 import ZodValidator from "../validations/zod-validator.js";
 import { status } from "./order-lab-service.js";
 import extractExcel from "../helpers/extract-excel.js";
+import checkDuplicate from "../helpers/check-duplicate.js";
 
 export default class SpesimenSevice {
      static async create(req){
@@ -71,6 +72,8 @@ export default class SpesimenSevice {
                    faskes_uuid: "faskes_uuid"
                })
          })
+
+         checkDuplicate(data)
 
          data.map((item) => {
              ZodValidator.validate(SpesimenValidation.CREATE, item)

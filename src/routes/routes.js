@@ -30,6 +30,7 @@ routes.get(`${baseUrl}/item-pemeriksaan/:uuid`, ItemPemeriksaanController.show);
 routes.get(`${baseUrl}/item-pemeriksaan`, ItemPemeriksaanController.findAll);
 routes.put(`${baseUrl}/item-pemeriksaan/:uuid`, ItemPemeriksaanController.update);
 routes.delete(`${baseUrl}/item-pemeriksaan/:uuid`, ItemPemeriksaanController.delete);
+routes.post(`${baseUrl}/item-pemeriksaan/import`, upload.single("file"), ItemPemeriksaanController.import);
 
 routes.post(`${baseUrl}/spesimen`, SpesimenController.create);
 routes.get(`${baseUrl}/spesimen/:uuid`, SpesimenController.show);

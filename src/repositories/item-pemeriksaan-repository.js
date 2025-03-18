@@ -97,4 +97,8 @@ export default class ItemPemeriksaanRepository {
 
     return pagination(ItemPemeriksaanModel, req, options);
   }
+
+  static async bulckCreate(data, transaction) {
+    return await ItemPemeriksaanModel.bulkCreate(data, { transaction });
+  }
 }

@@ -10,4 +10,15 @@ export default class SnomedRepository {
             }
         });
     }
+
+    static async findByNameIn(names) {
+        return await SnomedModel.findAll({
+            where: {
+                name: {
+                    [Op.in]: names,
+                },
+                deleted_at: { [Op.is]: null }
+            }
+        });
+    }
 }

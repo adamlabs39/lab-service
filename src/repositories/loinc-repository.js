@@ -11,4 +11,15 @@ export default class LoincRepository {
             }
         });
     }
+
+    static async findByNameIn(names) {
+        return await LoincModel.findAll({
+            where: {
+                name: {
+                    [Op.in]: names,
+                },
+                deleted_at: { [Op.is]: null }
+            }
+        });
+    }
 }   
