@@ -1,3 +1,5 @@
+import deletefile from "../helpers/file.js";
+import validateExcel from "../helpers/validator-excel.js";
 import successResponse from "../response/success-response.js";
 import CategoryPemeriksaanService from "../services/category-pemeriksaan-service.js";
 
@@ -56,6 +58,20 @@ export default class CategoryPemeriksaanController {
 
             const categoryPemeriksaan = await CategoryPemeriksaanService.findAll(request.body);
             response.status(200).json(successResponse("Data berhasil ditampilkan", categoryPemeriksaan));
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    static async import (request, response, next) {
+        try {
+            validateExcel(request.file);
+
+            await CategoryPemeriksaanService.import(request.file.path);
+
+            deletefile(request.file.path);
+
+            response.status(201).json(successResponse("Data berhasil disimpan"));
         } catch (error) {
             next(error)
         }

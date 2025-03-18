@@ -75,4 +75,8 @@ export default class SpesimenRepository {
             }
         });
     }
+
+    static async bulkCreate(data, transaction) {
+        return await SpesimenModel.bulkCreate(data, { transaction });
+    }
 }

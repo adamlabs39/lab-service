@@ -7,10 +7,13 @@ import TarifLabController from "../controllers/tarif-lab-controller.js";
 import OrderLabController from "../controllers/order-lab-controller.js";
 import HasilPemeriksaanController from "../controllers/hasil-pemeriksaan-controller.js";
 import LaporanController from "../controllers/Laporan-controller.js";
+import multer from "multer";
 
 const apiBase = process.env.API_BASE || "api";
 const apiVersion = process.env.API_VERSION || "v1";
 const baseUrl = `/${apiBase}/${apiVersion}/lab`;
+
+const upload = multer({ dest: "src/uploads" });
 
 console.log("baseUrl", baseUrl);
 
@@ -20,6 +23,7 @@ routes.get(`${baseUrl}/category-pemeriksaan/:uuid`, CategoryPemeriksaanControlle
 routes.get(`${baseUrl}/category-pemeriksaan`, CategoryPemeriksaanController.findAll);
 routes.put(`${baseUrl}/category-pemeriksaan/:uuid`, CategoryPemeriksaanController.update);
 routes.delete(`${baseUrl}/category-pemeriksaan/:uuid`, CategoryPemeriksaanController.delete);
+routes.post(`${baseUrl}/category-pemeriksaan/import`, upload.single("file"), CategoryPemeriksaanController.import);
 
 routes.post(`${baseUrl}/item-pemeriksaan`, ItemPemeriksaanController.create);
 routes.get(`${baseUrl}/item-pemeriksaan/:uuid`, ItemPemeriksaanController.show);
@@ -32,6 +36,7 @@ routes.get(`${baseUrl}/spesimen/:uuid`, SpesimenController.show);
 routes.get(`${baseUrl}/spesimen`, SpesimenController.getAll);
 routes.put(`${baseUrl}/spesimen/:uuid`, SpesimenController.update);
 routes.delete(`${baseUrl}/spesimen/:uuid`, SpesimenController.delete);
+routes.post(`${baseUrl}/spesimen/import`, upload.single("file"), SpesimenController.import);
 
 routes.get(`${baseUrl}/kelompok-pemeriksaan`, KelompokPemeriksaanController.findAll);
 routes.post(`${baseUrl}/kelompok-pemeriksaan`, KelompokPemeriksaanController.create);

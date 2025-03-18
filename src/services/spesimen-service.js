@@ -1,8 +1,11 @@
+import sequelizeInstance from "@adameds/model-sdk/instance";
 import ConflictException from "../exception/conflict-exception.js";
 import NotfoundException from "../exception/notfound-exception.js";
 import SpesimenRepository from "../repositories/spesimen-repository.js";
 import SpesimenValidation from "../validations/spesimen-validation.js";
 import ZodValidator from "../validations/zod-validator.js";
+import { status } from "./order-lab-service.js";
+import extractExcel from "../helpers/extract-excel.js";
 
 export default class SpesimenSevice {
      static async create(req){
@@ -52,5 +55,30 @@ export default class SpesimenSevice {
 
      static async getAll(req){
         return await SpesimenRepository.findAll(req)
+     }
+   
+     static async import(path){
+         const data = []
+
+         const workSheet =await extractExcel(path)
+
+         workSheet.eachRow((row, rowNumber) => {
+               if (rowNumber === 1) return
+               data.push({
+                   code: row.values[2],
+                   name: row.values[3],
+                   status: true,
+                   faskes_uuid: "faskes_uuid"
+               })
+         })
+
+         data.map((item) => {
+             ZodValidator.validate(SpesimenValidation.CREATE, item)
+         }) 
+
+         await sequelizeInstance.transaction(async (t) => {
+             await SpesimenRepository.bulkCreate(data, t)
+         })
+
      }
 }

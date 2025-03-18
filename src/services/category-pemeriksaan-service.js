@@ -4,6 +4,7 @@ import NotfoundException from "../exception/notfound-exception.js";
 import CategoryPemeriksaanRepository from "../repositories/category-pemeriksaan-repository.js";
 import CategoryPemeriksaanValidation from "../validations/category-pemeriksaan-validation.js";
 import ZodValidator from "../validations/zod-validator.js";
+import extractExcel from "../helpers/extract-excel.js";
 
 export default class CategoryPemeriksaanService {
   static async create(req) {
@@ -77,4 +78,32 @@ export default class CategoryPemeriksaanService {
     const categoryPemeriksaan = await CategoryPemeriksaanRepository.findAll(req);
     return categoryPemeriksaan;
   }
+
+  static async import (filePath) {
+    const data = []
+
+    const workSheet = await extractExcel(filePath)
+   
+    workSheet.eachRow((row, rowNumber) => {
+      if (rowNumber === 1) return
+      data.push({
+        code: row.values[2],
+        name: row.values[3],
+        no_urut: row.values[4],
+        status: true,
+        faskes_uuid: "faskes_uuid"
+      })
+    })
+
+    data.map((item) => {
+      ZodValidator.validate(CategoryPemeriksaanValidation.CREATE, item)
+    })
+
+    await sequelizeInstance.transaction(async (t) => {
+      await CategoryPemeriksaanRepository.bulkCreate(data, t)
+    }
+    )
+  }
+
+
 }

@@ -1,6 +1,8 @@
 import { SpesimenModel } from "@adameds/model-sdk/lab"
 import successResponse from "../response/success-response.js"
 import SpesimenSevice from "../services/spesimen-service.js"
+import validateExcel from "../helpers/validator-excel.js"
+import deletefile from "../helpers/file.js"
 
 export default class SpesimenController{
     static async create(req, res, next){
@@ -53,6 +55,17 @@ export default class SpesimenController{
 
             const categoryPemeriksaans = await SpesimenSevice.getAll(req.body)
             return res.status(200).json(successResponse("Success get al data spesimen", categoryPemeriksaans))
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    static async import(req,res,next){
+        try {
+            validateExcel(req.file)
+            await SpesimenSevice.import(req.file.path)
+            deletefile(req.file.path)
+            return res.status(201).json(successResponse("Success import data spesimen"))
         } catch (error) {
             next(error)
         }

@@ -58,4 +58,8 @@ export default class CategoryPemeriksaanRepository {
 
     return pagination(CategoryPemeriksaanModel, req, options);
   }
+
+  static async bulkCreate(data, transaction) {
+    return await CategoryPemeriksaanModel.bulkCreate(data, { transaction });
+  }
 }
