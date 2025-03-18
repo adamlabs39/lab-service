@@ -154,4 +154,8 @@ export default class KelompokPemeriksaanRepository {
 
         return await pagination(KelompokPemeriksaanModel, req, options);
     }
+
+    static async bulkCreate(data, transaction) {
+        return await KelompokPemeriksaanModel.bulkCreate(data, { transaction },{returning : true});
+    }
 }

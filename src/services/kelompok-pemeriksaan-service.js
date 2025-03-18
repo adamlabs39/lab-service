@@ -10,6 +10,10 @@ import LoincRepository from "../repositories/loinc-repository.js";
 import SnomedRepository from "../repositories/snomed-repository.js";
 import KelompokPemeriksaanValidation from "../validations/kelompok-pemeriksaan-validation.js";
 import ZodValidator from "../validations/zod-validator.js";
+import checkDuplicate from "../helpers/check-duplicate.js";
+import { status } from "./order-lab-service.js";
+import extractExcel from "../helpers/extract-excel.js";
+import { boolean } from "zod";
 
 export default class KelompokPemeriksaanService {
     static async create(req) {
@@ -187,6 +191,145 @@ export default class KelompokPemeriksaanService {
         
 
         return formatedKelompokPemeriksaan;
+    }
+
+    static async import(path, faskes_uuid){
+        const data = []
+
+        const workSheet = await extractExcel(path)
+
+        workSheet.eachRow((row, rowNumber) => {
+            if (rowNumber === 1) return;
+            data.push({
+                code: row.values[2],
+                name: row.values[3],
+                category_pemeriksaan: row.values[4],
+                loinc: row.values[7],
+                icd9: row.values[6],
+                snomed: row.values[5],
+                item_pemeriksaans: row.values[8] ? String(row.values[8]).split(",").map(item => item.trim()) : [],
+                faskes_uuid: faskes_uuid,
+                status: true
+            });
+        });
+
+        // return data
+        
+        // Mengambil semua kode yang diperlukan
+        const allItemPmeriksaansCodes = data.map(item => item.item_pemeriksaans).flat();
+        const snomedNames = data.map(item => item.snomed).filter(Boolean);
+        const icd9Names = data.map(item => item.icd9).filter(Boolean);
+        const loincNames = data.map(item => item.loinc).filter(Boolean);
+        const categoryPemeriksaanCodes = data.map(item => item.category_pemeriksaan).filter(Boolean);
+        
+        // Mengambil semua data terkait secara bersamaan
+        const [loincList, snomedList, icd9List, categoryPemeriksaanList, itemPemeriksaanList] = await Promise.all([
+            LoincRepository.findByNameIn(loincNames),
+            SnomedRepository.findByNameIn(snomedNames),
+            Icd9Repository.findByNameIn(icd9Names),
+            CategoryPemeriksaanRepository.findByCodeIn(categoryPemeriksaanCodes, faskes_uuid),
+            ItemPemeriksaanRepository.findByCodeIn(allItemPmeriksaansCodes, faskes_uuid)
+        ]);
+
+        
+        // Memperbarui data dengan UUID yang sesuai
+        data.forEach((item, index) => {
+            // Cek dan update LOINC
+            if (item.loinc) {
+                const loinc = loincList.find(loinc => loinc.name === item.loinc);
+                if (loinc) {
+                    data[index].loinc_uuid = loinc.uuid;
+                    delete data[index].loinc;
+                } else {
+                    throw new NotfoundException(`Loinc '${item.loinc}' tidak ditemukan`);
+                }
+            }
+            
+            // Cek dan update SNOMED
+            if (item.snomed) {
+                const snomed = snomedList.find(snomed => snomed.name === item.snomed);
+                if (snomed) {
+                    data[index].snomed_uuid = snomed.uuid;
+                    delete data[index].snomed;
+                } else {
+                    throw new NotfoundException(`Snomed '${item.snomed}' tidak ditemukan`);
+                }
+            }
+            
+            // Cek dan update ICD9
+            if (item.icd9) {
+                const icd9 = icd9List.find(icd9 => icd9.name === item.icd9);
+                if (icd9) {
+                    data[index].icd9_uuid = icd9.uuid;
+                    delete data[index].icd9;
+                } else {
+                    throw new NotfoundException(`ICD9 '${item.icd9}' tidak ditemukan`);
+                }
+            }
+            
+            // Cek dan update Category Pemeriksaan
+            if (item.category_pemeriksaan) {
+                const categoryPemeriksaan = categoryPemeriksaanList.find(category => category.code === item.category_pemeriksaan);
+                if (categoryPemeriksaan) {
+                    data[index].category_pemeriksaan_uuid = categoryPemeriksaan.uuid;
+                    delete data[index].category_pemeriksaan;
+                } else {
+                    throw new NotfoundException(`Category Pemeriksaan '${item.category_pemeriksaan}' tidak ditemukan`);
+                }
+            }
+            
+            // Cek dan update Item Pemeriksaans
+            if (item.item_pemeriksaans.length > 0) {
+                const itemUuids = item.item_pemeriksaans.map(code => {
+                    const foundItem = itemPemeriksaanList.find(ip => ip.code === code);
+                    if (!foundItem) {
+                        throw new NotfoundException(`Item Pemeriksaan '${code}' tidak ditemukan`);
+                    }
+                    return foundItem.uuid;
+                });
+                data[index].item_pemeriksaans = itemUuids;
+            }
+        });
+        
+        // return data
+
+        data.map((item) => {
+            ZodValidator.validate(KelompokPemeriksaanValidation.CREATE, item)
+        })
+
+         await sequelizeInstance.transaction(async (t) => {
+            const kelompokPemeriksaanData = data.map(item => {
+                return{
+                    code: item.code,
+                    name: item.name,
+                    loinc_uuid: item.loinc_uuid,
+                    icd9_uuid: item.icd9_uuid,
+                    snomedct_uuid: item.snomed_uuid,
+                    category_pemeriksaan_uuid: item.category_pemeriksaan_uuid,
+                    faskes_uuid: item.faskes_uuid,
+                    status: item.status
+                }
+            })
+            const kelompokPemeriksaans = await KelompokPemeriksaanRepository.bulkCreate(kelompokPemeriksaanData, t);
+    
+
+            const itemKelompokPemeriksaans = [];
+            
+            kelompokPemeriksaans.map((kelompok, index) => {
+                const itemUuids = data[index].item_pemeriksaans;
+                itemUuids.map((itemUuid) => {
+                    itemKelompokPemeriksaans.push({
+                        kelompok_pemeriksaan_uuid: kelompok.uuid,
+                        item_pemeriksaan_uuid: itemUuid
+                    });
+                });
+            });
+        
+            
+            await ItemKelompokPemeriksaanRepository.bulkCreate(itemKelompokPemeriksaans, t);
+        });
+        
+        
     }
 }
 

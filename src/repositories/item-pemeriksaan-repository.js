@@ -101,4 +101,16 @@ export default class ItemPemeriksaanRepository {
   static async bulckCreate(data, transaction) {
     return await ItemPemeriksaanModel.bulkCreate(data, { transaction });
   }
+
+  static async findByCodeIn(codes, faskes_uuid) {
+    return await ItemPemeriksaanModel.findAll({
+      where: {
+        faskes_uuid: faskes_uuid,
+        code: {
+          [Op.in]: codes,
+        },
+        deleted_at: { [Op.is]: null },
+      },
+    });
+  }
 }

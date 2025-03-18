@@ -1,3 +1,5 @@
+import deletefile from "../helpers/file.js";
+import validateExcel from "../helpers/validator-excel.js";
 import successResponse from "../response/success-response.js";
 import KelompokPemeriksaanService from "../services/kelompok-pemeriksaan-service.js";
 
@@ -54,6 +56,18 @@ export default class KelompokPemeriksaanController {
             req.body.faskes_uuid = "faskes_uuid";
             const result = await KelompokPemeriksaanService.getAll(req.body);
             return res.status(200).json(successResponse("Data berhasil ditampilkan", result));
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    static async import(req, res, next) {
+        try {
+            validateExcel(req.file);
+            await KelompokPemeriksaanService.import(req.file.path,'faskes_uuid')
+            deletefile(req.file.path);
+
+            return res.status(201).json(successResponse("Data berhasil disimpan"))
         } catch (error) {
             next(error);
         }

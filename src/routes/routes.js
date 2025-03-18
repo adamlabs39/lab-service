@@ -44,6 +44,7 @@ routes.post(`${baseUrl}/kelompok-pemeriksaan`, KelompokPemeriksaanController.cre
 routes.put(`${baseUrl}/kelompok-pemeriksaan/:uuid`, KelompokPemeriksaanController.update);
 routes.delete(`${baseUrl}/kelompok-pemeriksaan/:uuid`, KelompokPemeriksaanController.delete);
 routes.get(`${baseUrl}/kelompok-pemeriksaan/:uuid`, KelompokPemeriksaanController.show);
+routes.post(`${baseUrl}/kelompok-pemeriksaan/import`, upload.single("file"), KelompokPemeriksaanController.import);
 
 routes.post(`${baseUrl}/tarif-lab`, TarifLabController.create);
 routes.get(`${baseUrl}/tarif-lab`, TarifLabController.getAll);
