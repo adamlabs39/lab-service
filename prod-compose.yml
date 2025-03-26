@@ -1,0 +1,25 @@
+services:
+  adameds-lab:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      no_cache: true
+    image: adameds/lab-service:dev
+    container_name: adameds-lab
+    ports:
+      - 8090:8090
+    restart: always
+    networks:
+      - lab-network
+    environment:
+      DOTENV_KEY: ${DOTENV_KEY}
+      API_BASE: ${API_BASE}
+      API_VERSION: ${API_VERSION}
+      BASE_URL: ${BASE_URL}
+    volumes:
+      - type: bind
+        source: /home/gitlab-runner/adameds/.env.vault
+        target: /adameds-lab/.env.vault
+networks:
+  lab-network:
+    driver: bridge
