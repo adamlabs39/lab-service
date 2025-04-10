@@ -1,3 +1,4 @@
+import validateExcel from "../helpers/validator-excel.js";
 import successResponse from "../response/success-response.js";
 import TarifLabService from "../services/tarif-lab-service.js";
 
@@ -54,6 +55,17 @@ export default class TarifLabController {
             const uuid = req.params.uuid;
             const tarifLab = await TarifLabService.show(uuid);
             res.status(200).json(successResponse("Data berhasil ditampilkan", tarifLab));
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    static async import(req, res, next) {
+        try {
+            validateExcel(req.file);
+            const path = req.file.path;
+            const result = await TarifLabService.import(path, "faskes_uuid");
+            res.status(200).json(successResponse("Data berhasil diimport", result));
         } catch (error) {
             next(error);
         }

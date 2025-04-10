@@ -26,4 +26,18 @@ export default class PenjaminRepository {
                 },
          });
    }
+
+   static async findByNameIn(name, faskes_uuid) {
+        return await PenjaminModel.findAll({
+            where: {
+                name: {
+                    [Op.in]: name
+                },
+                faskes_uuid,
+                deleted_at: {
+                    [Op.is]: null,
+                },
+            },
+        });
+   }
 }

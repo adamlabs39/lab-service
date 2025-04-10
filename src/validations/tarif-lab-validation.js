@@ -2,14 +2,15 @@ import { z } from "zod";
 
 const komponenTidakanSchema = z.object({
     tarif_komponen_uuid : z.string().uuid(),
-    diskon : z.number(),
+    prosentase_per_komponen : z.number().optional(),
     tarif_per_komponen : z.number().min(1),
 })
 
 const tarifItemSchema = z.object({
     kelompok_pemeriksaan_uuid : z.string().uuid().optional(),
     item_pemeriksaan_uuid : z.string().uuid().optional(),
-    komponen_tindakan_labs : z.array(komponenTidakanSchema)
+    komponen_tindakan_labs : z.array(komponenTidakanSchema),
+    total_tarif : z.number().min(1),
 })
 
 export default class TarifLabValidation {
@@ -21,7 +22,8 @@ export default class TarifLabValidation {
         tarif_lab_items : z.array(tarifItemSchema),
         status: z.boolean(),
         faskes_uuid : z.string(),
-        grand_total: z.number().min(1)
+        grand_total: z.number().min(1),
+        presentase : z.boolean(),
     });
     static UPDATE = z.object({
         code: z.string().min(1).max(255),
@@ -31,6 +33,7 @@ export default class TarifLabValidation {
         tarif_lab_items : z.array(tarifItemSchema),
         status: z.boolean(),
         faskes_uuid : z.string(),
-        grand_total: z.number().min(1)
+        grand_total: z.number().min(1),
+        presentase : z.boolean(),
     });
 }

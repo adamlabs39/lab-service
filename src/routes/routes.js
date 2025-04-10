@@ -51,6 +51,7 @@ routes.get(`${baseUrl}/tarif-lab`, TarifLabController.getAll);
 routes.put(`${baseUrl}/tarif-lab/:uuid`, TarifLabController.update);
 routes.delete(`${baseUrl}/tarif-lab/:uuid`, TarifLabController.delete);
 routes.get(`${baseUrl}/tarif-lab/:uuid`, TarifLabController.show);
+routes.post(`${baseUrl}/tarif-lab/import`, upload.single("file"), TarifLabController.import);
 
 routes.post(`${baseUrl}/nilai-rujukan/`, ItemPemeriksaanController.createNilaiRujukan);
 routes.get(`${baseUrl}/nilai-rujukan/:item_pemeriksaan_uuid`, ItemPemeriksaanController.findAllNilaiRujukan);

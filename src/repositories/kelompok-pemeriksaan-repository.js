@@ -158,4 +158,18 @@ export default class KelompokPemeriksaanRepository {
     static async bulkCreate(data, transaction) {
         return await KelompokPemeriksaanModel.bulkCreate(data, { transaction },{returning : true});
     }
+
+    static async findByNameIn(name, faskes_uuid) {
+        return await KelompokPemeriksaanModel.findAll({
+            where: {
+                name: {
+                    [Op.in]: name,
+                },
+                faskes_uuid,
+                deleted_at: {
+                    [Op.is]: null,
+                },
+            },
+        });
+    }
 }

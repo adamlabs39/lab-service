@@ -278,4 +278,18 @@ export default class TarifLabRepository{
 
         return await pagination(TarifLabModel, req, options);
     }
+
+    static async findByCodeIn(code, faskes_uuid){
+        return await TarifLabModel.findAll({
+            where:{
+                code :{
+                    [Op.in] : code
+                },
+                faskes_uuid,
+                deleted_at :{
+                    [Op.is] : null
+                }
+            }
+        })
+    }
 }
