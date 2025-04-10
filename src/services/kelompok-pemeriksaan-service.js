@@ -183,6 +183,7 @@ export default class KelompokPemeriksaanService {
                         id : item.item_pemeriksaan.id,
                         name: item.item_pemeriksaan.name,
                         uuid: item.item_pemeriksaan.uuid,
+                        status: item.item_pemeriksaan.status,
                     }
                 }  
                 )
