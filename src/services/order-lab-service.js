@@ -32,10 +32,16 @@ export default class OrderLabService {
         const validata = ZodValidator.validate(OrderLabValidation.CREATE, req);
         // return validata 
         if(validata.patient_uuid){
-            const isPatientExist = await PatientRepository.findByUuid(validata.patient_uuid, validata.faskes_uuid);
+            const isPatientExist = await PatientRepository.findByUuid(validata.patient.no_rm, validata.faskes_uuid);
             
             if(!isPatientExist){
                 throw new NotfoundException("Pasien tidak ada");
+            }
+        }else{
+            const isPatientExist = await PatientRepository.findByNoRm(validata.no_rm, validata.faskes_uuid);
+
+            if(isPatientExist){
+                throw new ConflictException("Pasien sudah ada dengan no rm yang sama");
             }
         }
 
