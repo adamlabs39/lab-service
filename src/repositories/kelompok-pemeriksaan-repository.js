@@ -82,8 +82,10 @@ export default class KelompokPemeriksaanRepository {
                                 [Op.is] : null
                             }
                         },
+                        
                         attributes : ["uuid", "name", "code"]
-                    }
+                    },
+                    
                 },
                  {
                     model : CategoryPemeriksaanModel,

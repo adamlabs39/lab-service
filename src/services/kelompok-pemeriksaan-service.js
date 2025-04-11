@@ -140,7 +140,7 @@ export default class KelompokPemeriksaanService {
             throw new NotfoundException("Loinc tidak ada");
         }
 
-        sequelizeInstance.transaction(async (t) => {
+        await sequelizeInstance.transaction(async (t) => {
             await ItemKelompokPemeriksaanRepository.deleteByKelompokPemeriksaan(uuid, t);
 
             await KelompokPemeriksaanRepository.update(uuid, validData, t);
