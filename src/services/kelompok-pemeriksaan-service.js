@@ -14,6 +14,7 @@ import checkDuplicate from "../helpers/check-duplicate.js";
 import { status } from "./order-lab-service.js";
 import extractExcel from "../helpers/extract-excel.js";
 import { boolean } from "zod";
+import pagination from "../helpers/pagination.js";
 
 export default class KelompokPemeriksaanService {
     static async create(req) {
@@ -172,12 +173,14 @@ export default class KelompokPemeriksaanService {
         const kelompokPemerikasan = await KelompokPemeriksaanRepository.findAll(req);    
         const formatedKelompokPemeriksaan = kelompokPemerikasan.data.map(kelompokPemeriksaan => {
             return {
-                id: kelompokPemeriksaan.id,
+                data : {
+                    id: kelompokPemeriksaan.id,
                 name: kelompokPemeriksaan.name,
                 code: kelompokPemeriksaan.code,
                 uuid: kelompokPemeriksaan.uuid,
                 category_pemeriksaan_uuid: kelompokPemeriksaan.category_pemeriksaan_uuid,
                 category_pemeriksaan: kelompokPemeriksaan.category_pemeriksaan.name,
+                status: kelompokPemeriksaan.status,
                 item_pemeriksaan: kelompokPemeriksaan.item_kelompok_pemeriksaan.map(item => {
                     return {
                         id : item.item_pemeriksaan.id,
@@ -187,6 +190,8 @@ export default class KelompokPemeriksaanService {
                     }
                 }  
                 )
+                },
+                pagination: kelompokPemerikasan.pagination
             };
         });
         
