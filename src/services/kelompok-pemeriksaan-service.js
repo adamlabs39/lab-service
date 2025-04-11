@@ -173,8 +173,7 @@ export default class KelompokPemeriksaanService {
         const kelompokPemerikasan = await KelompokPemeriksaanRepository.findAll(req);    
         const formatedKelompokPemeriksaan = kelompokPemerikasan.data.map(kelompokPemeriksaan => {
             return {
-                data : {
-                    id: kelompokPemeriksaan.id,
+                id: kelompokPemeriksaan.id,
                 name: kelompokPemeriksaan.name,
                 code: kelompokPemeriksaan.code,
                 uuid: kelompokPemeriksaan.uuid,
@@ -190,14 +189,14 @@ export default class KelompokPemeriksaanService {
                     }
                 }  
                 )
-                },
             };
         });
 
-        formatedKelompokPemeriksaan.pagination = kelompokPemerikasan.pagination
+        kelompokPemerikasan.data = formatedKelompokPemeriksaan;
+        kelompokPemerikasan.pagination = kelompokPemerikasan.pagination
         
 
-        return formatedKelompokPemeriksaan;
+        return kelompokPemerikasan;
     }
 
     static async import(path, faskes_uuid){
