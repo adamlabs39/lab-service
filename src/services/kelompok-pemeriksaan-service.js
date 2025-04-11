@@ -191,12 +191,11 @@ export default class KelompokPemeriksaanService {
                 }  
                 )
                 },
-                pagination: kelompokPemerikasan.pagination
             };
         });
         
 
-        return formatedKelompokPemeriksaan;
+        return formatedKelompokPemeriksaan.pagination = kelompokPemerikasan.pagination;
     }
 
     static async import(path, faskes_uuid){
