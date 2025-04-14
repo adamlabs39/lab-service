@@ -111,8 +111,7 @@ export default class ItemPemeriksaanController {
     static async import(req, res, next) {
         try {
             validateExcel(req.file);
-           const result = await ItemPemeriksaanService.import(req.file.path, 'faskes_uuid');
-           return res.json(result)
+           await ItemPemeriksaanService.import(req.file.path, 'faskes_uuid');
             deletefile(req.file.path);
             res.status(201).json(successResponse("Data berhasil diimport"));
         } catch (error) {

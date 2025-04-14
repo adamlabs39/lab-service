@@ -3,6 +3,7 @@ import { Op } from "sequelize";
 
 export default class PatientRepository {
     static async findByUuid(uuid, faskes_uuid){
+        console.log("findByUuid", uuid, faskes_uuid);   
         return await PatientModel.findOne({
             where: {
                 uuid,
