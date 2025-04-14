@@ -401,8 +401,13 @@ export default class ItemPemeriksaanService {
         if (!itemPemeriksaanUuid)
           throw new NotfoundException("Item Pemeriksaan tidak ada");
 
+        const nilaiNormalText = row.values[17]
+        ? String(row.values[17])
+            .split(",")
+            .map((i) => i.trim())
+        : []
 
-        nilaiData.push({
+        const itemNilaiData = {
           item_pemeriksaan_uuid: itemPemeriksaanUuid,
           jenis_kelamin: String(row.values[3]).trim().toLowerCase(),
           umur_bawah_tahun: row.values[4],
@@ -418,16 +423,27 @@ export default class ItemPemeriksaanService {
           operator_kritis_bawah: row.values[14],
           kritis_atas: row.values[15],
           operator_kritis_atas: row.values[16],
-          nilai_normal_text: row.values[17]
-            ? String(row.values[17])
-                .split(",")
-                .map((i) => i.trim())
-            : [],
+          nilai_normal_text: nilaiNormalText,
           status: Boolean(row.values[18].trim()),
           faskes_uuid: faskesUuid,
-          tampilan:"tampilan gak eroh aku mbak"
-        });
+        };
+
+
+        if(nilaiNormalText.length === 0){
+          if(itemNilaiData.operator_nilai_normal == "-"){
+              itemNilaiData.tampilan = `${itemNilaiData.batas_bawah_nilai_normal} - ${itemNilaiData.batas_atas_nilai_normal}`
+          }else if(itemNilaiData.operator_nilai_normal == "<=" || itemNilaiData.operator_nilai_normal == "<"){
+              itemNilaiData.tampilan = `${itemNilaiData.operator_nilai_normal} ${itemNilaiData.batas_atas_nilai_normal}`
+          }else {
+              itemNilaiData.tampilan = `${itemNilaiData.operator_nilai_normal} ${itemNilaiData.batas_bawah_nilai_normal}`
+          }
+        }else {
+          itemNilaiData.tampilan = row.values[17]
+        }
+
+        nilaiData.push(itemNilaiData);
       });
+
 
       nilaiData.map((item) => {
         if (item.nilai_normal_text.length > 0) {
