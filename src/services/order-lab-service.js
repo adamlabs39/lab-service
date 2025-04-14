@@ -33,7 +33,6 @@ export default class OrderLabService {
 
         if(validata.patient_uuid){
             const isPatientExist = await PatientRepository.findByUuid(validata.patient_uuid, validata.faskes_uuid);
-            console.log("======================")
             if(!isPatientExist){
                 throw new NotfoundException("Pasien tidak ada");
             }

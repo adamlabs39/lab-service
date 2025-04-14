@@ -12,7 +12,7 @@ import NilaiRujukanValidation from "../validations/nilai-rujukan-validation.js";
 import NilaiRujukanRepository from "../repositories/nilai-rujukan-repository.js";
 import BadRequestException from "../exception/bad-request-exception.js";
 import sequelizeInstance from "@adameds/model-sdk/instance";
-import extractExcel from "../helpers/extract-excel.js";
+import excel from "exceljs";
 import checkDuplicate from "../helpers/check-duplicate.js";
 import { uuidv7 } from "uuidv7";
 
@@ -294,19 +294,16 @@ export default class ItemPemeriksaanService {
   static async import(path, faskesUuid) {
     const data = [];
 
-    const workbook = await extractExcel(path);
-
-    const itemSheet = workbook.getWorksheet("Item Pemeriksaan");
-    console.log(workbook);
-    console.log(typeof workbook.getWorksheet);
+    const workbook = new excel.Workbook();
+    await workbook.xlsx.readFile(path)
+    const itemSheet = workbook.worksheets[0];
     if (!itemSheet) {
       throw new NotfoundException("Sheet Item Pemeriksaan tidak ditemukan");
     }
 
+    const nilaiSheet = workbook.worksheets[1];
 
-    const nilaiSheet = workbook.getWorksheet("Nilai Rujukan");
-
-    workbook.eachRow((row, rowNumber) => {
+    itemSheet.eachRow((row, rowNumber) => {
       if (rowNumber === 1) return;
       data.push({
         uuid: uuidv7(),
@@ -394,20 +391,20 @@ export default class ItemPemeriksaanService {
       ZodValidator.validate(ItemPemeriksaanValidation.CREATE, item);
     });
 
-    checkDuplicate(nilaiData);
-
+    const nilaiData = [];
     if (nilaiSheet) {
-      const nilaiData = [];
       nilaiSheet.eachRow((row, rowNumber) => {
-        if (rowNumber === 1 && rowNumber == 2) return;
+        if (rowNumber === 1 || rowNumber == 2) return;
         const itemPemeriksaanUuid = data.find(
           (item) => item.code === row.values[2]
         )?.uuid;
         if (!itemPemeriksaanUuid)
           throw new NotfoundException("Item Pemeriksaan tidak ada");
+
+
         nilaiData.push({
           item_pemeriksaan_uuid: itemPemeriksaanUuid,
-          jenis_kelamin: row.values[3],
+          jenis_kelamin: String(row.values[3]).trim().toLowerCase(),
           umur_bawah_tahun: row.values[4],
           umur_bawah_bulan: row.values[5],
           umur_bawah_hari: row.values[6],
@@ -426,8 +423,9 @@ export default class ItemPemeriksaanService {
                 .split(",")
                 .map((i) => i.trim())
             : [],
-          status: row.values[18],
+          status: Boolean(row.values[18].trim()),
           faskes_uuid: faskesUuid,
+          tampilan:"tampilan gak eroh aku mbak"
         });
       });
 
@@ -444,7 +442,7 @@ export default class ItemPemeriksaanService {
       await ItemPemeriksaanRepository.bulckCreate(data, t);
 
       if (nilaiSheet) {
-        await NilaiRujukanRepository.bulckCreate(nilaiData, t);
+        await NilaiRujukanRepository.bulkCreate(nilaiData, t);
       }
     });
   }

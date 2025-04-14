@@ -13,6 +13,7 @@ export default class LoincRepository {
     }
 
     static async findByNameIn(names) {
+        console.log("findByNameIn", names);
         return await LoincModel.findAll({
             where: {
                 name: {
