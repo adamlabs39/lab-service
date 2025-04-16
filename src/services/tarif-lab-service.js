@@ -315,19 +315,19 @@ export default class TarifLabService {
       const metodePembayaran = row.getCell(5).value;
       const kelompokPemeriksaan = row.getCell(6).value;
       const komponenTarif = row.getCell(7).value;
-      const persentase = row.getCell(8).value;
+      const persentase = Boolean(row.getCell(8).value);
       const hargaTarifPersen = row.getCell(9).value ? parseFloat(row.getCell(9).value) : null;
       const hargaTarifRupiah = row.getCell(10).value ? convertRupiahToNumber(String(row.getCell(10))) : null;
       const itemPemeriksaan = row.getCell(11).value;
       const komponenTarifItem = row.getCell(12).value;
-      const presentaseItem = row.getCell(13).value;
+      const presentaseItem = Boolean(row.getCell(13).value);
       const hargaTarifPersenItem = row.getCell(14).value ? parseFloat(row.getCell(14).value) : null;
       const hargaTarifRupiahItem = row.getCell(15).value ? convertRupiahToNumber(String(row.getCell(15))) : null;
       const grandTotalItem = convertRupiahToNumber(String(row.getCell(16).value));
       // Gunakan kodeTarif sebagai key unik
       let currentTarif = tarifMap.get(kodeTarif);
 
-      console.log(parseInt(grandTotalItem), "grandTotalItem");
+      console.log(grandTotalItem);
       
 
       if (kodeTarif && !currentTarif) {
@@ -389,6 +389,7 @@ export default class TarifLabService {
             existingItem = {
               code: itemPemeriksaan,
               jenis: "item",
+              total_tarif: parseInt(grandTotalItem),
               komponen_tarif: [],
             };
             pemeriksaans.push(existingItem);
@@ -505,8 +506,71 @@ export default class TarifLabService {
         });
       });
       
-      return data
-      data.map((item) => ZodValidator.validate(TarifLabValidation.CREATE, item));
+  
+     const validData = data.map((item) => ZodValidator.validate(TarifLabValidation.CREATE, item));
+
+     await sequelizeInstance.transaction(async (t) => {
+      const tarifLab = await TarifLabRepository.create(validData[0], t);
+
+      const tarifLabPenjamin = validData[0].penjamin_uuids.map((item) => {
+        return {
+          tarif_lab_uuid: tarifLab.uuid,
+          penjamin_uuid: item,
+          faskes_uuid: validData[0].faskes_uuid,
+        };
+      });
+
+      await TarifLabPenjaminRepository.bulkCreate(tarifLabPenjamin, t);
+
+      const tarifLabPelayanan = validData[0].pelayanans.map((item) => {
+        return {
+          tarif_lab_uuid: tarifLab.uuid,
+          pelayanan: item,
+          faskes_uuid: validData[0].faskes_uuid,
+        };
+      });
+
+      await TarifLabPelayananRepository.bulkCreate(tarifLabPelayanan, t);
+
+      const tarifLabItems = validData[0].tarif_lab_items.map((item, i) => {
+        let uuid = uuidv7();
+        validData[0].tarif_lab_items[i] = {
+          ...validData[0].tarif_lab_items[i],
+          uuid: uuid,
+        };
+        return {
+          tarif_lab_uuid: tarifLab.uuid,
+          kelompok_pemeriksaan_uuid: item.kelompok_pemeriksaan_uuid,
+          item_pemeriksaan_uuid: item.item_pemeriksaan_uuid,
+          faskes_uuid: validData[0].faskes_uuid,
+          total_tarif: item.total_tarif,
+        };
+      });
+
+      await TarifLabItemRepository.bulkCreate(tarifLabItems, t);
+
+      const tarifLabKomponenTindakan = [];
+
+      validData[0].tarif_lab_items.forEach((item) => {
+        item.komponen_tindakan_labs.forEach((komponen) => {
+          tarifLabKomponenTindakan.push({
+            tarif_lab_item_uuid: item.uuid,
+            tarif_komponen_uuid: komponen.tarif_komponen_uuid,
+            diskon: komponen.diskon,
+            tarif_per_komponen: komponen.tarif_per_komponen,
+            faskes_uuid: validData[0].faskes_uuid,
+            tarif_lab_uuid: tarifLab.uuid,
+            prosentase_per_komponen: komponen.prosentase_per_komponen,
+          });
+        });
+      });
+
+      
+      await TarifKomponenTindakanLabRepository.bulkCreate(
+        tarifLabKomponenTindakan,
+        t
+      );
+     })
 
   }
 }
