@@ -7,7 +7,7 @@ export default class CategoryPemeriksaanController {
     static async create(request, response, next) {
        try {
         const data = request.body;
-        data.faskes_uuid = req.author.faskesUuid;
+        data.faskes_uuid = request.author.faskesUuid;
         await CategoryPemeriksaanService.create(data);
        return response.status(201).json(successResponse("Data berhasil disimpan"));
        } catch (error) {

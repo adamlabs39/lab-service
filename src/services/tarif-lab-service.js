@@ -15,6 +15,10 @@ import sequelizeInstance from "@adameds/model-sdk/instance";
 import { uuidv7 } from "uuidv7";
 import extractExcel from "../helpers/extract-excel.js";
 import { map } from "zod";
+import { parse } from "dotenv";
+import calculatePersen from "../helpers/calculate_persen.js";
+import calculateRupiah from "../helpers/calculate_rupiah.js";
+import convertRupiahToNumber from "../helpers/convert_rupiah_to_number.js";
 
 export default class TarifLabService {
   static async create(req) {
@@ -300,7 +304,7 @@ export default class TarifLabService {
     const data = [];
     const tarifMap = new Map(); // Simpan berdasarkan kodeTarif
     const workSheet = await extractExcel(path);
-    let grandTotal = 0
+    
 
     workSheet.eachRow((row, rowNumber) => {
       if (rowNumber === 1) return; // Skip header
@@ -312,19 +316,19 @@ export default class TarifLabService {
       const kelompokPemeriksaan = row.getCell(6).value;
       const komponenTarif = row.getCell(7).value;
       const persentase = row.getCell(8).value;
-      const hargaTarifPersen = row.getCell(9).value;
-      const hargaTarifRupiah = row.getCell(10).value;
+      const hargaTarifPersen = row.getCell(9).value ? parseFloat(row.getCell(9).value) : null;
+      const hargaTarifRupiah = row.getCell(10).value ? convertRupiahToNumber(String(row.getCell(10))) : null;
       const itemPemeriksaan = row.getCell(11).value;
       const komponenTarifItem = row.getCell(12).value;
       const presentaseItem = row.getCell(13).value;
-      const hargaTarifPersenItem = row.getCell(14).value;
-      const hargaTarifRupiahItem = row.getCell(15).value;
-      const grandTotalItem = row.getCell(16).value;
-
-      grandTotal += grandTotalItem
-
+      const hargaTarifPersenItem = row.getCell(14).value ? parseFloat(row.getCell(14).value) : null;
+      const hargaTarifRupiahItem = row.getCell(15).value ? convertRupiahToNumber(String(row.getCell(15))) : null;
+      const grandTotalItem = convertRupiahToNumber(String(row.getCell(16).value));
       // Gunakan kodeTarif sebagai key unik
       let currentTarif = tarifMap.get(kodeTarif);
+
+      console.log(parseInt(grandTotalItem), "grandTotalItem");
+      
 
       if (kodeTarif && !currentTarif) {
         currentTarif = {
@@ -342,11 +346,14 @@ export default class TarifLabService {
             : [],
           tarif_lab_items: [],
           faskes_uuid: faskes_uuid,
+          grand_total: grandTotalItem,
           status : true,
-
+          presentase : persentase ? presentaseItem : false,
         };
         tarifMap.set(kodeTarif, currentTarif);
         data.push(currentTarif);
+      }else{
+        currentTarif.grand_total +=grandTotalItem
       }
 
       // Tambahkan pemeriksaan kalau sudah ada tarif
@@ -361,6 +368,7 @@ export default class TarifLabService {
             existingKelompok = {
               code: kelompokPemeriksaan,
               jenis: "kelompok",
+              total_tarif: parseInt(grandTotalItem),
               komponen_tarif: [],
             };
             pemeriksaans.push(existingKelompok);
@@ -368,9 +376,8 @@ export default class TarifLabService {
 
           existingKelompok.komponen_tarif.push({
             code: komponenTarif,
-            persentase,
-            harga_tarif_persen: hargaTarifPersen,
-            harga_tarif_rupiah: hargaTarifRupiah,
+            prosentase_per_komponen : hargaTarifPersen ? hargaTarifPersen : calculatePersen(hargaTarifRupiah, grandTotalItem),
+            tarif_per_komponen : hargaTarifRupiah ? hargaTarifRupiah : calculateRupiah(hargaTarifPersen, grandTotalItem),
           });
         }
 
@@ -389,9 +396,8 @@ export default class TarifLabService {
 
           existingItem.komponen_tarif.push({
             code: komponenTarifItem,
-            persentase: presentaseItem,
-            harga_tarif_persen: hargaTarifPersenItem,
-            harga_tarif_rupiah: hargaTarifRupiahItem,
+            prosentase_per_komponen : hargaTarifPersenItem ? hargaTarifPersenItem : calculatePersen(hargaTarifRupiahItem, grandTotalItem),
+            tarif_per_komponen : hargaTarifRupiahItem ? hargaTarifRupiahItem : calculateRupiah(hargaTarifPersenItem, grandTotalItem),
           });
         }
       }
@@ -486,7 +492,7 @@ export default class TarifLabService {
               }
               return {
                 ...k,
-                komponen_tarif_uuid: komponen.uuid, // replace code dengan uuid
+                tarif_komponen_uuid: komponen.uuid, // replace code dengan uuid
               };
             });
             return {
@@ -498,11 +504,9 @@ export default class TarifLabService {
           return p;
         });
       });
-
-      data.grand_total = grandTotal
       
-    return data
-    data.map((item) => ZodValidator.validate(TarifLabValidation.CREATE, item));
+      return data
+      data.map((item) => ZodValidator.validate(TarifLabValidation.CREATE, item));
 
   }
 }

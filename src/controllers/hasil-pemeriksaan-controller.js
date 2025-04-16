@@ -5,7 +5,7 @@ export default class HasilPemeriksaanController {
     static async inputHasilPemeriksaan(req, res, next) {
         try {
             const data = req.body;
-            data.faskes_uuid = "faskes_uuid";
+            data.faskes_uuid = req.author.faskesUuid;
             await HasilPemeriksaanService.inputHasilPemeriksaan(data);
             res.status(201).json(successResponse("Data berhasil disimpan"));
         } catch (error) {
@@ -17,7 +17,7 @@ export default class HasilPemeriksaanController {
     static async expertise(req, res, next) {
         try {
             const data = req.body;
-            data.faskes_uuid = "faskes_uuid"
+            data.faskes_uuid = req.author.faskesUuid;
             data.order_lab_uuid = req.params.uuid
             const result = await HasilPemeriksaanService.expertise(data);
             res.status(200).json(successResponse("Expertise success", result));
@@ -29,7 +29,7 @@ export default class HasilPemeriksaanController {
     static async getHasilPemeriksaan(req, res, next) {
         try {
             const data = req.body;
-            data.faskes_uuid = "faskes_uuid"
+            data.faskes_uuid = req.author.faskesUuid;
             const order_lab_uuid = req.params.uuid
             const result = await HasilPemeriksaanService.getPemeriksaan(data, order_lab_uuid);
             res.status(200).json(successResponse("Data berhasil ditampilkan", result));
