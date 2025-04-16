@@ -6,7 +6,7 @@ import ItemPemeriksaanService from "../services/item-pemeriksaan-service.js";
 export default class ItemPemeriksaanController {
     static async create(req, res, next) {
         try {
-            req.body.faskes_uuid = "faskes_uuid";
+            req.body.faskes_uuid = req.author.faskesUuid;
             await ItemPemeriksaanService.create(req.body);
             return res.status(201).json(successResponse("Data berhasil disimpan"));
         } catch (error) {
@@ -16,7 +16,7 @@ export default class ItemPemeriksaanController {
 
     static async update(req, res, next) {
         try {
-            req.body.faskes_uuid = "faskes_uuid";
+            req.body.faskes_uuid = req.author.faskesUuid;
             const uuid = req.params.uuid;
             await ItemPemeriksaanService.update(uuid, req.body);
 
@@ -49,7 +49,7 @@ export default class ItemPemeriksaanController {
 
     static async findAll(req, res, next) {
         try {
-            req.body.faskes_uuid = "faskes_uuid";
+            req.body.faskes_uuid = req.author.faskesUuid;
             const itemPemeriksaan = await ItemPemeriksaanService.findAll(req.body);
             res.status(200).json(successResponse("Data berhasil ditampilkan", itemPemeriksaan));
         } catch (error) {
@@ -59,7 +59,7 @@ export default class ItemPemeriksaanController {
 
     static async createNilaiRujukan(req, res, next) {
         try {
-            req.body.faskes_uuid = "faskes_uuid";
+            req.body.faskes_uuid = req.author.faskesUuid;
             await ItemPemeriksaanService.createNilaiRujukan(req.body);
             return res.status(201).json(successResponse("Nilai Rujukan created"));
         } catch (error) {
@@ -90,7 +90,7 @@ export default class ItemPemeriksaanController {
     static async updateNilaiRujukan(req, res, next) {
         try {
             const uuid = req.params.uuid
-            req.body.faskes_uuid = "faskes_uuid";
+            req.body.faskes_uuid = req.author.faskesUuid;
             await ItemPemeriksaanService.updateNilaiRujukan(uuid, req.body);
             res.status(200).json(successResponse("Data berhasil diedit"));
         } catch (error) {

@@ -20,7 +20,7 @@ export default class HasilPemeriksaanController {
             data.faskes_uuid = "faskes_uuid"
             data.order_lab_uuid = req.params.uuid
             const result = await HasilPemeriksaanService.expertise(data);
-            res.status(200).json(successResponse("Data berhasil ditampilkan", result));
+            res.status(200).json(successResponse("Expertise success", result));
         } catch (error) {
             next(error);
         }

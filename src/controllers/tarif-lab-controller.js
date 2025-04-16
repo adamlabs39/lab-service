@@ -5,7 +5,7 @@ import TarifLabService from "../services/tarif-lab-service.js";
 export default class TarifLabController {
     static async create(req, res, next) {
         try {
-            req.body.faskes_uuid = "faskes_uuid";
+            req.body.faskes_uuid = req.author.faskesUuid;
             await TarifLabService.create(req.body);
             return res.status(201).json(successResponse("data berhasil disimpan"));
         } catch (error) {
@@ -15,7 +15,7 @@ export default class TarifLabController {
     
     static async update(req, res, next) {
         try {
-            req.body.faskes_uuid = "faskes_uuid";
+            req.body.faskes_uuid = req.author.faskesUuid;
             const uuid = req.params.uuid;
             await TarifLabService.update(uuid, req.body);
             res.status(200).json(successResponse("data berhasil diedit"));
@@ -41,7 +41,7 @@ export default class TarifLabController {
             req.body.limit = req.query.limit;
             req.body.penjamin_uuids = req.query.penjamin_uuids;
             req.body.pelayanans = req.query.pelayanans;
-            req.body.faskes_uuid = "faskes_uuid";
+            req.body.faskes_uuid = req.author.faskesUuid;
 
             const tarifLabs = await TarifLabService.findAll(req.body);
             res.status(200).json(successResponse("Data berhasil ditampilkan", tarifLabs));

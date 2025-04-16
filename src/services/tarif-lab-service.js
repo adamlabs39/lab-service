@@ -298,80 +298,97 @@ export default class TarifLabService {
 
   static async import(path, faskes_uuid) {
     const data = [];
-
+    const tarifMap = new Map(); // Simpan berdasarkan kodeTarif
     const workSheet = await extractExcel(path);
-    let currentTarif = null;
+    let grandTotal = 0
 
     workSheet.eachRow((row, rowNumber) => {
       if (rowNumber === 1) return; // Skip header
 
-      const kodeTarif = row.getCell(2).value; // Kolom "Kode Tarif"
-      const namaTarif = row.getCell(3).value; // Kolom "Nama Tarif"
-      const pelayanan = row.getCell(4).value; // Kolom "Pelayanan"
-      const metodePembayaran = row.getCell(5).value; // Kolom "Metode Pembayaran"
-      const kelompokPemeriksaan = row.getCell(6).value; // Kolom "Kelompok Pemeriksaan"
-      const komponenTarif = row.getCell(7).value; // Kolom "Komponen Tarif"
-      const persentase = row.getCell(8).value; // Kolom "Persentase"
-      const hargaTarifPersen = row.getCell(9).value; // Kolom "Harga Tarif (persen)"
-      const hargaTarifRupiah = row.getCell(10).value; // Kolom "Harga Tarif (rupiah)"
-      const itemPemeriksaan = row.getCell(11).value; // Kolom "Item Pemeriksaan"
-      const komponenTarifItem = row.getCell(12).value; // Kolom "Komponen Tarif Item"
-      const presentaseItem = row.getCell(13).value; // Kolom "Persentase Item"
-      const hargaTarifPersenItem = row.getCell(14).value; // Kolom "Harga Tarif Item (persen)"
-      const hargaTarifRupiahItem = row.getCell(15).value; // Kolom "Harga Tarif Item (rupiah)"
+      const kodeTarif = row.getCell(2).value;
+      const namaTarif = row.getCell(3).value;
+      const pelayanan = row.getCell(4).value;
+      const metodePembayaran = row.getCell(5).value;
+      const kelompokPemeriksaan = row.getCell(6).value;
+      const komponenTarif = row.getCell(7).value;
+      const persentase = row.getCell(8).value;
+      const hargaTarifPersen = row.getCell(9).value;
+      const hargaTarifRupiah = row.getCell(10).value;
+      const itemPemeriksaan = row.getCell(11).value;
+      const komponenTarifItem = row.getCell(12).value;
+      const presentaseItem = row.getCell(13).value;
+      const hargaTarifPersenItem = row.getCell(14).value;
+      const hargaTarifRupiahItem = row.getCell(15).value;
+      const grandTotalItem = row.getCell(16).value;
 
-      // Jika ada kode tarif baru, buat entri baru
-      if (kodeTarif) {
+      grandTotal += grandTotalItem
+
+      // Gunakan kodeTarif sebagai key unik
+      let currentTarif = tarifMap.get(kodeTarif);
+
+      if (kodeTarif && !currentTarif) {
         currentTarif = {
-          kode_tarif: kodeTarif,
-          nama_tarif: namaTarif,
-          pelayanans: pelayanan ? String(pelayanan).split(",").map((i) => i.trim()) : [],
-          penjamins: metodePembayaran ? String(metodePembayaran).split(",").map((i) => i.trim()) : [],
-          pemeriksaans: [], // Gabungan kelompok pemeriksaan dan item pemeriksaan
+          code: kodeTarif,
+          name: namaTarif,
+          pelayanans: pelayanan
+            ? String(pelayanan)
+                .split(",")
+                .map((i) => i.trim())
+            : [],
+          penjamins: metodePembayaran
+            ? String(metodePembayaran)
+                .split(",")
+                .map((i) => i.trim())
+            : [],
+          tarif_lab_items: [],
+          faskes_uuid: faskes_uuid,
+          status : true,
+
         };
+        tarifMap.set(kodeTarif, currentTarif);
         data.push(currentTarif);
       }
 
-      // Pastikan ada tarif sebelum menambahkan kelompok/item pemeriksaan
+      // Tambahkan pemeriksaan kalau sudah ada tarif
       if (currentTarif) {
-        const pemeriksaans = currentTarif.pemeriksaans;
+        const pemeriksaans = currentTarif.tarif_lab_items;
 
-        // **Handle Kelompok Pemeriksaan**
         if (kelompokPemeriksaan) {
-          let existingKelompok = pemeriksaans.find((p) => p.nama === kelompokPemeriksaan && p.jenis === "kelompok");
+          let existingKelompok = pemeriksaans.find(
+            (p) => p.code === kelompokPemeriksaan && p.jenis === "kelompok"
+          );
           if (!existingKelompok) {
             existingKelompok = {
-              nama: kelompokPemeriksaan,
+              code: kelompokPemeriksaan,
               jenis: "kelompok",
               komponen_tarif: [],
             };
             pemeriksaans.push(existingKelompok);
           }
 
-          // Tambahkan komponen tarif ke kelompok pemeriksaan yang sesuai
           existingKelompok.komponen_tarif.push({
-            nama: komponenTarif,
-            persentase: persentase,
+            code: komponenTarif,
+            persentase,
             harga_tarif_persen: hargaTarifPersen,
             harga_tarif_rupiah: hargaTarifRupiah,
           });
         }
 
-        // **Handle Item Pemeriksaan**
         if (itemPemeriksaan) {
-          let existingItem = pemeriksaans.find((p) => p.nama === itemPemeriksaan && p.jenis === "item");
+          let existingItem = pemeriksaans.find(
+            (p) => p.code === itemPemeriksaan && p.jenis === "item"
+          );
           if (!existingItem) {
             existingItem = {
-              nama: itemPemeriksaan,
+              code: itemPemeriksaan,
               jenis: "item",
               komponen_tarif: [],
             };
             pemeriksaans.push(existingItem);
           }
 
-          // Tambahkan komponen tarif ke item pemeriksaan yang sesuai
           existingItem.komponen_tarif.push({
-            nama: komponenTarifItem,
+            code: komponenTarifItem,
             persentase: presentaseItem,
             harga_tarif_persen: hargaTarifPersenItem,
             harga_tarif_rupiah: hargaTarifRupiahItem,
@@ -380,26 +397,112 @@ export default class TarifLabService {
       }
     });
 
-    const allCode = [...new Set(data.map((i) => i.kode_tarif))];
-
-    // const isThereDuplicateCode = await TarifLabRepository.findByCodeIn(allCode, faskes_uuid);
-
-    // if (isThereDuplicateCode) {
-    //   throw new ConflictException("Code ada yang duplicate");
-    // }
-
     const allPenjamins = data.map((d) => d.penjamins).flat();
-    const allPelayanans = data.map((d) => d.pelayanans).flat();
-    const allPemeriksaans = data.map((d) => d.pemeriksaans.map((p) => p.nama)).flat();
     const uniquePenjamin = [...new Set(allPenjamins)];
-    const uniquePemeriksaans = [...new Set(allPemeriksaans)];
 
-    const [penjaminList, pemeriksaanList] = await Promise.all([
-      PenjaminRepository.findByNameIn(uniquePenjamin, faskes_uuid),
-      KelompokPemeriksaanRepository.findByNameIn(uniquePemeriksaans, faskes_uuid),
-    ]);
+    const allItemPemeriksaan = data
+      .map((d) =>
+        d.tarif_lab_items.filter((p) => p.jenis === "item").map((p) => p.code)
+      )
+      .flat();
 
-    return data;
+    const allKelompokPemeriksaan = data
+      .map((d) =>
+        d.tarif_lab_items.filter((p) => p.jenis === "kelompok").map((p) => p.code)
+      )
+      .flat();
+
+      const allKomponen = data
+      .map((d) =>
+        d.tarif_lab_items.flatMap((p) =>
+          p.komponen_tarif.map((k) => k.code)
+        )
+      )
+      .flat();
+      
+
+    // Ambil yang unik
+    const uniqueItemPemeriksaan = [...new Set(allItemPemeriksaan)];
+    const uniqueKelompokPemeriksaan = [...new Set(allKelompokPemeriksaan)];
+    const uniqueKomponen = [...new Set(allKomponen)];
+
+    const [penjaminList, kelompokPemeriksaanList, itemPemeriksaanList, komponenList] =
+      await Promise.all([
+        PenjaminRepository.findByCodeIn(uniquePenjamin, faskes_uuid),
+        KelompokPemeriksaanRepository.findByCodeIn(
+          uniqueKelompokPemeriksaan,
+          faskes_uuid
+        ),
+        ItemPemeriksaanRepository.findByCodeIn(uniqueItemPemeriksaan, faskes_uuid),
+        NameTarifKomponenRepository.findByCodeIn(uniqueKomponen, faskes_uuid),
+      ]);
+
+      // return data
+
+      data.forEach((item, index) => {
+        // Ubah penjamins: dari code jadi uuid
+        item.penjamin_uuids = item.penjamins.map((p) => {
+          const penjamin = penjaminList.find((pen) => pen.code === p);
+          if (!penjamin) {
+            throw new NotfoundException(`Penjamin ${p} tidak ditemukan`);
+          }
+          return penjamin.uuid;
+        });
+      
+        // Ubah tarif_lab_items: kelompok -> replace code dengan uuid
+        item.tarif_lab_items = item.tarif_lab_items.map((p) => {
+          if (p.jenis === "kelompok") {
+            const pemeriksaan = kelompokPemeriksaanList.find((k) => k.code === p.code);
+            if (!pemeriksaan) {
+              throw new NotfoundException(`Kelompok Pemeriksaan ${p.code} tidak ditemukan`);
+            }
+            return {
+              ...p,
+              kelompok_pemeriksaan_uuid: pemeriksaan.uuid, // replace code dengan uuid
+            };
+          }
+      
+          if (p.jenis === "item") {
+            const itemPemeriksaan = itemPemeriksaanList.find((k) => k.code === p.code);
+            if (!itemPemeriksaan) {
+              throw new NotfoundException(`Item Pemeriksaan ${p.code} tidak ditemukan`);
+            }
+            return {
+              ...p,
+              item_pemeriksaan_uuid: itemPemeriksaan.uuid,
+            };
+          }
+      
+          return p; // kalau jenis lain, biarkan
+        });
+      
+        // Ubah komponen_tarif di setiap tarif_lab_item
+        item.tarif_lab_items = item.tarif_lab_items.map((p) => {
+          if (Array.isArray(p.komponen_tarif)) {
+            const komponen_tarif = p.komponen_tarif.map((k) => {
+              const komponen = komponenList.find((kom) => kom.code === k.code);
+              if (!komponen) {
+                throw new NotfoundException(`Komponen ${k.code} tidak ditemukan`);
+              }
+              return {
+                ...k,
+                komponen_tarif_uuid: komponen.uuid, // replace code dengan uuid
+              };
+            });
+            return {
+              ...p,
+              komponen_tindakan_labs: komponen_tarif,
+            };
+          }
+      
+          return p;
+        });
+      });
+
+      data.grand_total = grandTotal
+      
+    return data
+    data.map((item) => ZodValidator.validate(TarifLabValidation.CREATE, item));
+
   }
-
 }

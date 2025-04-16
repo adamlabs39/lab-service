@@ -14,4 +14,18 @@ export default class NameTarifKomponenRepository {
             },
         });
     }
+
+    static async findByCodeIn(code, faskes_uuid) {
+        return await NameTarifKomponenModel.findAll({
+            where: {
+                code: {
+                    [Op.in]: code,
+                },
+                faskes_uuid,
+                deleted_at: {
+                    [Op.is]: null,
+                },
+            },
+        });
+    }
 }

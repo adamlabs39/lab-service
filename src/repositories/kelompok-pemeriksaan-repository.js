@@ -20,6 +20,21 @@ export default class KelompokPemeriksaanRepository {
         }, { transaction });
     }
 
+    static async findByCodeIn(code, faskes_uuid) {
+        console.log("code", code);
+        return await KelompokPemeriksaanModel.findAll({
+            where: {
+                code: {
+                    [Op.in]: code,
+                },
+                faskes_uuid,
+                deleted_at: {
+                    [Op.is]: null,
+                },
+            },
+        });
+    }
+
     static async findByUuids(uuids) {
         return await KelompokPemeriksaanModel.findAll({
             where: {

@@ -7,7 +7,7 @@ import deletefile from "../helpers/file.js"
 export default class SpesimenController{
     static async create(req, res, next){
         try {
-            req.body.faskes_uuid = "faskes_uuid"
+            req.body.faskes_uuid = req.author.faskesUuid
             await SpesimenSevice.create(req.body)
             return res.status(201).json(successResponse("Spesimen created"))
         } catch (error) {
@@ -17,7 +17,7 @@ export default class SpesimenController{
 
     static async update(req,res,next){
         try {
-            req.body.faskes_uuid = "faskes_uuid"
+            req.body.faskes_uuid = req.author.faskesUuid
             const uuid = req.params.uuid
             await SpesimenSevice.update(uuid,req.body)
             return res.status(200).json(successResponse("Spesimen updated"))
@@ -51,7 +51,7 @@ export default class SpesimenController{
             req.body.name = req.query.name
             req.body.page = req.query.name
             req.body.limit = req.query.name
-            req.body.faskes_uuid = "faskes_uuid"
+            req.body.faskes_uuid = req.author.faskesUuid
 
             const categoryPemeriksaans = await SpesimenSevice.getAll(req.body)
             return res.status(200).json(successResponse("Success get al data spesimen", categoryPemeriksaans))

@@ -38,6 +38,7 @@ export default class ItemPemeriksaanRepository {
   }
 
   static async findByCode(code, faskes_uuid) {
+    console.log("code", code);
     return await ItemPemeriksaanModel.findOne({
       where: {
         code: code,
@@ -103,6 +104,7 @@ export default class ItemPemeriksaanRepository {
   }
 
   static async findByCodeIn(codes, faskes_uuid) {
+    console.log("code", codes);
     return await ItemPemeriksaanModel.findAll({
       where: {
         faskes_uuid: faskes_uuid,

@@ -10,7 +10,7 @@ import LaporanController from "../controllers/Laporan-controller.js";
 import multer from "multer";
 
 const apiBase = process.env.API_BASE || "api";
-const apiVersion = process.env.API_VERSION || "v1";
+const apiVersion = process.env.API_VERSION || "v3";
 const baseUrl = `/${apiBase}/${apiVersion}/lab`;
 
 const upload = multer({ dest: "src/uploads" });
