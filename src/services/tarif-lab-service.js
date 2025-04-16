@@ -20,6 +20,7 @@ import calculatePersen from "../helpers/calculate_persen.js";
 import calculateRupiah from "../helpers/calculate_rupiah.js";
 import convertRupiahToNumber from "../helpers/convert_rupiah_to_number.js";
 
+
 export default class TarifLabService {
   static async create(req) {
     const validData = ZodValidator.validate(TarifLabValidation.CREATE, req);
@@ -509,68 +510,126 @@ export default class TarifLabService {
   
      const validData = data.map((item) => ZodValidator.validate(TarifLabValidation.CREATE, item));
 
-     await sequelizeInstance.transaction(async (t) => {
-      const tarifLab = await TarifLabRepository.create(validData[0], t);
-
-      const tarifLabPenjamin = validData[0].penjamin_uuids.map((item) => {
-        return {
+    //  return validData
+    await sequelizeInstance.transaction(async (t) => {
+      for (const [id, data] of validData.entries()) {
+        const tarifLab = await TarifLabRepository.create(data, t);
+    
+        const tarifLabPenjamin = data.penjamin_uuids.map((item) => ({
           tarif_lab_uuid: tarifLab.uuid,
           penjamin_uuid: item,
-          faskes_uuid: validData[0].faskes_uuid,
-        };
-      });
-
-      await TarifLabPenjaminRepository.bulkCreate(tarifLabPenjamin, t);
-
-      const tarifLabPelayanan = validData[0].pelayanans.map((item) => {
-        return {
+          faskes_uuid: data.faskes_uuid,
+        }));
+        await TarifLabPenjaminRepository.bulkCreate(tarifLabPenjamin, t);
+    
+        const tarifLabPelayanan = data.pelayanans.map((item) => ({
           tarif_lab_uuid: tarifLab.uuid,
           pelayanan: item,
-          faskes_uuid: validData[0].faskes_uuid,
-        };
-      });
-
-      await TarifLabPelayananRepository.bulkCreate(tarifLabPelayanan, t);
-
-      const tarifLabItems = validData[0].tarif_lab_items.map((item, i) => {
-        let uuid = uuidv7();
-        validData[0].tarif_lab_items[i] = {
-          ...validData[0].tarif_lab_items[i],
-          uuid: uuid,
-        };
-        return {
-          tarif_lab_uuid: tarifLab.uuid,
-          kelompok_pemeriksaan_uuid: item.kelompok_pemeriksaan_uuid,
-          item_pemeriksaan_uuid: item.item_pemeriksaan_uuid,
-          faskes_uuid: validData[0].faskes_uuid,
-          total_tarif: item.total_tarif,
-        };
-      });
-
-      await TarifLabItemRepository.bulkCreate(tarifLabItems, t);
-
-      const tarifLabKomponenTindakan = [];
-
-      validData[0].tarif_lab_items.forEach((item) => {
-        item.komponen_tindakan_labs.forEach((komponen) => {
-          tarifLabKomponenTindakan.push({
-            tarif_lab_item_uuid: item.uuid,
-            tarif_komponen_uuid: komponen.tarif_komponen_uuid,
-            diskon: komponen.diskon,
-            tarif_per_komponen: komponen.tarif_per_komponen,
-            faskes_uuid: validData[0].faskes_uuid,
+          faskes_uuid: data.faskes_uuid,
+        }));
+        await TarifLabPelayananRepository.bulkCreate(tarifLabPelayanan, t);
+    
+        const tarifLabItems = data.tarif_lab_items.map((item, i) => {
+          const uuid = uuidv7();
+          data.tarif_lab_items[i] = { ...item, uuid };
+          return {
             tarif_lab_uuid: tarifLab.uuid,
-            prosentase_per_komponen: komponen.prosentase_per_komponen,
+            kelompok_pemeriksaan_uuid: item.kelompok_pemeriksaan_uuid,
+            item_pemeriksaan_uuid: item.item_pemeriksaan_uuid,
+            faskes_uuid: data.faskes_uuid,
+            total_tarif: item.total_tarif,
+          };
+        });
+        await TarifLabItemRepository.bulkCreate(tarifLabItems, t);
+    
+        const tarifLabKomponenTindakan = [];
+        data.tarif_lab_items.forEach((item) => {
+          item.komponen_tindakan_labs.forEach((komponen) => {
+            tarifLabKomponenTindakan.push({
+              tarif_lab_item_uuid: item.uuid,
+              tarif_komponen_uuid: komponen.tarif_komponen_uuid,
+              diskon: komponen.diskon,
+              tarif_per_komponen: komponen.tarif_per_komponen,
+              faskes_uuid: data.faskes_uuid,
+              tarif_lab_uuid: tarifLab.uuid,
+              prosentase_per_komponen: komponen.prosentase_per_komponen,
+            });
           });
         });
-      });
+        await TarifKomponenTindakanLabRepository.bulkCreate(tarifLabKomponenTindakan, t);
+      }
+    });
 
-      
-      await TarifKomponenTindakanLabRepository.bulkCreate(
-        tarifLabKomponenTindakan,
-        t
-      );
-     })
+// await sequelizeInstance.transaction(async (t) => {
+//   const tarifLabsData = [];
+//   const tarifLabPenjaminData = [];
+//   const tarifLabPelayananData = [];
+//   const tarifLabItemsData = [];
+//   const tarifLabKomponenTindakanData = [];
+
+//   for (const data of validData) {
+//     const tarifLabUuid = uuidv7();
+
+//     tarifLabsData.push({
+//       uuid: tarifLabUuid,
+//       name: data.name,
+//       code: data.code,
+//       faskes_uuid: data.faskes_uuid,
+//       status : data.status,
+//       grand_total: data.grand_total,
+//       // field lain sesuai strukturmu
+//     });
+
+//     data.penjamin_uuids.forEach((penjamin) => {
+//       tarifLabPenjaminData.push({
+//         tarif_lab_uuid: tarifLabUuid,
+//         penjamin_uuid: penjamin,
+//         faskes_uuid: data.faskes_uuid,
+//       });
+//     });
+
+//     data.pelayanans.forEach((pelayanan) => {
+//       tarifLabPelayananData.push({
+//         tarif_lab_uuid: tarifLabUuid,
+//         pelayanan,
+//         faskes_uuid: data.faskes_uuid,
+//       });
+//     });
+
+//     data.tarif_lab_items.forEach((item) => {
+//       const itemUuid = uuidv4();
+
+//       tarifLabItemsData.push({
+//         uuid: itemUuid,
+//         tarif_lab_uuid: tarifLabUuid,
+//         kelompok_pemeriksaan_uuid: item.kelompok_pemeriksaan_uuid,
+//         item_pemeriksaan_uuid: item.item_pemeriksaan_uuid,
+//         total_tarif: item.total_tarif,
+//         faskes_uuid: data.faskes_uuid,
+//       });
+
+//       item.komponen_tindakan_labs.forEach((komponen) => {
+//         tarifLabKomponenTindakanData.push({
+//           tarif_lab_item_uuid: itemUuid,
+//           tarif_lab_uuid: tarifLabUuid,
+//           tarif_komponen_uuid: komponen.tarif_komponen_uuid,
+//           diskon: komponen.diskon,
+//           tarif_per_komponen: komponen.tarif_per_komponen,
+//           prosentase_per_komponen: komponen.prosentase_per_komponen,
+//           faskes_uuid: data.faskes_uuid,
+//         });
+//       });
+//     });
+//   }
+
+//   // Bulk insert semua data
+//   await TarifLabRepository.bulkCreate(tarifLabsData, { transaction: t });
+//   await TarifLabPenjaminRepository.bulkCreate(tarifLabPenjaminData, { transaction: t });
+//   await TarifLabPelayananRepository.bulkCreate(tarifLabPelayananData, { transaction: t });
+//   await TarifLabItemRepository.bulkCreate(tarifLabItemsData, { transaction: t });
+//   await TarifKomponenTindakanLabRepository.bulkCreate(tarifLabKomponenTindakanData, { transaction: t });
+// });
+
 
   }
 }

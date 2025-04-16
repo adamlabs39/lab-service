@@ -27,6 +27,11 @@ export default class TarifLabRepository{
         return await TarifLabModel.create(data, {transaction});
     }
 
+    static async bulkCreate(data, transaction){
+        console.log("data", data);
+        return await TarifLabModel.bulkCreate(data, {transaction});
+    }
+
     static async findByCode(code, faskes_uuid){
         return await TarifLabModel.findOne({
             where: {
