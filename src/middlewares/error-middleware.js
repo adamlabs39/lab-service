@@ -1,3 +1,4 @@
+import AuthorizationSdkException from "@adameds/authorization-sdk/sdkException";
 import BadRequestException from "../exception/bad-request-exception.js";
 import ConflictException from "../exception/conflict-exception.js";
 import InternalServerException from "../exception/internal-server-exception.js";
@@ -9,6 +10,10 @@ const errorMiddleware = (error, request, response, nextFunction) => {
     return response.status(error.code).json(errorResponse(error.message));
   } else if (error instanceof BadRequestException) {
     return response.status(error.code).json(errorResponse(error.message));
+  
+  }else if (error instanceof AuthorizationSdkException) {
+    return response.status(error.code).json(errorResponse(error.message));
+
   } else if (error instanceof ConflictException) {
     return response.status(error.code).json(errorResponse(error.message));
   } else if (error instanceof InternalServerException) {
