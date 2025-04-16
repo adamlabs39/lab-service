@@ -64,7 +64,7 @@ export default class TarifLabController {
         try {
             validateExcel(req.file);
             const path = req.file.path;
-            const result = await TarifLabService.import(path, "faskes_uuid");
+            const result = await TarifLabService.import(path, req.author.faskesUuid);
             res.status(200).json(successResponse("Data berhasil diimport", result));
         } catch (error) {
             next(error);

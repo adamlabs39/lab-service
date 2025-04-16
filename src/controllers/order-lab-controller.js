@@ -5,7 +5,7 @@ export default class OrderLabController{
     static async create(req, res, next){
         try {
             const data = req.body;
-            data.faskes_uuid = req.author.faskesUuid;
+            data.faskes_uuid = req.author.faskesUuid; 
             data.petugas_order = req.author.username;
             await OrderLabService.create(data);
             res.status(201).json(successResponse("Data berhasil disimpan"));
