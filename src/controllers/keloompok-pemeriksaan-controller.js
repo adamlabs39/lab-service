@@ -64,7 +64,7 @@ export default class KelompokPemeriksaanController {
     static async import(req, res, next) {
         try {
             validateExcel(req.file);
-            await KelompokPemeriksaanService.import(req.file.path,'faskes_uuid')
+            await KelompokPemeriksaanService.import(req.file.path, req.author.faskesUuid)
             deletefile(req.file.path);
 
             return res.status(201).json(successResponse("Data berhasil disimpan"))

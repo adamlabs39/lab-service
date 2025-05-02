@@ -80,7 +80,7 @@ export default class CategoryPemeriksaanService {
     return categoryPemeriksaan;
   }
 
-  static async import (filePath) {
+  static async import (filePath, faskes_uuid) {
     const data = []
 
     const workSheet = await extractExcel(filePath)
@@ -92,7 +92,7 @@ export default class CategoryPemeriksaanService {
         name: row.values[3],
         no_urut: row.values[4],
         status: true,
-        faskes_uuid: "faskes_uuid"
+        faskes_uuid: faskes_uuid
       })
     })
 

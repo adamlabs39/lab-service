@@ -67,7 +67,7 @@ export default class CategoryPemeriksaanController {
         try {
             validateExcel(request.file);
 
-            await CategoryPemeriksaanService.import(request.file.path);
+            await CategoryPemeriksaanService.import(request.file.path, request.author.faskesUuid);
 
             deletefile(request.file.path);
 
