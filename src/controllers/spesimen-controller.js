@@ -63,7 +63,7 @@ export default class SpesimenController{
     static async import(req,res,next){
         try {
             validateExcel(req.file)
-            await SpesimenSevice.import(req.file.path)
+            await SpesimenSevice.import(req.file.path, req.author.faskesUuid)
             deletefile(req.file.path)
             return res.status(201).json(successResponse("Success import data spesimen"))
         } catch (error) {
