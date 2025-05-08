@@ -168,18 +168,16 @@ export default class KelompokPemeriksaanRepository {
         {
           model: ItemKelompokPemeriksaanModel,
           as: "item_kelompok_pemeriksaan",
+          required: false,
           where: {
-            deleted_at: {
-              [Op.is]: null,
-            },
+            deleted_at: { [Op.is]: null },
           },
           include: {
             model: ItemPemeriksaanModel,
             as: "item_pemeriksaan",
+            required: false,
             where: {
-              deleted_at: {
-                [Op.is]: null,
-              },
+              deleted_at: { [Op.is]: null },
             },
             attributes: ["uuid", "name", "code"],
           },
@@ -187,47 +185,40 @@ export default class KelompokPemeriksaanRepository {
         {
           model: CategoryPemeriksaanModel,
           as: "category_pemeriksaan",
+          required: false,
           where: {
-            deleted_at: {
-              [Op.is]: null,
-            },
+            deleted_at: { [Op.is]: null },
           },
           attributes: ["uuid", "name", "code"],
         },
         {
           model: Icd9Model,
           as: "icd9",
+          required: false,
           where: {
-            deleted_at: {
-              [Op.is]: null,
-            },
+            deleted_at: { [Op.is]: null },
           },
           attributes: ["uuid", "name", "code"],
         },
         {
           model: SnomedModel,
           as: "snomed",
+          required: false,
           where: {
-            deleted_at: {
-              [Op.is]: null,
-            },
+            deleted_at: { [Op.is]: null },
           },
           attributes: ["uuid", "name", "code"],
         },
         {
           model: LoincModel,
           as: "loinc",
+          required: false,
           where: {
-            deleted_at: {
-              [Op.is]: null,
-            },
+            deleted_at: { [Op.is]: null },
           },
           attributes: ["uuid", "name", "code"],
         },
       ],
-      attributes: {
-        exclude: ["created_at", "updated_at", "deleted_at"],
-      },
     };
 
     return await pagination(KelompokPemeriksaanModel, req, options);
