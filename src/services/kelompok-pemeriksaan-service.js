@@ -226,10 +226,13 @@ export default class KelompokPemeriksaanService {
           category_pemeriksaan_uuid:
             kelompokPemeriksaan.category_pemeriksaan_uuid,
           category_pemeriksaan: kelompokPemeriksaan.category_pemeriksaan.name,
+          icd9_uuid: kelompokPemeriksaan.icd9?.uuid ?? "-",
           icd9_code: kelompokPemeriksaan.icd9?.code ?? "-",
           icd9_name: kelompokPemeriksaan.icd9?.name ?? "-",
+          snomed_uuid: kelompokPemeriksaan.snomed?.uuid ?? "-",
           snomed_code: kelompokPemeriksaan.snomed?.code ?? "-",
           snomed_name: kelompokPemeriksaan.snomed?.name ?? "-",
+          loinc_uuid: kelompokPemeriksaan.loinc?.uuid ?? "-",
           loinc_code: kelompokPemeriksaan.loinc?.code ?? "-",
           loinc_name: kelompokPemeriksaan.loinc?.name ?? "-",
           status: kelompokPemeriksaan.status,
