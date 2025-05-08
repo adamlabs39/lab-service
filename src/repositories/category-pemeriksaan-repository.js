@@ -9,9 +9,13 @@ export default class CategoryPemeriksaanRepository {
   }
 
   static async update(uuid, data, transaction) {
-    return await CategoryPemeriksaanModel.update(data, {
-      where: { uuid: uuid },
-    }, { transaction });
+    return await CategoryPemeriksaanModel.update(
+      data,
+      {
+        where: { uuid: uuid },
+      },
+      { transaction }
+    );
   }
 
   static async delete(uuid, transaction) {
@@ -35,9 +39,9 @@ export default class CategoryPemeriksaanRepository {
   static async findByUuid(uuid) {
     return await CategoryPemeriksaanModel.findOne({
       where: { uuid: uuid, deleted_at: null },
-      attributes:{
+      attributes: {
         exclude: ["created_at", "updated_at", "deleted_at"],
-      }
+      },
     });
   }
   static async findAll(req) {
@@ -51,6 +55,7 @@ export default class CategoryPemeriksaanRepository {
           [Op.is]: null,
         },
       },
+      order: [["created_at", "DESC"]],
       attributes: {
         exclude: ["created_at", "updated_at", "deleted_at"],
       },
@@ -70,8 +75,8 @@ export default class CategoryPemeriksaanRepository {
         code: {
           [Op.in]: codes,
         },
-        deleted_at: { [Op.is]: null }
-      }
+        deleted_at: { [Op.is]: null },
+      },
     });
   }
 }

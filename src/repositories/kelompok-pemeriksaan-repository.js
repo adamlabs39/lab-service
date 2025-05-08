@@ -161,9 +161,6 @@ export default class KelompokPemeriksaanRepository {
           [Op.is]: null,
         },
       },
-      attributes: {
-        exclude: ["created_at", "updated_at", "deleted_at"],
-      },
       include: [
         {
           model: ItemKelompokPemeriksaanModel,
@@ -219,6 +216,10 @@ export default class KelompokPemeriksaanRepository {
           attributes: ["uuid", "name", "code"],
         },
       ],
+      order: [["created_at", "DESC"]],
+      attributes: {
+        exclude: ["created_at", "updated_at", "deleted_at"],
+      },
     };
 
     return await pagination(KelompokPemeriksaanModel, req, options);
