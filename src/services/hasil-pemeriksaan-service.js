@@ -8,6 +8,7 @@ import ZodValidator from "../validations/zod-validator.js";
 import ExpertiseValidation from "../validations/expertise-validation.js";
 import toEpochDate from "../helpers/date-helper.js";
 import { status } from "./order-lab-service.js";
+import { NotfoundException } from "@adameds/model-sdk/exceptions";
 
 export default class HasilPemeriksaanService {
   static async inputHasilPemeriksaan(req) {

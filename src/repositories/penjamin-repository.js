@@ -40,4 +40,19 @@ export default class PenjaminRepository {
             },
         });
    }
+
+   static async findByCodeIn(code, faskes_uuid) {
+        // console.log("code", code);
+        return await PenjaminModel.findAll({
+            where: {
+                code: {
+                    [Op.in]: code
+                },
+                faskes_uuid,
+                deleted_at: {
+                    [Op.is]: null,
+                },
+            },
+        });
+   }
 }

@@ -43,30 +43,25 @@ export default class NilaiRujukanValidation {
         path: ["umur_atas_tahun"],
       }
     )
-    .refine(
-      (data) => {
-        if (
-          data.operator_nilai_normal == ">" ||
-          (data.operator_nilai_normal == ">=" &&
-            data.batas_bawah_nilai_normal === undefined &&
-            data.batas_atas_nilai_normal !== undefined)
-        ) {
-          return false;
-        } else if (
-          data.operator_nilai_normal == "<" ||
-          (data.operator_nilai_normal == "<=" &&
-            data.batas_bawah_nilai_normal !== undefined &&
-            data.batas_atas_nilai_normal === undefined)
-        ) {
-          return false;
-        }
-        return true;
-      },
-      {
-        message: "Operator nilai normal tidak sesuai",
-        path: ["operator_nilai_normal"],
+    .refine((data) => {
+      const { operator_nilai_normal, batas_bawah_nilai_normal, batas_atas_nilai_normal } = data;
+    
+      // Kalau operator > atau >= → batas bawah wajib ada
+      if (['>', '>='].includes(operator_nilai_normal) && batas_bawah_nilai_normal === undefined) {
+        return false;
       }
-    )
+    
+      // Kalau operator < atau <= → batas atas wajib ada
+      if (['<', '<='].includes(operator_nilai_normal) && batas_atas_nilai_normal === undefined) {
+        return false;
+      }
+    
+      return true;
+    }, {
+      message: 'Batas bawah/atas harus diisi sesuai dengan operator yang dipilih',
+      path: ['batas_bawah_nilai_normal'], // atau ['batas_atas_nilai_normal'] tergantung konteks
+    })
+    
     .refine(
       (data) => {
         if (

@@ -7,6 +7,10 @@ export default class NilaiRujukanRepository {
         return await NilaiRujukanModel.create(data, { transaction });
     }
 
+    static async bulkCreate(data, transaction) {
+        return await NilaiRujukanModel.bulkCreate(data, { transaction });
+    }
+
    static async findByUuid(uuid) {
         return await NilaiRujukanModel.findOne({
             where: { uuid: uuid, deleted_at: { [Op.is]: null } },

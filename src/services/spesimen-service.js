@@ -58,7 +58,7 @@ export default class SpesimenSevice {
         return await SpesimenRepository.findAll(req)
      }
    
-     static async import(path){
+     static async import(path, faskes_uuid){
          const data = []
 
          const workSheet =await extractExcel(path)
@@ -69,7 +69,7 @@ export default class SpesimenSevice {
                    code: row.values[2],
                    name: row.values[3],
                    status: true,
-                   faskes_uuid: "faskes_uuid"
+                   faskes_uuid: faskes_uuid
                })
          })
 

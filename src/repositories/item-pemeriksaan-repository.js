@@ -1,4 +1,8 @@
-import { CategoryPemeriksaanModel, ItemPemeriksaanModel, PilihanHasilItemPemeriksaanModel } from "@adameds/model-sdk/lab";
+import {
+  CategoryPemeriksaanModel,
+  ItemPemeriksaanModel,
+  PilihanHasilItemPemeriksaanModel,
+} from "@adameds/model-sdk/lab";
 import pagination from "../helpers/pagination.js";
 import toEpochDate from "../helpers/date-helper.js";
 import { Op } from "sequelize";
@@ -9,9 +13,13 @@ export default class ItemPemeriksaanRepository {
   }
 
   static async update(uuid, data, transaction) {
-    return await ItemPemeriksaanModel.update(data, {
-      where: { uuid: uuid },
-    }, { transaction });
+    return await ItemPemeriksaanModel.update(
+      data,
+      {
+        where: { uuid: uuid },
+      },
+      { transaction }
+    );
   }
 
   static async findByUuids(uuids) {
@@ -27,7 +35,6 @@ export default class ItemPemeriksaanRepository {
     });
   }
 
-
   static async delete(uuid, transaction) {
     console.log("uuid", uuid);
     const res = await ItemPemeriksaanModel.update(
@@ -38,6 +45,7 @@ export default class ItemPemeriksaanRepository {
   }
 
   static async findByCode(code, faskes_uuid) {
+    console.log("code", code);
     return await ItemPemeriksaanModel.findOne({
       where: {
         code: code,
@@ -62,14 +70,15 @@ export default class ItemPemeriksaanRepository {
         {
           model: CategoryPemeriksaanModel,
           as: "category_pemeriksaan",
-        attributes:["name", "id", "uuid"],
-      },
-      {
-        model: PilihanHasilItemPemeriksaanModel,
-        as: "pilihan_hasil_item_pemeriksaan",
-        attributes:["pilihan_hasil"],
-      }
-      ]});
+          attributes: ["name", "id", "uuid"],
+        },
+        {
+          model: PilihanHasilItemPemeriksaanModel,
+          as: "pilihan_hasil_item_pemeriksaan",
+          attributes: ["pilihan_hasil"],
+        },
+      ],
+    });
   }
 
   static async findAll(req) {
@@ -90,6 +99,7 @@ export default class ItemPemeriksaanRepository {
           attributes: ["name", "id", "uuid"],
         },
       ],
+      order: [["created_at", "DESC"]],
       attributes: {
         exclude: ["created_at", "updated_at", "deleted_at"],
       },
@@ -103,6 +113,7 @@ export default class ItemPemeriksaanRepository {
   }
 
   static async findByCodeIn(codes, faskes_uuid) {
+    console.log("code", codes);
     return await ItemPemeriksaanModel.findAll({
       where: {
         faskes_uuid: faskes_uuid,

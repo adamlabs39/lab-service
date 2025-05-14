@@ -7,7 +7,7 @@ export default class KelompokPemeriksaanController {
     static async create(req, res, next) {
         try {
             const data = req.body;
-            data.faskes_uuid = "faskes_uuid";
+            data.faskes_uuid = req.author.faskesUuid;
             console.log("kontroler");
             await KelompokPemeriksaanService.create(data);
             return res.status(201).json(successResponse("Data berhasil disimpan"));
@@ -20,7 +20,7 @@ export default class KelompokPemeriksaanController {
         try {
             const uuid = req.params.uuid;
             const data = req.body;
-            data.faskes_uuid = "faskes_uuid";
+            data.faskes_uuid = req.author.faskesUuid;
             await KelompokPemeriksaanService.update(uuid, data);
             return res.status(200).json(successResponse("Data berhasil diedit"));
         } catch (error) {
@@ -53,7 +53,7 @@ export default class KelompokPemeriksaanController {
             req.body.name = req.query.name;
             req.body.page = req.query.page;
             req.body.limit = req.query.limit;
-            req.body.faskes_uuid = "faskes_uuid";
+            req.body.faskes_uuid = req.author.faskesUuid;
             const result = await KelompokPemeriksaanService.getAll(req.body);
             return res.status(200).json(successResponse("Data berhasil ditampilkan", result));
         } catch (error) {
@@ -64,7 +64,7 @@ export default class KelompokPemeriksaanController {
     static async import(req, res, next) {
         try {
             validateExcel(req.file);
-            await KelompokPemeriksaanService.import(req.file.path,'faskes_uuid')
+            await KelompokPemeriksaanService.import(req.file.path, req.author.faskesUuid)
             deletefile(req.file.path);
 
             return res.status(201).json(successResponse("Data berhasil disimpan"))

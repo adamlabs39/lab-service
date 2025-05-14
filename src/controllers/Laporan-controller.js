@@ -5,7 +5,7 @@ export default class LaporanController{
     static async getKunjungan(req, res, next){
         try {
             req = req.query
-            req.faskes_uuid = "faskes_uuid" 
+            req.faskes_uuid = req.author.faskesUuid 
             const laporan = await LaporanService.getKunjungan(req)
             res.status(200).json(successResponse("Data Berhasil ditampilkam", laporan))
         } catch (error) {
@@ -16,7 +16,7 @@ export default class LaporanController{
     static async getTat(req, res, next){
         try {
             req = req.query
-            req.faskes_uuid = "faskes_uuid"
+            req.faskes_uuid = req.author.faskesUuid
             const laporan = await LaporanService.getTat(req)
             res.status(200).json(successResponse("Data Berhasil ditampilkan", laporan))
         } catch (error) {
@@ -27,7 +27,7 @@ export default class LaporanController{
     static async getRekapKunjungan(req, res, next){
         try {
             req = req.query
-            req.faskes_uuid = "faskes_uuid"
+            req.faskes_uuid = req.author.faskesUuid
             const laporan = await LaporanService.getRekapKunjungan(req)
             res.status(200).json(successResponse("Data Berhasil ditampilkan", laporan))
         } catch (error) {

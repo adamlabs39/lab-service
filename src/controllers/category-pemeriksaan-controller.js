@@ -7,7 +7,7 @@ export default class CategoryPemeriksaanController {
     static async create(request, response, next) {
        try {
         const data = request.body;
-        data.faskes_uuid = "faskes_uuid";
+        data.faskes_uuid = request.author.faskesUuid;
         await CategoryPemeriksaanService.create(data);
        return response.status(201).json(successResponse("Data berhasil disimpan"));
        } catch (error) {
@@ -19,7 +19,7 @@ export default class CategoryPemeriksaanController {
         try {
             const data = request.body;
             const uuid = request.params.uuid;
-            data.faskes_uuid = "faskes_uuid";
+            data.faskes_uuid = request.author.faskesUuid;
             await CategoryPemeriksaanService.update(uuid, data);
 
             response.status(200).json(successResponse("Data berhasil diedit"));
@@ -50,7 +50,7 @@ export default class CategoryPemeriksaanController {
 
     static async findAll(request, response, next) {
         try {
-            request.body.faskes_uuid = "faskes_uuid";
+            request.body.faskes_uuid = request.author.faskesUuid;
             request.body.name = request.query.name;
             request.body.page = request.query.page; 
             request.body.limit = request.query.limit;
@@ -67,7 +67,7 @@ export default class CategoryPemeriksaanController {
         try {
             validateExcel(request.file);
 
-            await CategoryPemeriksaanService.import(request.file.path);
+            await CategoryPemeriksaanService.import(request.file.path, request.author.faskesUuid);
 
             deletefile(request.file.path);
 
