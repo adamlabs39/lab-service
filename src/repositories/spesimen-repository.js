@@ -62,6 +62,8 @@ export default class SpesimenRepository {
       attributes: {
         exclude: ["created_at", "updated_at", "deleted_at"],
       },
+      distinct: true, // Pindahkan ke sini untuk kontrol lebih baik
+      subQuery: false,
     };
 
     return pagination(SpesimenModel, req, options);

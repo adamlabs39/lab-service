@@ -1,27 +1,30 @@
 import Utils from "./utils.js";
 
-
 const pagination = async (model, args, options) => {
-  const page = args.page || 1;
-  const limit = args.limit || 10;
+  const page = parseInt(args.page || 1, 10);
+  const limit = parseInt(args.limit || 10, 10);
   const offset = (page - 1) * limit;
-  const subQuery = args.subQuery ?? false;
 
-  const query = await model.findAndCountAll({
+  // Query untuk count total (tanpa limit/offset)
+  const countQuery = await model.count({
+    ...options,
+    distinct: true,
+    include: options.include?.filter((inc) => !inc.required), // Hanya include yang tidak required
+  });
+
+  // Query untuk data
+  const dataQuery = await model.findAll({
+    ...options,
     limit: limit,
     offset: offset,
     distinct: true,
-    subQuery: subQuery,
-    ...options,
+    subQuery: false,
   });
-
-  const mappedRows = query.rows.map((row) =>
-    Utils.camelToSnakeObject(row.toJSON())
-  );
+  console.log(JSON.stringify(dataQuery));
 
   return {
-    data: mappedRows,
-    pagination: Utils.paginationHelper(page, limit, query.count),
+    data: dataQuery.map((row) => Utils.camelToSnakeObject(row.toJSON())),
+    pagination: Utils.paginationHelper(page, limit, countQuery),
   };
 };
 

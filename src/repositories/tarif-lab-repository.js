@@ -307,9 +307,9 @@ export default class TarifLabRepository {
         },
       ],
       order: [["created_at", "DESC"]],
-      attributes: {
-        exclude: ["created_at", "updated_at", "deleted_at"],
-      },
+      attributes: { exclude: ["created_at", "updated_at", "deleted_at"] },
+      distinct: true, // Pindahkan ke sini untuk kontrol lebih baik
+      subQuery: false,
     };
 
     return await pagination(TarifLabModel, req, options);
