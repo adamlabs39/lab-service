@@ -6,10 +6,14 @@ import {
   TarifLabModel,
   TarifLabPelayananModel,
   TarifLabPenjaminModel,
+  TarifKomponenTindakanLabModel,
 } from "@adameds/model-sdk/lab";
 import { Op } from "sequelize";
 import toEpochDate from "../helpers/date-helper.js";
-import { PenjaminModel } from "@adameds/model-sdk/datamaster";
+import {
+  NameTarifKomponenModel,
+  PenjaminModel,
+} from "@adameds/model-sdk/datamaster";
 import pagination from "../helpers/pagination.js";
 
 TarifLabModel.hasMany(TarifLabPenjaminModel, {
@@ -225,94 +229,136 @@ export default class TarifLabRepository {
   }
 
   static async findAll(req) {
-    const buildWhereCondition = (uuids) => {
-      const condition = {
-        deleted_at: { [Op.is]: null },
-      };
-
-      if (uuids && uuids.length > 0) {
-        condition.uuid = { [Op.in]: uuids };
-      }
-
-      return condition;
-    };
-
-    const wherePenjamInCondition = buildWhereCondition(req.penjamin_uuids);
-    // const wherePelayananInCondition = buildWhereCondition(req.pelayanans);
-
-    const options = {
+    // 1. Query utama untuk mendapatkan data TarifLab dengan pagination
+    const mainQueryOptions = {
       where: {
         faskes_uuid: req.faskes_uuid,
-        name: {
-          [Op.iLike]: `%${req.name || ""}%`,
-        },
-        deleted_at: {
-          [Op.is]: null,
-        },
+        name: { [Op.iLike]: `%${req.name || ""}%` },
+        deleted_at: { [Op.is]: null },
+      },
+      order: [["created_at", "DESC"]],
+      attributes: { exclude: ["created_at", "updated_at", "deleted_at"] },
+    };
+
+    // Eksekusi query utama dengan pagination
+    const { data: mainData, pagination: paginationInfo } = await pagination(
+      TarifLabModel,
+      req,
+      mainQueryOptions
+    );
+
+    // Jika tidak ada data, kembalikan response kosong
+    if (mainData.length === 0) {
+      return { data: [], pagination: paginationInfo };
+    }
+
+    // 2. Ambil semua relasi untuk data yang sudah dipaginasi
+    const uuids = mainData.map((item) => item.uuid);
+
+    // Query untuk tarif_lab_penjamin dengan penjamin
+    const tarifPenjamin = await TarifLabPenjaminModel.findAll({
+      where: {
+        tarif_lab_uuid: { [Op.in]: uuids },
+        deleted_at: { [Op.is]: null },
+        ...(req.penjamin_uuids?.length > 0 && {
+          uuid: { [Op.in]: req.penjamin_uuids },
+        }),
       },
       include: [
         {
-          model: TarifLabPenjaminModel,
-          as: "tarif_lab_penjamin",
-          required: false,
-          where: wherePenjamInCondition,
-          include: {
-            model: PenjaminModel,
-            as: "penjamin",
-            required: false,
-            where: {
-              deleted_at: { [Op.is]: null },
-            },
-            attributes: ["uuid", "name"],
-          },
+          model: PenjaminModel,
+          as: "penjamin",
+          where: { deleted_at: { [Op.is]: null } },
+          attributes: ["uuid", "name"],
+        },
+      ],
+      raw: true,
+      nest: true,
+    });
+
+    // Query untuk pelayanan
+    const pelayanan = await TarifLabPelayananModel.findAll({
+      where: {
+        tarif_lab_uuid: { [Op.in]: uuids },
+        deleted_at: { [Op.is]: null },
+        ...(req.pelayanans?.length > 0 && {
+          uuid: { [Op.in]: req.pelayanans },
+        }),
+      },
+      attributes: ["uuid", "pelayanan", "tarif_lab_uuid"],
+      raw: true,
+    });
+
+    // Query untuk tarif_lab_item dengan relasinya
+    const tarifItems = await TarifLabItemModel.findAll({
+      where: {
+        tarif_lab_uuid: { [Op.in]: uuids },
+        deleted_at: { [Op.is]: null },
+      },
+      include: [
+        {
+          model: KelompokPemeriksaanModel,
+          as: "kelompok_pemeriksaan",
+          required: false, // Penting: biarkan tetap muncul meski relasi kosong
+          where: { deleted_at: { [Op.is]: null } },
+          attributes: ["uuid", "name"],
         },
         {
-          model: TarifLabPelayananModel,
-          as: "pelayanan",
-          required: false,
-          ...(req.pelayanans?.length > 0 && {
-            where: {
-              uuid: { [Op.in]: req.pelayanans },
-              deleted_at: { [Op.is]: null },
-            },
-          }),
-          ...(!(req.pelayanans?.length > 0) && {
-            where: {
-              deleted_at: { [Op.is]: null },
-            },
-          }),
-          attributes: ["uuid", "pelayanan"],
+          model: ItemPemeriksaanModel,
+          as: "item_pemeriksaan",
+          required: false, // Penting: biarkan tetap muncul meski relasi kosong
+          where: { deleted_at: { [Op.is]: null } },
+          attributes: ["uuid", "name"],
         },
         {
-          model: TarifLabItemModel,
-          as: "tarif_lab_item",
-          required: false,
+          model: TarifKomponenTindakanLabModel,
+          as: "tarif_komponen_tindakan_lab",
           where: { deleted_at: { [Op.is]: null } },
           include: [
             {
-              model: KelompokPemeriksaanModel,
-              as: "kelompok_pemeriksaan",
-              required: false,
-              where: { deleted_at: { [Op.is]: null } },
-              attributes: ["uuid", "name"],
-            },
-            {
-              model: ItemPemeriksaanModel,
-              as: "item_pemeriksaan",
-              required: false,
+              model: NameTarifKomponenModel,
+              as: "tarif_komponen",
               where: { deleted_at: { [Op.is]: null } },
               attributes: ["uuid", "name"],
             },
           ],
+          attributes: {
+            exclude: [
+              "faskes_uuid",
+              "tarif_lab_uuid",
+              "tarif_lab_item_uuid",
+              "tarif_komponen_uuid",
+              "created_at",
+              "updated_at",
+              "deleted_at",
+            ],
+          },
         },
       ],
-      order: [["created_at", "DESC"]],
-      attributes: { exclude: ["created_at", "updated_at", "deleted_at"] },
-      distinct: true, // Pindahkan ke sini untuk kontrol lebih baik
-      subQuery: false,
-    };
+      raw: true,
+      nest: true,
+    });
 
-    return await pagination(TarifLabModel, req, options);
+    // 3. Gabungkan semua data
+    const enrichedData = mainData.map((tarifLab) => {
+      return {
+        ...tarifLab,
+        tarif_lab_penjamin: tarifPenjamin.filter(
+          (item) => item.tarif_lab_uuid === tarifLab.uuid
+        ),
+        pelayanan: pelayanan.filter(
+          (item) => item.tarif_lab_uuid === tarifLab.uuid
+        ),
+        tarif_lab_item: tarifItems.filter(
+          (item) => item.tarif_lab_uuid === tarifLab.uuid
+        ),
+      };
+    });
+
+    return {
+      data: enrichedData,
+      pagination: paginationInfo,
+    };
   }
 
   static async findByCodeIn(code, faskes_uuid) {

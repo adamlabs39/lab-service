@@ -17,10 +17,9 @@ const pagination = async (model, args, options) => {
     ...options,
     limit: limit,
     offset: offset,
-    distinct: true,
-    subQuery: false,
+    // distinct: true,
+    // subQuery: false,
   });
-  console.log(JSON.stringify(dataQuery));
 
   return {
     data: dataQuery.map((row) => Utils.camelToSnakeObject(row.toJSON())),

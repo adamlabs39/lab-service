@@ -216,6 +216,7 @@ export default class KelompokPemeriksaanService {
     const kelompokPemerikasan = await KelompokPemeriksaanRepository.findAll(
       req
     );
+    console.log(JSON.stringify(kelompokPemerikasan));
     const formatedKelompokPemeriksaan = kelompokPemerikasan.data.map(
       (kelompokPemeriksaan) => {
         return {

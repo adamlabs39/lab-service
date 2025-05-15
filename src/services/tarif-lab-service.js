@@ -22,6 +22,7 @@ import convertRupiahToNumber from "../helpers/convert_rupiah_to_number.js";
 
 export default class TarifLabService {
   static async create(req) {
+    console.log(JSON.stringify(req));
     const validData = ZodValidator.validate(TarifLabValidation.CREATE, req);
     const isCodeExist = await TarifLabRepository.findByCode(
       validData.code,
@@ -43,7 +44,8 @@ export default class TarifLabService {
     const kelomPokPemerikSaanUuids = [];
     const nameTarifKomponenUuids = [];
 
-    validData.tarif_lab_items.map(async (item) => {
+    validData.tarif_lab_items.map(async (item, i) => {
+      let uuid = uuidv7();
       if (!item.komponen_tindakan_labs) {
         throw new NotfoundException("Komponen Tarif tidak boleh kosong");
       }
@@ -61,6 +63,11 @@ export default class TarifLabService {
           nameTarifKomponenUuids.push(komponen.tarif_komponen_uuid);
         });
       }
+
+      validData.tarif_lab_items[i] = {
+        ...validData.tarif_lab_items[i],
+        uuid: uuid,
+      };
     });
 
     const itemPemeriksaans = await ItemPemeriksaanRepository.findByUuids(
@@ -119,13 +126,9 @@ export default class TarifLabService {
 
       await TarifLabPelayananRepository.bulkCreate(tarifLabPelayanan, t);
 
-      const tarifLabItems = validData.tarif_lab_items.map((item, i) => {
-        let uuid = uuidv7();
-        validData.tarif_lab_items[i] = {
-          ...validData.tarif_lab_items[i],
-          uuid: uuid,
-        };
+      const tarifLabItems = validData.tarif_lab_items.map((item) => {
         return {
+          uuid: item.uuid,
           tarif_lab_uuid: tarifLab.uuid,
           kelompok_pemeriksaan_uuid: item.kelompok_pemeriksaan_uuid,
           item_pemeriksaan_uuid: item.item_pemeriksaan_uuid,
