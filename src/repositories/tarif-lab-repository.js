@@ -289,7 +289,7 @@ export default class TarifLabRepository {
       raw: true,
     });
 
-    // Query untuk tarif_lab_item dengan relasinya
+    // Query untuk Ambil tarif items
     const tarifItems = await TarifLabItemModel.findAll({
       where: {
         tarif_lab_uuid: { [Op.in]: uuids },
@@ -310,33 +310,74 @@ export default class TarifLabRepository {
           where: { deleted_at: { [Op.is]: null } },
           attributes: ["uuid", "name"],
         },
-        {
-          model: TarifKomponenTindakanLabModel,
-          as: "tarif_komponen_tindakan_lab",
-          where: { deleted_at: { [Op.is]: null } },
-          include: [
-            {
-              model: NameTarifKomponenModel,
-              as: "tarif_komponen",
-              where: { deleted_at: { [Op.is]: null } },
-              attributes: ["uuid", "name"],
-            },
-          ],
-          attributes: {
-            exclude: [
-              "faskes_uuid",
-              "tarif_lab_uuid",
-              "tarif_lab_item_uuid",
-              "tarif_komponen_uuid",
-              "created_at",
-              "updated_at",
-              "deleted_at",
-            ],
-          },
-        },
       ],
       raw: true,
       nest: true,
+    });
+
+    const tarifItemUuids = tarifItems.map((item) => item.uuid);
+
+    // Bagi tarifItemUuids menjadi chunk kecil
+    const CHUNK_SIZE = 100; // Sesuaikan dengan kebutuhan
+    const chunks = [];
+    for (let i = 0; i < tarifItemUuids.length; i += CHUNK_SIZE) {
+      chunks.push(tarifItemUuids.slice(i, i + CHUNK_SIZE));
+    }
+
+    // Query per chunk
+    const komponenTindakan = (
+      await Promise.all(
+        chunks.map((chunk) =>
+          TarifKomponenTindakanLabModel.findAll({
+            where: {
+              tarif_lab_item_uuid: { [Op.in]: chunk },
+              deleted_at: { [Op.is]: null },
+            },
+            include: [
+              {
+                model: NameTarifKomponenModel,
+                as: "tarif_komponen",
+                where: { deleted_at: { [Op.is]: null } },
+                attributes: ["uuid", "name"],
+              },
+            ],
+          })
+        )
+      )
+    ).flat();
+
+    // Proses penggabungan tarif item & komponen tarif
+    const tarifItemsWithComponents = tarifItems.map((item, index) => {
+      // console.log(
+      //   `Processing tarif item ${index + 1}/${tarifItems.length}`,
+      //   item.uuid
+      // );
+
+      const components = komponenTindakan
+        .filter((kt) => {
+          const isMatch = kt.tarif_lab_item_uuid === item.uuid;
+          // if (!isMatch) {
+          //   console.log(
+          //     `Komponen ${kt.uuid} tidak cocok dengan item ${item.uuid}`
+          //   );
+          // }
+          return isMatch;
+        })
+        .map((kt) => ({
+          uuid: kt.uuid,
+          name: kt.tarif_komponen?.name || null,
+          prosentase: kt.prosentase_per_komponen,
+          tarif: kt.tarif_per_komponen,
+        }));
+
+      // console.log(
+      //   `Found ${components.length} components for item ${item.uuid}`
+      // );
+
+      return {
+        ...item,
+        komponen_tarif: components,
+      };
     });
 
     // 3. Gabungkan semua data
@@ -349,7 +390,7 @@ export default class TarifLabRepository {
         pelayanan: pelayanan.filter(
           (item) => item.tarif_lab_uuid === tarifLab.uuid
         ),
-        tarif_lab_item: tarifItems.filter(
+        tarif_lab_item: tarifItemsWithComponents.filter(
           (item) => item.tarif_lab_uuid === tarifLab.uuid
         ),
       };

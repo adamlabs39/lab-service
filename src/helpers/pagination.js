@@ -17,8 +17,8 @@ const pagination = async (model, args, options) => {
     ...options,
     limit: limit,
     offset: offset,
-    // distinct: true,
-    // subQuery: false,
+    distinct: true,
+    subQuery: false,
   });
 
   return {
