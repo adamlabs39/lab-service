@@ -46,30 +46,29 @@ OrderLabModel.hasMany(OrderLabPemeriksaanModel, {
   constraints: false,
 });
 
-
 OrderLabModel.belongsTo(PractitionerModel, {
   foreignKey: "petugas_order",
   as: "petugasOrder",
   constraints: false,
-})
+});
 
 OrderLabModel.belongsTo(PractitionerModel, {
   foreignKey: "practitioner_uuid",
   as: "practitioner",
   constraints: false,
-})
+});
 
-OrderLabModel.belongsTo(PenjaminModel,{
-  foreignKey:"penjamin_uuid",
+OrderLabModel.belongsTo(PenjaminModel, {
+  foreignKey: "penjamin_uuid",
   as: "penjamin",
-  constraints: false
-})
+  constraints: false,
+});
 
 OrderLabModel.hasMany(ObservationItemModel, {
   foreignKey: "order_lab_uuid",
   as: "observation_items",
   constraints: false,
-})
+});
 
 export default class OrderLabRepository {
   static async create(data, transaction) {
@@ -92,7 +91,6 @@ export default class OrderLabRepository {
   }
 
   static async findByUuid(uuid, faskes_uuid) {
-   
     return await OrderLabModel.findOne({
       where: {
         uuid: uuid,
@@ -245,7 +243,7 @@ export default class OrderLabRepository {
       attributes: {
         exclude: ["created_at", "updated_at", "deleted_at"],
       },
-    });;
+    });
   }
 
   static async findAll(req) {
@@ -277,17 +275,17 @@ export default class OrderLabRepository {
           no_rm: {
             [Op.iLike]: `%${req.search}%`,
           },
-        //   '$patient.name$': {
-        //     [Op.iLike]: `%${req.search}%`,
-        //   },
-        //   '$patient.address.full_address$': {
-        //     [Op.iLike]: `%${req.search}%`,
-        //   }
+          //   '$patient.name$': {
+          //     [Op.iLike]: `%${req.search}%`,
+          //   },
+          //   '$patient.address.full_address$': {
+          //     [Op.iLike]: `%${req.search}%`,
+          //   }
         },
       ];
     }
 
-    const wherePayemntMethod = {}
+    const wherePayemntMethod = {};
 
     if (req.payment_method) {
       wherePayemntMethod.payment_method = req.payment_method;
@@ -357,7 +355,7 @@ export default class OrderLabRepository {
                 {
                   model: TarifLabItemModel,
                   as: "tarif_lab_item",
-                  require : false,
+                  require: false,
                   include: [
                     {
                       model: KelompokPemeriksaanModel,
@@ -456,16 +454,20 @@ export default class OrderLabRepository {
   }
 
   static async updateBatalOrder(uuids, data, transaction) {
-    return await OrderlabModel.update(data, {
-      where: { 
-        uuid: {
-          [Op.in]: uuids,
+    return await OrderLabModel.update(
+      data,
+      {
+        where: {
+          uuid: {
+            [Op.in]: uuids,
+          },
+          deleted_at: {
+            [Op.is]: null,
+          },
         },
-        deleted_at: {
-          [Op.is]: null,
-        },
-       },
-    }, { transaction });
+      },
+      { transaction }
+    );
   }
 
   static async findByUuids(uuids, faskes_uuid) {
@@ -482,17 +484,24 @@ export default class OrderLabRepository {
     });
   }
 
-  static async update(uuid, faskes_uuid,data,transaction) {
-    console.log(data)
-    return await OrderLabModel.update(data, {
-      where: { uuid: uuid, deleted_at : {
-        [Op.is]: null,
-      } },
-    }, { transaction });
+  static async update(uuid, faskes_uuid, data, transaction) {
+    console.log(data);
+    return await OrderLabModel.update(
+      data,
+      {
+        where: {
+          uuid: uuid,
+          deleted_at: {
+            [Op.is]: null,
+          },
+        },
+      },
+      { transaction }
+    );
   }
 
-  static async findAllSelesai(req){
-    console.log(req)
+  static async findAllSelesai(req) {
+    console.log(req);
     const whereOrderStatus = {};
 
     if (req.order_status) {
@@ -515,8 +524,8 @@ export default class OrderLabRepository {
 
     const whereSearch = {};
 
-    if(req.search){
-      console.log(req.search)
+    if (req.search) {
+      console.log(req.search);
       whereSearch[Op.or] = [
         {
           no_rm: {
@@ -528,180 +537,181 @@ export default class OrderLabRepository {
             [Op.iLike]: `%${req.search}%`,
           },
         },
-          {'$patient.name$': {
+        {
+          "$patient.name$": {
             [Op.iLike]: `%${req.search}%`,
-          },}
+          },
+        },
       ];
     }
 
-    const wherePelayanan = {}
+    const wherePelayanan = {};
 
-    if(req.pelayanan){
-      wherePelayanan.pelayanan = req.pelayanan
+    if (req.pelayanan) {
+      wherePelayanan.pelayanan = req.pelayanan;
     }
 
-
-   const options = {
-    where :{
-      faskes_uuid : req.faskes_uuid,
-      order_status : status.SELESAI,
-      ...whereDate,
-      ...wherePelayanan,
-      ...whereSearch,
-      deleted_at :{
-        [Op.is] : null
-      }
-    },
-    include: [
-      {
-        model: OrderLabPemeriksaanModel,
-        as: "order_lab_pemeriksaan",
-        where: {
-          deleted_at: {
-            [Op.is]: null,
-          },
+    const options = {
+      where: {
+        faskes_uuid: req.faskes_uuid,
+        order_status: status.SELESAI,
+        ...whereDate,
+        ...wherePelayanan,
+        ...whereSearch,
+        deleted_at: {
+          [Op.is]: null,
         },
-        include: [
-          {
-            model: TarifLabModel,
-            as: "tarif_lab",
-            where: {
-              deleted_at: {
-                [Op.is]: null,
-              },
+      },
+      include: [
+        {
+          model: OrderLabPemeriksaanModel,
+          as: "order_lab_pemeriksaan",
+          where: {
+            deleted_at: {
+              [Op.is]: null,
             },
-            attributes: ["uuid",'name' ,"grand_total"],
-            include: [
-              {
-                model: TarifLabPenjaminModel,
-                as: "tarif_lab_penjamin",
-                where: {
-                  deleted_at: {
-                    [Op.is]: null,
-                  },
+          },
+          include: [
+            {
+              model: TarifLabModel,
+              as: "tarif_lab",
+              where: {
+                deleted_at: {
+                  [Op.is]: null,
                 },
-
-                include: {
-                  model: PenjaminModel,
-                  as: "penjamin",
+              },
+              attributes: ["uuid", "name", "grand_total"],
+              include: [
+                {
+                  model: TarifLabPenjaminModel,
+                  as: "tarif_lab_penjamin",
                   where: {
                     deleted_at: {
                       [Op.is]: null,
                     },
                   },
-                  attributes: ["uuid", "name"],
-                },
-              },
-              {
-                model: TarifLabPelayananModel,
-                as: "pelayanan",
-                where: {
-                  deleted_at: {
-                    [Op.is]: null,
-                  },
-                },
-                attributes: ["uuid", "pelayanan"],
-              },
-              {
-                model: TarifLabItemModel,
-                as: "tarif_lab_item",
-                require : false,
-                include: [
-                  {
-                    model: KelompokPemeriksaanModel,
-                    as: "kelompok_pemeriksaan",
+
+                  include: {
+                    model: PenjaminModel,
+                    as: "penjamin",
+                    where: {
+                      deleted_at: {
+                        [Op.is]: null,
+                      },
+                    },
                     attributes: ["uuid", "name"],
                   },
-                  {
-                    model: ItemPemeriksaanModel,
-                    as: "item_pemeriksaan",
-                    attributes: ["uuid", "name"],
+                },
+                {
+                  model: TarifLabPelayananModel,
+                  as: "pelayanan",
+                  where: {
+                    deleted_at: {
+                      [Op.is]: null,
+                    },
                   },
-                ],
-              },
-            ],
-          },
-        ],
-        attributes:{
-          exclude: ["created_at","updated_at","deleted_at"]
-        }
-      },
-      {
-        model: PatientModel,
-        as: "patient",
-        where: {
-          deleted_at: {
-            [Op.is]: null,
+                  attributes: ["uuid", "pelayanan"],
+                },
+                {
+                  model: TarifLabItemModel,
+                  as: "tarif_lab_item",
+                  require: false,
+                  include: [
+                    {
+                      model: KelompokPemeriksaanModel,
+                      as: "kelompok_pemeriksaan",
+                      attributes: ["uuid", "name"],
+                    },
+                    {
+                      model: ItemPemeriksaanModel,
+                      as: "item_pemeriksaan",
+                      attributes: ["uuid", "name"],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          attributes: {
+            exclude: ["created_at", "updated_at", "deleted_at"],
           },
         },
-        attributes: {
-          exclude: ["createdAt", "updatedAt", "deletedAt"],
-        },
-        include: [
-          {
-            model: AddressModel,
-            as: "address",
-            where: {
-              deleted_at: {
-                [Op.is]: null,
+        {
+          model: PatientModel,
+          as: "patient",
+          where: {
+            deleted_at: {
+              [Op.is]: null,
+            },
+          },
+          attributes: {
+            exclude: ["createdAt", "updatedAt", "deletedAt"],
+          },
+          include: [
+            {
+              model: AddressModel,
+              as: "address",
+              where: {
+                deleted_at: {
+                  [Op.is]: null,
+                },
+              },
+              attributes: {
+                exclude: ["createdAt", "updatedAt", "deletedAt"],
               },
             },
-            attributes: {
-              exclude: ["createdAt", "updatedAt", "deletedAt"],
-            },
-          },
-          {
-            model: BirthDetailModel,
-            as: "birth_detail",
-            where: {
-              deleted_at: {
-                [Op.is]: null,
+            {
+              model: BirthDetailModel,
+              as: "birth_detail",
+              where: {
+                deleted_at: {
+                  [Op.is]: null,
+                },
+              },
+              attributes: {
+                exclude: ["createdAt", "updatedAt", "deletedAt"],
               },
             },
-            attributes: {
-              exclude: ["createdAt", "updatedAt", "deletedAt"],
+          ],
+        },
+        {
+          model: LokasiModel,
+          as: "lokasi",
+          attributes: ["uuid", "name"],
+          where: {
+            deleted_at: {
+              [Op.is]: null,
             },
           },
-        ],
-      },
-      {
-        model: LokasiModel,
-        as: "lokasi",
-        attributes: ["uuid", "name"],
-        where: {
-          deleted_at: {
-            [Op.is]: null,
-          },
         },
-      },
-      {
-        model: PractitionerModel,
-        as: "dokterPengirim",
-        required: false,
-        include: [
-          {
-            model: PegawaiModel,
-            as: "pegawai",
-            where: {
-              deleted_at: {
-                [Op.is]: null,
+        {
+          model: PractitionerModel,
+          as: "dokterPengirim",
+          required: false,
+          include: [
+            {
+              model: PegawaiModel,
+              as: "pegawai",
+              where: {
+                deleted_at: {
+                  [Op.is]: null,
+                },
               },
+              attributes: ["uuid", "name"],
             },
-            attributes: ["uuid", "name"],
+          ],
+          where: {
+            deleted_at: {
+              [Op.is]: null,
+            },
           },
-        ],
-        where: {
-          deleted_at: {
-            [Op.is]: null,
-          },
+          exclude: ["created_at", "updated_at", "deleted_at"],
         },
+      ],
+      attributes: {
         exclude: ["created_at", "updated_at", "deleted_at"],
       },
-    ],
-    attributes: {
-      exclude: ["created_at", "updated_at", "deleted_at"],
-    },
-  }
+    };
 
     return await pagination(OrderLabModel, req, options);
   }

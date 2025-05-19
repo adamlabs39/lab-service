@@ -7,6 +7,7 @@ import {
   TarifLabPelayananModel,
   TarifLabPenjaminModel,
   TarifKomponenTindakanLabModel,
+  CategoryPemeriksaanModel,
 } from "@adameds/model-sdk/lab";
 import { Op } from "sequelize";
 import toEpochDate from "../helpers/date-helper.js";
@@ -414,5 +415,101 @@ export default class TarifLabRepository {
         },
       },
     });
+  }
+
+  static async findAllActive(req) {
+    // 1. Query utama untuk mendapatkan data TarifLab dengan pagination
+    const mainData = await TarifLabModel.findAll({
+      where: {
+        faskes_uuid: req.faskes_uuid,
+        name: { [Op.iLike]: `%${req.name || ""}%` },
+        deleted_at: { [Op.is]: null },
+      },
+      distinct: true,
+      subQuery: false,
+      order: [["created_at", "DESC"]],
+      attributes: { exclude: ["created_at", "updated_at", "deleted_at"] },
+      raw: true,
+    });
+
+    // Jika tidak ada data, kembalikan response kosong
+    if (mainData.length === 0) {
+      return { data: [] };
+    }
+
+    // 2. Ambil semua relasi
+    const uuids = mainData.map((item) => item.uuid);
+
+    // Query untuk Ambil tarif items
+    const tarifItems = await TarifLabItemModel.findAll({
+      where: {
+        tarif_lab_uuid: { [Op.in]: uuids },
+        deleted_at: { [Op.is]: null },
+      },
+      include: [
+        {
+          model: KelompokPemeriksaanModel,
+          as: "kelompok_pemeriksaan",
+          required: false, // Penting: biarkan tetap muncul meski relasi kosong
+          where: { deleted_at: { [Op.is]: null } },
+          attributes: ["uuid", "name"],
+          include: [
+            // Tambahkan relasi category untuk kelompok pemeriksaan
+            {
+              model: CategoryPemeriksaanModel,
+              as: "category_pemeriksaan",
+              required: false,
+              where: { deleted_at: { [Op.is]: null } },
+              attributes: ["code", "name", "no_urut"], // Ambil code dan name dari category
+            },
+          ],
+        },
+        {
+          model: ItemPemeriksaanModel,
+          as: "item_pemeriksaan",
+          required: false, // Penting: biarkan tetap muncul meski relasi kosong
+          where: { deleted_at: { [Op.is]: null } },
+          attributes: ["uuid", "name"],
+          include: [
+            // Tambahkan relasi category untuk kelompok pemeriksaan
+            {
+              model: CategoryPemeriksaanModel,
+              as: "category_pemeriksaan",
+              required: false,
+              where: { deleted_at: { [Op.is]: null } },
+              attributes: ["code", "name", "no_urut"], // Ambil code dan name dari category
+            },
+          ],
+        },
+      ],
+      raw: true,
+      nest: true,
+    });
+
+    // console.log("tarif items ==> ", JSON.stringify(tarifItems));
+
+    tarifItems.map((item) => {
+      item.kelompok_pemeriksaan = item.kelompok_pemeriksaan_uuid
+        ? item.kelompok_pemeriksaan
+        : null;
+      item.item_pemeriksaan = item.item_pemeriksaan_uuid
+        ? item.item_pemeriksaan
+        : null;
+    });
+
+    // 3. Gabungkan semua data
+    const enrichedData = mainData.map((tarifLab) => {
+      return {
+        ...tarifLab,
+        tarif_lab_item: tarifItems.filter(
+          (item) => item.tarif_lab_uuid === tarifLab.uuid
+        ),
+      };
+    });
+
+    return {
+      data: enrichedData,
+      // pagination: paginationInfo,
+    };
   }
 }

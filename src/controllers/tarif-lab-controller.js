@@ -64,6 +64,20 @@ export default class TarifLabController {
     }
   }
 
+  static async getAllActive(req, res, next) {
+    try {
+      console.log("get active");
+      req.body.name = req.query.name;
+      req.body.faskes_uuid = req.author.faskesUuid;
+
+      const tarifLabs = await TarifLabService.findAllActive(req.body);
+      // console.log(JSON.stringify(tarifLabs));
+      res
+        .status(200)
+        .json(successResponse("Data berhasil ditampilkan", tarifLabs));
+    } catch (error) {}
+  }
+
   static async import(req, res, next) {
     try {
       validateExcel(req.file);

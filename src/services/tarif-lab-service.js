@@ -680,4 +680,77 @@ export default class TarifLabService {
     //   await TarifKomponenTindakanLabRepository.bulkCreate(tarifLabKomponenTindakanData, { transaction: t });
     // });
   }
+
+  static async findAllActive(req) {
+    const tarifLabs = await TarifLabRepository.findAllActive(req);
+
+    const result = {
+      category: [],
+      non_category: [],
+    };
+
+    // Pertama, kumpulkan semua kategori unik dan tarifnya
+    const categoriesMap = new Map();
+
+    tarifLabs.data.forEach((tarif) => {
+      let firstCategory = null;
+      let allSameCategory = true;
+
+      // Cek konsistensi kategori semua item dalam tarif
+      for (const item of tarif.tarif_lab_item) {
+        const category =
+          item.item_pemeriksaan?.category_pemeriksaan ||
+          item.kelompok_pemeriksaan?.category_pemeriksaan;
+
+        if (!category) {
+          allSameCategory = false;
+          break;
+        }
+
+        if (!firstCategory) {
+          firstCategory = category;
+        } else if (
+          category.uuid !== firstCategory.uuid ||
+          category.code !== firstCategory.code
+        ) {
+          allSameCategory = false;
+          break;
+        }
+      }
+
+      // Jika semua item memiliki kategori yang sama
+      if (allSameCategory && firstCategory) {
+        const categoryKey = `${firstCategory.uuid}-${firstCategory.code}`;
+
+        if (!categoriesMap.has(categoryKey)) {
+          categoriesMap.set(categoryKey, {
+            name: firstCategory.name,
+            code: firstCategory.code,
+            no_urut: firstCategory.no_urut,
+            tarif_lab: [],
+          });
+        }
+
+        categoriesMap.get(categoryKey).tarif_lab.push({
+          name: tarif.name,
+          code: tarif.code,
+          grand_total: tarif.grand_total,
+        });
+      } else {
+        // Jika berbeda kategori atau tidak ada kategori
+        result.non_category.push({
+          name: tarif.name,
+          code: tarif.code,
+          grand_total: tarif.grand_total,
+        });
+      }
+    });
+
+    // Konversi Map ke array untuk category
+    result.category = Array.from(categoriesMap.values()).sort(
+      (a, b) => a.no_urut - b.no_urut
+    );
+
+    return result;
+  }
 }
