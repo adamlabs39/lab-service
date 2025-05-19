@@ -6,7 +6,11 @@ export const JENIS_KELAMIN = ["laki-laki", "perempuan", "general"];
 export default class NilaiRujukanValidation {
   static CREATE_ANGKA = z
     .object({
-      item_pemeriksaan_uuid: z.string().uuid(1),
+      item_pemeriksaan_uuid: z
+        .string({
+          required_error: "Data gagal disimpan, Item Pemeriksaan harus dipilih",
+        })
+        .uuid(1),
       jenis_kelamin: z.enum(JENIS_KELAMIN),
       umur_bawah_tahun: z.number(),
       umur_bawah_bulan: z.number(),
@@ -43,25 +47,39 @@ export default class NilaiRujukanValidation {
         path: ["umur_atas_tahun"],
       }
     )
-    .refine((data) => {
-      const { operator_nilai_normal, batas_bawah_nilai_normal, batas_atas_nilai_normal } = data;
-    
-      // Kalau operator > atau >= → batas bawah wajib ada
-      if (['>', '>='].includes(operator_nilai_normal) && batas_bawah_nilai_normal === undefined) {
-        return false;
+    .refine(
+      (data) => {
+        const {
+          operator_nilai_normal,
+          batas_bawah_nilai_normal,
+          batas_atas_nilai_normal,
+        } = data;
+
+        // Kalau operator > atau >= → batas bawah wajib ada
+        if (
+          [">", ">="].includes(operator_nilai_normal) &&
+          batas_bawah_nilai_normal === undefined
+        ) {
+          return false;
+        }
+
+        // Kalau operator < atau <= → batas atas wajib ada
+        if (
+          ["<", "<="].includes(operator_nilai_normal) &&
+          batas_atas_nilai_normal === undefined
+        ) {
+          return false;
+        }
+
+        return true;
+      },
+      {
+        message:
+          "Batas bawah/atas harus diisi sesuai dengan operator yang dipilih",
+        path: ["batas_bawah_nilai_normal"], // atau ['batas_atas_nilai_normal'] tergantung konteks
       }
-    
-      // Kalau operator < atau <= → batas atas wajib ada
-      if (['<', '<='].includes(operator_nilai_normal) && batas_atas_nilai_normal === undefined) {
-        return false;
-      }
-    
-      return true;
-    }, {
-      message: 'Batas bawah/atas harus diisi sesuai dengan operator yang dipilih',
-      path: ['batas_bawah_nilai_normal'], // atau ['batas_atas_nilai_normal'] tergantung konteks
-    })
-    
+    )
+
     .refine(
       (data) => {
         if (

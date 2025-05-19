@@ -9,7 +9,7 @@ export default class SpesimenController {
     try {
       req.body.faskes_uuid = req.author.faskesUuid;
       await SpesimenSevice.create(req.body);
-      return res.status(201).json(successResponse("Spesimen created"));
+      return res.status(201).json(successResponse("Data berhasil disimpan"));
     } catch (error) {
       next(error);
     }
@@ -20,7 +20,7 @@ export default class SpesimenController {
       req.body.faskes_uuid = req.author.faskesUuid;
       const uuid = req.params.uuid;
       await SpesimenSevice.update(uuid, req.body);
-      return res.status(200).json(successResponse("Spesimen updated"));
+      return res.status(200).json(successResponse("Data berhasil diupdated"));
     } catch (error) {
       next(error);
     }
@@ -30,7 +30,7 @@ export default class SpesimenController {
     try {
       const uuid = req.params.uuid;
       await SpesimenSevice.delete(uuid);
-      return res.status(200).json(successResponse("Spesimen deleted"));
+      return res.status(200).json(successResponse("Data berhasil dihapus"));
     } catch (error) {
       next(error);
     }
@@ -42,7 +42,7 @@ export default class SpesimenController {
       const spesimen = await SpesimenSevice.show(uuid);
       return res
         .status(200)
-        .json(successResponse("Succes get detail spesimen", spesimen));
+        .json(successResponse("Data berhasil ditampilkan", spesimen));
     } catch (error) {
       next(error);
     }
@@ -59,7 +59,7 @@ export default class SpesimenController {
       return res
         .status(200)
         .json(
-          successResponse("Success get all data spesimen", categoryPemeriksaans)
+          successResponse("Data berhasil ditampilkan", categoryPemeriksaans)
         );
     } catch (error) {
       next(error);
@@ -71,9 +71,7 @@ export default class SpesimenController {
       validateExcel(req.file);
       await SpesimenSevice.import(req.file.path, req.author.faskesUuid);
       deletefile(req.file.path);
-      return res
-        .status(201)
-        .json(successResponse("Success import data spesimen"));
+      return res.status(201).json(successResponse("Data berhasil diimport"));
     } catch (error) {
       next(error);
     }
