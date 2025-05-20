@@ -732,6 +732,7 @@ export default class TarifLabService {
         }
 
         categoriesMap.get(categoryKey).tarif_lab.push({
+          uuid: tarif.uuid,
           name: tarif.name,
           code: tarif.code,
           grand_total: tarif.grand_total,

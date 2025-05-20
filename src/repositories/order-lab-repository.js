@@ -450,7 +450,7 @@ export default class OrderLabRepository {
       },
     };
 
-    return await pagination(OrderlabModel, req, options);
+    return await pagination(OrderLabModel, req, options);
   }
 
   static async updateBatalOrder(uuids, data, transaction) {

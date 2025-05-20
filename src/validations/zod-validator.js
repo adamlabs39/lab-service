@@ -6,7 +6,7 @@ export default class ZodValidator {
       return schema.parse(data);
     } catch (error) {
       const errorMessages = error.errors.map((error) => {
-        return `${error.message}`;
+        return `${error.path} - ${error.message}`;
       });
       throw new BadRequestException(errorMessages);
     }
