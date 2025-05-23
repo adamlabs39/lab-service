@@ -272,8 +272,6 @@ export default class OrderLabRepository {
   }
 
   static async findAll(req) {
-    console.log("params ==> ", req);
-
     // 1. Validasi & Sanitasi Input
     const {
       order_status,
@@ -353,7 +351,7 @@ export default class OrderLabRepository {
       {
         model: PatientModel,
         as: "patient",
-        attributes: ["uuid", "name", "no_rm"],
+        attributes: ["uuid", "name", "no_rm", "gender"],
         where: { deleted_at: { [Op.is]: null } },
         include: [
           {
