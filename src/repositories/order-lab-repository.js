@@ -247,210 +247,137 @@ export default class OrderLabRepository {
   }
 
   static async findAll(req) {
-    const whereOrderStatus = {};
+    console.log("params ==> ", req);
 
-    if (req.order_status) {
-      whereOrderStatus.order_status = req.order_status;
-    }
+    // 1. Validasi & Sanitasi Input
+    const {
+      order_status,
+      start_date,
+      end_date,
+      search,
+      payment_method,
+      faskes_uuid,
+      page = 1,
+      limit = 10,
+    } = req;
 
-    const whereDate = {};
+    // Validasi pagination
+    const safePage = isNaN(parseInt(page)) ? 1 : Math.max(parseInt(page), 1);
+    const safeLimit = isNaN(parseInt(limit))
+      ? 10
+      : Math.min(parseInt(limit), 100);
 
-    if (req.start_date || req.end_date) {
-      whereDate.tgl_order = {};
-
-      if (req.start_date) {
-        whereDate.tgl_order[Op.gte] = req.start_date;
-      }
-
-      if (req.end_date) {
-        whereDate.tgl_order[Op.lte] = req.end_date;
-      }
-    }
-
-    const whereSearch = {};
-
-    if (req.search) {
-      whereSearch[Op.or] = [
-        {
-          no_rm: {
-            [Op.iLike]: `%${req.search}%`,
-          },
-          //   '$patient.name$': {
-          //     [Op.iLike]: `%${req.search}%`,
-          //   },
-          //   '$patient.address.full_address$': {
-          //     [Op.iLike]: `%${req.search}%`,
-          //   }
-        },
-      ];
-    }
-
-    const wherePayemntMethod = {};
-
-    if (req.payment_method) {
-      wherePayemntMethod.payment_method = req.payment_method;
-    }
-
-    const options = {
-      where: {
-        faskes_uuid: req.faskes_uuid,
-        // ...whereSearch,
-        // ...whereOrderStatus,
-        // ...whereDate,
-        // ...wherePayemntMethod,
-        deleted_at: {
-          [Op.is]: null,
-        },
+    // 2. Build WHERE clause utama
+    const where = {
+      faskes_uuid: {
+        [Op.eq]: faskes_uuid,
       },
-      include: [
-        {
-          model: OrderLabPemeriksaanModel,
-          as: "order_lab_pemeriksaan",
-          required: false,
-          where: {
-            deleted_at: {
-              [Op.is]: null,
-            },
-          },
-          include: [
-            {
-              model: TarifLabModel,
-              as: "tarif_lab",
-              where: {
-                deleted_at: {
-                  [Op.is]: null,
-                },
-              },
-              include: [
-                {
-                  model: TarifLabPenjaminModel,
-                  as: "tarif_lab_penjamin",
-                  where: {
-                    deleted_at: {
-                      [Op.is]: null,
-                    },
-                  },
-
-                  include: {
-                    model: PenjaminModel,
-                    as: "penjamin",
-                    where: {
-                      deleted_at: {
-                        [Op.is]: null,
-                      },
-                    },
-                    attributes: ["uuid", "name"],
-                  },
-                },
-                {
-                  model: TarifLabPelayananModel,
-                  as: "pelayanan",
-                  where: {
-                    deleted_at: {
-                      [Op.is]: null,
-                    },
-                  },
-                  attributes: ["uuid", "pelayanan"],
-                },
-                {
-                  model: TarifLabItemModel,
-                  as: "tarif_lab_item",
-                  require: false,
-                  include: [
-                    {
-                      model: KelompokPemeriksaanModel,
-                      as: "kelompok_pemeriksaan",
-                      attributes: ["uuid", "name"],
-                    },
-                    {
-                      model: ItemPemeriksaanModel,
-                      as: "item_pemeriksaan",
-                      attributes: ["uuid", "name"],
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-        {
-          model: PatientModel,
-          as: "patient",
-          where: {
-            deleted_at: {
-              [Op.is]: null,
-            },
-          },
-          attributes: {
-            exclude: ["createdAt", "updatedAt", "deletedAt"],
-          },
-          include: [
-            {
-              model: AddressModel,
-              as: "address",
-              where: {
-                deleted_at: {
-                  [Op.is]: null,
-                },
-              },
-              attributes: {
-                exclude: ["createdAt", "updatedAt", "deletedAt"],
-              },
-            },
-            {
-              model: BirthDetailModel,
-              as: "birth_detail",
-              where: {
-                deleted_at: {
-                  [Op.is]: null,
-                },
-              },
-              attributes: {
-                exclude: ["createdAt", "updatedAt", "deletedAt"],
-              },
-            },
-          ],
-        },
-        {
-          model: LokasiModel,
-          as: "lokasi",
-          attributes: ["uuid", "name"],
-          where: {
-            deleted_at: {
-              [Op.is]: null,
-            },
-          },
-        },
-        {
-          model: PractitionerModel,
-          as: "dokterPengirim",
-          required: false,
-          include: [
-            {
-              model: PegawaiModel,
-              as: "pegawai",
-              where: {
-                deleted_at: {
-                  [Op.is]: null,
-                },
-              },
-              attributes: ["uuid", "name"],
-            },
-          ],
-          where: {
-            deleted_at: {
-              [Op.is]: null,
-            },
-          },
-          exclude: ["created_at", "updated_at", "deleted_at"],
-        },
-      ],
-      attributes: {
-        exclude: ["created_at", "updated_at", "deleted_at"],
+      deleted_at: {
+        [Op.is]: null,
       },
     };
 
-    return await pagination(OrderLabModel, req, options);
+    // 3. Filter Status Order
+    if (order_status) {
+      where.order_status = {
+        [Op.eq]: order_status,
+      };
+    }
+
+    // 4. Filter Payment Method
+    if (payment_method) {
+      where.payment_method = {
+        [Op.eq]: payment_method,
+      };
+    }
+
+    // 5. Filter Tanggal dengan validasi
+    if (start_date || end_date) {
+      where.tgl_order = {};
+
+      if (start_date) {
+        where.tgl_order[Op.gte] = new Date(start_date);
+      }
+
+      if (end_date) {
+        where.tgl_order[Op.lte] = new Date(end_date);
+      }
+    }
+
+    // 6. Search dengan parameterized query
+    if (search) {
+      where[Op.or] = [
+        { no_rm: { [Op.iLike]: `%${search}%` } },
+        OrderLabModel.sequelize.where(
+          OrderLabModel.sequelize.col("patient.name"),
+          {
+            [Op.iLike]: `%${search}%`,
+          }
+        ),
+        OrderLabModel.sequelize.where(
+          OrderLabModel.sequelize.col("patient.address.full_address"),
+          {
+            [Op.iLike]: `%${search}%`,
+          }
+        ),
+      ];
+    }
+
+    // 7. Optimasi Include Model untuk Pagination
+    const include = [
+      {
+        model: PatientModel,
+        as: "patient",
+        attributes: ["uuid", "name", "no_rm"],
+        where: { deleted_at: { [Op.is]: null } },
+        include: [
+          {
+            model: AddressModel,
+            as: "address",
+            attributes: ["full_address"],
+            where: { deleted_at: { [Op.is]: null } },
+          },
+        ],
+      },
+      // {
+      //   model: OrderLabPemeriksaanModel,
+      //   as: "order_lab_pemeriksaan",
+      //   attributes: ["uuid"],
+      //   required: false,
+      //   where: { deleted_at: { [Op.is]: null } },
+      // },
+    ];
+
+    // 8. Konfigurasi Query untuk Pagination Helper
+    const options = {
+      where,
+      include,
+      attributes: {
+        exclude: ["created_at", "updated_at", "deleted_at"],
+        include: [
+          // atau Cara 2: Lewat model
+          [OrderLabModel.sequelize.col("patient.name"), "patient_name"],
+          [
+            OrderLabModel.sequelize.col("patient.address.full_address"),
+            "patient_address",
+          ],
+        ],
+      },
+      order: [["tgl_order", "DESC"]],
+    };
+
+    try {
+      const result = await pagination(
+        OrderLabModel,
+        { page: safePage, limit: safeLimit },
+        options
+      );
+
+      return result;
+    } catch (error) {
+      console.error("Pagination Error:", error);
+      throw new Error("Failed to fetch paginated orders");
+    }
   }
 
   static async updateBatalOrder(uuids, data, transaction) {
