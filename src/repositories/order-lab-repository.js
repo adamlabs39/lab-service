@@ -12,10 +12,14 @@ import {
 } from "@adameds/model-sdk/lab";
 import { Op } from "sequelize";
 import {
+  KabupatenModel,
+  KecamatanModel,
+  KelurahanModel,
   LokasiModel,
   PegawaiModel,
   PenjaminModel,
   PractitionerModel,
+  ProvinceModel,
 } from "@adameds/model-sdk/datamaster";
 import pagination from "../helpers/pagination.js";
 import { BirthDetailModel, PatientModel } from "@adameds/model-sdk/admisi";
@@ -68,6 +72,27 @@ OrderLabModel.hasMany(ObservationItemModel, {
   foreignKey: "order_lab_uuid",
   as: "observation_items",
   constraints: false,
+});
+
+AddressModel.belongsTo(ProvinceModel, {
+  as: "provData",
+  foreignKey: "prov",
+  targetKey: "code",
+});
+AddressModel.belongsTo(KabupatenModel, {
+  as: "cityData",
+  foreignKey: "city",
+  targetKey: "code",
+});
+AddressModel.belongsTo(KecamatanModel, {
+  as: "districtData",
+  foreignKey: "district",
+  targetKey: "code",
+});
+AddressModel.belongsTo(KelurahanModel, {
+  as: "villageData",
+  foreignKey: "village",
+  targetKey: "code",
 });
 
 export default class OrderLabRepository {
@@ -334,8 +359,41 @@ export default class OrderLabRepository {
           {
             model: AddressModel,
             as: "address",
-            attributes: ["full_address"],
+            attributes: ["full_address", "rt", "rw"],
             where: { deleted_at: { [Op.is]: null } },
+            include: [
+              {
+                model: ProvinceModel,
+                as: "provData",
+                attributes: ["code", "name"],
+              },
+              {
+                model: KabupatenModel,
+                as: "cityData", // Diubah dari "city" untuk menghindari konflik
+                attributes: ["code", "name"],
+              },
+              {
+                model: KecamatanModel,
+                as: "districtData", // Diubah dari "district" untuk menghindari konflik
+                attributes: ["code", "name"],
+              },
+              {
+                model: KelurahanModel,
+                as: "villageData", // Diubah dari "village" untuk menghindari konflik
+                attributes: ["code", "name"],
+              },
+            ],
+          },
+          {
+            model: BirthDetailModel,
+            as: "birth_detail",
+            attributes: [
+              "birth_place",
+              "birth_date",
+              "age_year",
+              "age_month",
+              "age_day",
+            ],
           },
         ],
       },
