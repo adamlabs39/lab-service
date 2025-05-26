@@ -142,6 +142,9 @@ export default class OrderLabRepository {
               [Op.is]: null,
             },
           },
+          attributes: {
+            exclude: ["created_at", "updated_at", "deleted_at"],
+          },
           include: [
             {
               model: TarifLabModel,
@@ -151,54 +154,9 @@ export default class OrderLabRepository {
                   [Op.is]: null,
                 },
               },
-              include: [
-                {
-                  model: TarifLabPenjaminModel,
-                  as: "tarif_lab_penjamin",
-                  where: {
-                    deleted_at: {
-                      [Op.is]: null,
-                    },
-                  },
-
-                  include: {
-                    model: PenjaminModel,
-                    as: "penjamin",
-                    where: {
-                      deleted_at: {
-                        [Op.is]: null,
-                      },
-                    },
-                    attributes: ["uuid", "name"],
-                  },
-                },
-                {
-                  model: TarifLabPelayananModel,
-                  as: "pelayanan",
-                  where: {
-                    deleted_at: {
-                      [Op.is]: null,
-                    },
-                  },
-                  attributes: ["uuid", "pelayanan"],
-                },
-                {
-                  model: TarifLabItemModel,
-                  as: "tarif_lab_item",
-                  include: [
-                    {
-                      model: KelompokPemeriksaanModel,
-                      as: "kelompok_pemeriksaan",
-                      attributes: ["uuid", "name"],
-                    },
-                    {
-                      model: ItemPemeriksaanModel,
-                      as: "item_pemeriksaan",
-                      attributes: ["uuid", "name"],
-                    },
-                  ],
-                },
-              ],
+              attributes: {
+                exclude: ["created_at", "updated_at", "deleted_at"],
+              },
             },
           ],
         },
@@ -222,9 +180,36 @@ export default class OrderLabRepository {
                   [Op.is]: null,
                 },
               },
-              attributes: {
-                exclude: ["createdAt", "updatedAt", "deletedAt"],
-              },
+              include: [
+                {
+                  model: ProvinceModel,
+                  as: "provData",
+                  attributes: ["code", "name"],
+                },
+                {
+                  model: KabupatenModel,
+                  as: "cityData", // Diubah dari "city" untuk menghindari konflik
+                  attributes: ["code", "name"],
+                },
+                {
+                  model: KecamatanModel,
+                  as: "districtData", // Diubah dari "district" untuk menghindari konflik
+                  attributes: ["code", "name"],
+                },
+                {
+                  model: KelurahanModel,
+                  as: "villageData", // Diubah dari "village" untuk menghindari konflik
+                  attributes: ["code", "name"],
+                },
+              ],
+              attributes: [
+                "uuid",
+                "full_address",
+                "rt",
+                "rw",
+                "postalCode",
+                "country",
+              ],
             },
             {
               model: BirthDetailModel,
@@ -234,9 +219,14 @@ export default class OrderLabRepository {
                   [Op.is]: null,
                 },
               },
-              attributes: {
-                exclude: ["createdAt", "updatedAt", "deletedAt"],
-              },
+              attributes: [
+                "uuid",
+                "birth_place",
+                "birth_date",
+                "age_year",
+                "age_month",
+                "age_day",
+              ],
             },
           ],
         },
@@ -271,11 +261,11 @@ export default class OrderLabRepository {
               [Op.is]: null,
             },
           },
-          exclude: ["created_at", "updated_at", "deleted_at"],
+          attributes: ["uuid", "code_bpjs", "satu_sehat_id"],
         },
       ],
       attributes: {
-        exclude: ["created_at", "updated_at", "deleted_at"],
+        exclude: ["id", "created_at", "updated_at", "deleted_at"],
       },
     });
   }
