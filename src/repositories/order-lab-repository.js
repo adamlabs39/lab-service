@@ -22,7 +22,11 @@ import {
   ProvinceModel,
 } from "@adameds/model-sdk/datamaster";
 import pagination from "../helpers/pagination.js";
-import { BirthDetailModel, PatientModel } from "@adameds/model-sdk/admisi";
+import {
+  BirthDetailModel,
+  InsuranceAccountModel,
+  PatientModel,
+} from "@adameds/model-sdk/admisi";
 import { AddressModel } from "@adameds/model-sdk/setting";
 import { status } from "../services/order-lab-service.js";
 
@@ -93,6 +97,11 @@ AddressModel.belongsTo(KelurahanModel, {
   as: "villageData",
   foreignKey: "village",
   targetKey: "code",
+});
+PatientModel.hasMany(InsuranceAccountModel, {
+  as: "insurance_account",
+  foreignKey: "patient_uuid",
+  constraints: false,
 });
 
 export default class OrderLabRepository {
@@ -353,6 +362,7 @@ export default class OrderLabRepository {
         as: "patient",
         attributes: ["uuid", "name", "no_rm", "gender", "phone"],
         where: { deleted_at: { [Op.is]: null } },
+        required: false,
         include: [
           {
             model: AddressModel,
@@ -393,6 +403,12 @@ export default class OrderLabRepository {
               "age_day",
             ],
           },
+          {
+            model: InsuranceAccountModel,
+            as: "insurance_account",
+            attributes: ["name", "account_number", "class_entitle"],
+            required: false,
+          },
         ],
       },
       {
@@ -423,6 +439,12 @@ export default class OrderLabRepository {
           },
         },
         attributes: ["code_bpjs", "satu_sehat_id"],
+      },
+      {
+        model: PenjaminModel,
+        as: "penjamin",
+        attributes: ["code", "name"],
+        required: false,
       },
       // {
       //   model: OrderLabPemeriksaanModel,
