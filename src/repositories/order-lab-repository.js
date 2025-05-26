@@ -254,7 +254,7 @@ export default class OrderLabRepository {
                   [Op.is]: null,
                 },
               },
-              attributes: ["uuid", "name"],
+              attributes: ["uuid", "name", "first_title", "last_title"],
             },
           ],
           where: {
@@ -351,7 +351,7 @@ export default class OrderLabRepository {
       {
         model: PatientModel,
         as: "patient",
-        attributes: ["uuid", "name", "no_rm", "gender"],
+        attributes: ["uuid", "name", "no_rm", "gender", "phone"],
         where: { deleted_at: { [Op.is]: null } },
         include: [
           {
@@ -394,6 +394,35 @@ export default class OrderLabRepository {
             ],
           },
         ],
+      },
+      {
+        model: LokasiModel,
+        as: "lokasi",
+        attributes: ["code", "name"],
+        required: false,
+      },
+      {
+        model: PractitionerModel,
+        as: "dokterPengirim",
+        required: false,
+        include: [
+          {
+            model: PegawaiModel,
+            as: "pegawai",
+            where: {
+              deleted_at: {
+                [Op.is]: null,
+              },
+            },
+            attributes: ["uuid", "name", "first_title", "last_title"],
+          },
+        ],
+        where: {
+          deleted_at: {
+            [Op.is]: null,
+          },
+        },
+        attributes: ["code_bpjs", "satu_sehat_id"],
       },
       // {
       //   model: OrderLabPemeriksaanModel,
