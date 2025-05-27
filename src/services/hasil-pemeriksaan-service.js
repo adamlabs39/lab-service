@@ -12,12 +12,14 @@ import { NotfoundException } from "@adameds/model-sdk/exceptions";
 
 export default class HasilPemeriksaanService {
   static async inputHasilPemeriksaan(req) {
+    // proses validasi
     console.log(req);
     const validdata = ZodValidator.validate(
       HasilPemeriksaanValidation.INPUT_HASIL_PEMERIKSAAN,
       req
     );
 
+    // get data order lab
     const orderLabExist = await OrderLabRepository.findByUuid(
       validdata.order_lab_uuid,
       validdata.faskes_uuid
@@ -27,36 +29,56 @@ export default class HasilPemeriksaanService {
       throw new NotfoundException("Order Lab tidak ada");
     }
 
-    if(orderLabExist.order_status !== status.PERIKSA ){
+    if (orderLabExist.order_status !== status.PERIKSA) {
       throw new BadRequestException("Order Lab belum diperiksa");
     }
 
+    // get item pemeriksaan
     const observationItemUuids = validdata.hasil_pemeriksaan.map(
       (item) => item.observation_item_uuid
     );
 
+    // Cari observation items berdasarkan UUID
     const observationItems = await ObservationItemRepository.findByUuids(
       observationItemUuids,
       validdata.faskes_uuid
     );
 
     if (observationItems.length !== observationItemUuids.length) {
-      throw new NotfoundException("Observation Item tidak ada");
+      throw new NotfoundException("Observation Item tidak ditemukan");
     }
 
+    // get pasien
     const patient = await PatientRepository.findByUuid(
       orderLabExist.patient_uuid,
       validdata.faskes_uuid
     );
 
-    const hasilPemeriksaan = validdata.hasil_pemeriksaan.map((item, i) => {
+    // Mapping hasil pemeriksaan dengan data yang valid
+    const hasilPemeriksaan = validdata.hasil_pemeriksaan.map((item, index) => {
+      const observationItem = observationItems.find(
+        (oi) => oi.uuid === item.observation_item_uuid
+      );
+
+      if (!observationItem) {
+        throw new Error(
+          `Observation Item dengan UUID ${item.observation_item_uuid} tidak ditemukan`
+        );
+      }
+
       return {
         observation_item_uuid: item.observation_item_uuid,
-        item_pemeriksaan_uuid: observationItems[i].item_pemeriksaan_uuid,
+        item_pemeriksaan_uuid: observationItem.item_pemeriksaan_uuid,
         result: item.result,
-        jenis_input: observationItems[i].item_pemeriksaan.jenis_input,
+        jenis_input: observationItem.item_pemeriksaan.jenis_input,
+        status_nilai_rujukan:
+          observationItem.item_pemeriksaan.status_nilai_rujukan,
       };
     });
+
+    const pemeriksaanMustCheckingFlag = hasilPemeriksaan.filter(
+      (item) => item.status_nilai_rujukan
+    );
 
     const patientData = {
       gender: patient.gender,
@@ -66,27 +88,49 @@ export default class HasilPemeriksaanService {
     };
 
     const flags = await flagDecider(
-      hasilPemeriksaan,
+      pemeriksaanMustCheckingFlag,
       patientData,
       validdata.faskes_uuid
     );
 
+    console.log("decide flags ==> ", JSON.stringify(flags));
+
+    const mergedDataHasilPemeriksaan = hasilPemeriksaan.map((item) => {
+      // Cari item yang sesuai di flagDecider berdasarkan observation_item_uuid
+      const flagItem = flags.find(
+        (flag) => flag.observation_item_uuid === item.observation_item_uuid
+      );
+
+      // Jika ditemukan, gabungkan datanya, jika tidak set flag menjadi null
+      return {
+        observation_item_uuid: item.observation_item_uuid,
+        item_pemeriksaan_uuid: item.item_pemeriksaan_uuid,
+        result: item.result,
+        flag: flagItem ? flagItem.flag : null,
+      };
+    });
+
+    console.log(
+      "format input hasil = ",
+      JSON.stringify(mergedDataHasilPemeriksaan)
+    );
+
     await sequelizeInstance.transaction(async (t) => {
-      if(validdata.catatan_analis){
+      if (validdata.catatan_analis) {
         await OrderLabRepository.update(
           validdata.order_lab_uuid,
           validdata.faskes_uuid,
-          { 
-              catatan_analis: validdata.catatan_analis,
+          {
+            catatan_analis: validdata.catatan_analis,
           },
           t
         );
       }
 
-      for (const flag of flags) {
-        const data = flag
-        data.waltu_periksan =  toEpochDate(new Date())
-        data.status_periksa = true
+      for (const observation of mergedDataHasilPemeriksaan) {
+        const data = observation;
+        data.waktu_periksa = toEpochDate(new Date());
+        data.status_periksa = true;
 
         await ObservationItemRepository.updateResult(
           data.observation_item_uuid,
@@ -117,16 +161,16 @@ export default class HasilPemeriksaanService {
       await OrderLabRepository.update(
         validata.order_lab_uuid,
         validata.faskes_uuid,
-        { 
-            catatan_expertise: validata.catatan_expertise,
-            expertise : true,
+        {
+          catatan_expertise: validata.catatan_expertise,
+          expertise: true,
         },
         t
       );
     });
   }
 
-  static async getPemeriksaan(req, order_lab_uuid){
+  static async getPemeriksaan(req, order_lab_uuid) {
     const orderLabExist = await OrderLabRepository.findByUuid(
       order_lab_uuid,
       req.faskes_uuid
@@ -141,6 +185,6 @@ export default class HasilPemeriksaanService {
       req.faskes_uuid
     );
 
-    return hasilPemeriksaan
-  } 
+    return hasilPemeriksaan;
+  }
 }
