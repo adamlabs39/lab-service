@@ -240,10 +240,10 @@ export default class KelompokPemeriksaanService {
           item_pemeriksaan: kelompokPemeriksaan.item_kelompok_pemeriksaan.map(
             (item) => {
               return {
-                id: item.item_pemeriksaan.id,
-                name: item.item_pemeriksaan.name,
-                uuid: item.item_pemeriksaan.uuid,
-                status: item.item_pemeriksaan.status,
+                id: item.item_pemeriksaan?.id,
+                name: item.item_pemeriksaan?.name,
+                uuid: item.item_pemeriksaan?.uuid,
+                status: item.item_pemeriksaan?.status,
               };
             }
           ),

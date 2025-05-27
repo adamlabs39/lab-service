@@ -24,7 +24,7 @@ export default class KelompokPemeriksaanValidation {
     icd9_uuid: z.string().uuid().optional(),
     loinc_uuid: z.string().uuid(),
     category_pemeriksaan_uuid: z.string().uuid(),
-    item_pemeriksaans: z.array(z.string().uuid()),
+    item_pemeriksaans: z.array(z.string().uuid()).nonempty(),
     status: z.boolean(),
     faskes_uuid: z.string().min(1).max(255),
   });
@@ -36,7 +36,7 @@ export default class KelompokPemeriksaanValidation {
     icd9_uuid: z.string().uuid().optional(),
     loinc_uuid: z.string().uuid(),
     category_pemeriksaan_uuid: z.string().uuid(),
-    item_pemeriksaans: z.array(z.string().uuid()),
+    item_pemeriksaans: z.array(z.string().uuid()).nonempty(),
     status: z.boolean(),
     faskes_uuid: z.string().min(1).max(255),
   });
