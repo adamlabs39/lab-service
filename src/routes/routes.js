@@ -162,8 +162,13 @@ routes.get(`${baseUrl}/laporan-kunjungan`, LaporanController.getKunjungan);
 routes.get(`${baseUrl}/laporan-tat`, LaporanController.getTat);
 
 routes.get(
-  `${baseUrl}/laporan-rekap-kunjungan`,
-  LaporanController.getRekapKunjungan
+  `${baseUrl}/rekap-pemeriksaan-per-tanggal`,
+  LaporanController.getRekapPemeriksaanPerTanggal
+);
+
+routes.get(
+  `${baseUrl}/rekap-pemeriksaan`,
+  LaporanController.getRekapPemeriksaan
 );
 
 export default routes;

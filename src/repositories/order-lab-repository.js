@@ -137,6 +137,7 @@ export default class OrderLabRepository {
         {
           model: OrderLabPemeriksaanModel,
           as: "order_lab_pemeriksaan",
+          required: false,
           where: {
             deleted_at: {
               [Op.is]: null,
@@ -149,6 +150,7 @@ export default class OrderLabRepository {
             {
               model: TarifLabModel,
               as: "tarif_lab",
+              required: false,
               where: {
                 deleted_at: {
                   [Op.is]: null,
@@ -614,7 +616,9 @@ export default class OrderLabRepository {
                       [Op.is]: null,
                     },
                   },
-
+                  attributes: {
+                    exclude: ["created_at", "updated_at", "deleted_at"],
+                  },
                   include: {
                     model: PenjaminModel,
                     as: "penjamin",
@@ -669,7 +673,19 @@ export default class OrderLabRepository {
             },
           },
           attributes: {
-            exclude: ["createdAt", "updatedAt", "deletedAt"],
+            exclude: [
+              "createdAt",
+              "updatedAt",
+              "deletedAt",
+              "language",
+              "motherName",
+              "religion",
+              "maritialStatus",
+              "address_uuid",
+              "birth_detail_uuid",
+              "addressUuid",
+              "birthDetailUuid",
+            ],
           },
           include: [
             {
@@ -729,11 +745,22 @@ export default class OrderLabRepository {
               [Op.is]: null,
             },
           },
-          exclude: ["created_at", "updated_at", "deleted_at"],
+          attributes: ["uuid", "is_doctor", "code_antrian_dokter"],
         },
       ],
       attributes: {
-        exclude: ["created_at", "updated_at", "deleted_at"],
+        exclude: [
+          "created_at",
+          "updated_at",
+          "deleted_at",
+          "patient_uuid",
+          "penjamin_uuid",
+          "lokasi_uuid",
+          "dokter_pengirim_uuid",
+          "status_puasa",
+          "practitioner_uuid",
+          "spesimen_uuids",
+        ],
       },
     };
 
