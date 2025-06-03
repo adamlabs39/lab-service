@@ -5,7 +5,17 @@ export default class LaporanController {
   static async getKunjungan(req, res, next) {
     try {
       const data = req.query;
+      const safePage = isNaN(parseInt(data.page))
+        ? 1
+        : Math.max(parseInt(data.page), 1);
+      const safeLimit = isNaN(parseInt(data.limit))
+        ? 10
+        : Math.min(parseInt(data.limit), 100);
+
       data.faskes_uuid = req.author.faskesUuid;
+      data.page = safePage;
+      data.limit = safeLimit;
+
       const laporan = await LaporanService.getKunjungan(data);
       res
         .status(200)
@@ -18,7 +28,16 @@ export default class LaporanController {
   static async getTat(req, res, next) {
     try {
       const data = req.query;
+      const safePage = isNaN(parseInt(data.page))
+        ? 1
+        : Math.max(parseInt(data.page), 1);
+      const safeLimit = isNaN(parseInt(data.limit))
+        ? 10
+        : Math.min(parseInt(data.limit), 100);
+
       data.faskes_uuid = req.author.faskesUuid;
+      data.page = safePage;
+      data.limit = safeLimit;
       const laporan = await LaporanService.getTat(data);
       res
         .status(200)

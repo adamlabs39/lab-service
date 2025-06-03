@@ -15,8 +15,11 @@ export default class LaporanService {
     );
 
     const laporan = await OrderLabRepository.findAllSelesai(validdata);
+    // return laporan;
 
-    const laporanWithGrandTotalLab = laporan.data.map((item) => {
+    const plainData = laporan.data.map((item) => item.get({ plain: true }));
+
+    const laporanWithGrandTotalLab = plainData.map((item) => {
       let grandTotalLab;
 
       if (item.is_mcu) {
@@ -35,7 +38,12 @@ export default class LaporanService {
       };
     });
 
-    return laporanWithGrandTotalLab;
+    const payload = {
+      data: laporanWithGrandTotalLab,
+      pagination: laporan.pagination,
+    };
+
+    return payload;
   }
 
   static async getTat(req) {
@@ -45,8 +53,9 @@ export default class LaporanService {
     );
 
     const laporan = await OrderLabRepository.findAllSelesai(validdata);
+    const plainData = laporan.data.map((item) => item.get({ plain: true }));
 
-    const laporanWithTat = laporan.data.map((item) => {
+    const laporanWithTat = plainData.map((item) => {
       const tat = parseInt(item.waktu_selsai) - parseInt(item.waktu_validasi);
       const tatFormated = convertSecodToTime(tat);
       return {
@@ -55,7 +64,12 @@ export default class LaporanService {
       };
     });
 
-    return laporanWithTat;
+    const payload = {
+      data: laporanWithTat,
+      pagination: laporan.pagination,
+    };
+
+    return payload;
   }
 
   static async getRekapPemeriksaanPerTanggal(req) {
@@ -68,7 +82,14 @@ export default class LaporanService {
       validData
     );
 
-    return formatPemeriksaanPerTanggal(result.data);
+    const dataRekap = formatPemeriksaanPerTanggal(result.data);
+
+    const payload = {
+      data: dataRekap,
+      pagination: result.pagination,
+    };
+
+    return payload;
   }
 
   static async getRekapPemeriksaan(req) {
@@ -81,6 +102,13 @@ export default class LaporanService {
       validData
     );
 
-    return formatPemeriksaan(result.data);
+    const dataRekap = formatPemeriksaan(result.data);
+
+    const payload = {
+      data: dataRekap,
+      pagination: result.pagination,
+    };
+
+    return payload;
   }
 }
