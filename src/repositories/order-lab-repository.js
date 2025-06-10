@@ -266,10 +266,35 @@ export default class OrderLabRepository {
           },
           attributes: ["uuid", "code_bpjs", "satu_sehat_id"],
         },
+        {
+          model: PractitionerModel,
+          as: "practitioner",
+          required: false,
+          include: [
+            {
+              model: PegawaiModel,
+              as: "pegawai",
+              where: {
+                deleted_at: {
+                  [Op.is]: null,
+                },
+              },
+              attributes: ["uuid", "name", "first_title", "last_title"],
+            },
+          ],
+          where: {
+            deleted_at: {
+              [Op.is]: null,
+            },
+          },
+          attributes: ["uuid", "code_bpjs", "satu_sehat_id"],
+        },
       ],
       attributes: {
         exclude: ["id", "created_at", "updated_at", "deleted_at"],
       },
+      raw: true,
+      nest: true,
     });
   }
 

@@ -185,6 +185,6 @@ export default class HasilPemeriksaanService {
       req.faskes_uuid
     );
 
-    return hasilPemeriksaan;
+    return { ...orderLabExist, hasil_pemeriksaan: hasilPemeriksaan };
   }
 }
