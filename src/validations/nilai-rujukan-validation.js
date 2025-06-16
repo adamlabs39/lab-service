@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const OPERATOR = ["<", "<=", ">", ">=", "-"];
-export const JENIS_KELAMIN = ["laki-laki", "perempuan", "general"];
+export const JENIS_KELAMIN = ["Male", "Female", "General"];
 
 export default class NilaiRujukanValidation {
   static CREATE_ANGKA = z

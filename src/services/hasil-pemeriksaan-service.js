@@ -183,11 +183,11 @@ export default class HasilPemeriksaanService {
       req.faskes_uuid
     );
 
-    // const checkNilaiRujukanPemeriksaan = await checkNilaiRujukan(
-    //   hasilPemeriksaan,
-    //   orderLabExist.patient,
-    //   req.faskes_uuid
-    // );
+    const checkNilaiRujukanPemeriksaan = await checkNilaiRujukan(
+      hasilPemeriksaan,
+      orderLabExist.patient,
+      req.faskes_uuid
+    );
 
     return { ...orderData, hasil_pemeriksaan: hasilPemeriksaan };
   }

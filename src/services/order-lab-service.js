@@ -207,10 +207,7 @@ export default class OrderLabService {
   }
 
   static async findOne(uuid, faskes_uuid) {
-    console.log(uuid);
-    console.log(faskes_uuid);
     const order = await OrderLabRepository.findByUuid(uuid, faskes_uuid);
-    console.log("order = ", JSON.stringify(order));
 
     if (!order) {
       throw new NotfoundException("Order tidak ada");
