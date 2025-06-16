@@ -293,8 +293,6 @@ export default class OrderLabRepository {
       attributes: {
         exclude: ["id", "created_at", "updated_at", "deleted_at"],
       },
-      raw: true,
-      nest: true,
     });
   }
 

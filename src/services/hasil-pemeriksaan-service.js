@@ -9,6 +9,7 @@ import ExpertiseValidation from "../validations/expertise-validation.js";
 import toEpochDate from "../helpers/date-helper.js";
 import { status } from "./order-lab-service.js";
 import { NotfoundException } from "@adameds/model-sdk/exceptions";
+import checkNilaiRujukan from "../helpers/check-nilai-rujukan.js";
 
 export default class HasilPemeriksaanService {
   static async inputHasilPemeriksaan(req) {
@@ -110,11 +111,6 @@ export default class HasilPemeriksaanService {
       };
     });
 
-    console.log(
-      "format input hasil = ",
-      JSON.stringify(mergedDataHasilPemeriksaan)
-    );
-
     await sequelizeInstance.transaction(async (t) => {
       if (validdata.catatan_analis) {
         await OrderLabRepository.update(
@@ -180,11 +176,19 @@ export default class HasilPemeriksaanService {
       throw new NotfoundException("Order Lab tidak ada");
     }
 
+    const orderData = orderLabExist.get({ plain: true });
+
     const hasilPemeriksaan = await ObservationItemRepository.findByOrderLabUuid(
       order_lab_uuid,
       req.faskes_uuid
     );
 
-    return { ...orderLabExist, hasil_pemeriksaan: hasilPemeriksaan };
+    // const checkNilaiRujukanPemeriksaan = await checkNilaiRujukan(
+    //   hasilPemeriksaan,
+    //   orderLabExist.patient,
+    //   req.faskes_uuid
+    // );
+
+    return { ...orderData, hasil_pemeriksaan: hasilPemeriksaan };
   }
 }

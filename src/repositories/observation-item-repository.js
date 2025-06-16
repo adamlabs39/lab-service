@@ -2,6 +2,7 @@ import { Op, fn, col } from "sequelize";
 
 import {
   ItemPemeriksaanModel,
+  NilaiRujukanModel,
   ObservationItemModel,
   OrderLabModel,
 } from "@adameds/model-sdk/lab";
@@ -17,6 +18,12 @@ ObservationItemModel.belongsTo(ItemPemeriksaanModel, {
 ObservationItemModel.belongsTo(OrderLabModel, {
   foreignKey: "order_lab_uuid",
   as: "order_lab",
+  constraints: false,
+});
+
+ItemPemeriksaanModel.hasMany(NilaiRujukanModel, {
+  foreignKey: "item_pemeriksaan_uuid",
+  as: "nilai_rujukan", // Gunakan alias yang konsisten
   constraints: false,
 });
 
@@ -75,10 +82,22 @@ export default class ObservationItemRepository {
             [Op.is]: null,
           },
         },
+        // required: false,
+        // include: {
+        //   model: NilaiRujukanModel,
+        //   as: "nilai_rujukan",
+        //   where: {
+        //     deleted_at: {
+        //       [Op.is]: null,
+        //     },
+        //   },
+        // },
         attributes: {
           exclude: ["created_at", "updated_at", "deleted_at"],
         },
       },
+      raw: true,
+      nest: true,
     });
   }
 
