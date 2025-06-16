@@ -76,6 +76,9 @@ export default class SpesimenRepository {
           [Op.in]: uuids,
         },
       },
+      attributes: {
+        exclude: ["created_at", "updated_at", "deleted_at"],
+      },
     });
   }
 

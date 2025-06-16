@@ -1,24 +1,5 @@
 import NilaiRujukanRepository from "../repositories/nilai-rujukan-repository.js";
-import {
-  JENIS_KELAMIN,
-  OPERATOR,
-} from "../validations/nilai-rujukan-validation.js";
-
-const jenisInput = {
-  text: "text",
-  angka: "angka",
-  longText: "long text",
-  pilihan: "pilihan",
-};
-
-const flag = {
-  normal: "N",
-  abnormal: "TN",
-  low: "L",
-  high: "H",
-  kritisHigh: "KH",
-  kritisLow: "KL",
-};
+import { JENIS_KELAMIN } from "../validations/nilai-rujukan-validation.js";
 
 const calculateAgeInDays = (ageYear, ageMonth, ageDay) => {
   return ageYear * 365 + ageMonth * 30 + ageDay;
@@ -59,23 +40,30 @@ const filterNilaiRujukan = async (
       const usiaSesuai =
         usiaPasienHari >= umurBawahHari && usiaPasienHari <= umurAtasHari;
 
-      console.log(
-        "usia eq = ",
-        usiaSesuai,
-        usiaPasienHari,
-        umurBawahHari,
-        umurAtasHari
-      );
+      // console.log(
+      //   "usia eq = ",
+      //   usiaSesuai,
+      //   usiaPasienHari,
+      //   umurBawahHari,
+      //   umurAtasHari
+      // );
 
       // 4. Cek kesesuaian jenis kelamin
       const jenisKelaminSesuai =
         rujukan.jenis_kelamin === JENIS_KELAMIN[2] ||
-        rujukan.jenis_kelamin === pasien.jenis_kelamin;
+        rujukan.jenis_kelamin === pasien.gender;
+
+      // console.log(
+      //   "gender eq = ",
+      //   jenisKelaminSesuai,
+      //   pasien.gender,
+      //   rujukan.jenis_kelamin
+      // );
 
       return usiaSesuai && jenisKelaminSesuai;
     });
 
-    console.log("rujukan eq => ", rujukanSesuai);
+    // console.log("rujukan eq => ", rujukanSesuai);
 
     // Ambil nilai rujukan yang sesuai (prioritaskan yang bukan general jika ada)
     let rujukanTerpilih = null;
@@ -86,75 +74,38 @@ const filterNilaiRujukan = async (
         rujukanSesuai[0];
     }
 
-    console.log("rujukan terpilih ==> ", rujukanTerpilih);
+    // console.log("rujukan terpilih ==> ", rujukanTerpilih);
+
+    item.item_pemeriksaan.nilai_rujukan = rujukanTerpilih
+      ? rujukanTerpilih.tampilan
+      : null;
 
     // Return item pemeriksaan dengan data rujukan
     return {
       ...item,
-      nilai_rujukan: rujukanTerpilih,
-      tampilan: rujukanTerpilih ? rujukanTerpilih.tampilan : null,
-      status_rujukan: rujukanTerpilih ? true : false,
     };
   });
 };
 
 const checkNilaiRujukan = async (hasil_pemeriksaan, patient, faskes_uuid) => {
-  console.log(hasil_pemeriksaan);
-
-  patient.gender =
-    patient.gender === "Male" ? JENIS_KELAMIN[0] : JENIS_KELAMIN[1];
-  console.log(patient);
-
   const itemPemeriksaanList = hasil_pemeriksaan;
 
   const itemPemeriksaanUuids = itemPemeriksaanList.map(
     (item) => item.item_pemeriksaan_uuid
   );
 
-  console.log("item uuid => ", itemPemeriksaanUuids);
-
   const nilaiRujukanList = await NilaiRujukanRepository.findByItemPemeriksaans(
     itemPemeriksaanUuids,
     faskes_uuid
   );
 
-  console.log("nilai rujukan => ", nilaiRujukanList);
-
-  // return nilaiRujukan
-  // Buat Hash Map untuk pencarian cepat (O(1))
-
-  // const nilaiRujukanMap = new Map();
-  // for (const item of nilaiRujukan) {
-  //   nilaiRujukanMap.set(item.item_pemeriksaan_uuid, {
-  //     ...item,
-  //     totalUmurBawah: calculateAgeInDays(
-  //       item.umur_bawah_tahun,
-  //       item.umur_bawah_bulan,
-  //       item.umur_bawah_hari
-  //     ),
-  //     totalUmurAtas: calculateAgeInDays(
-  //       item.umur_atas_tahun,
-  //       item.umur_atas_bulan,
-  //       item.umur_atas_hari
-  //     ),
-  //   });
-  // }
-
-  // console.log("nilai rujukan map => ", nilaiRujukanMap);
-
-  // const totalUmur = calculateAgeInDays(
-  //   patient.ageYear,
-  //   patient.ageMonth,
-  //   patient.ageDay
-  // );
-
-  const hasil = filterNilaiRujukan(
+  const hasilPemeriksaan = await filterNilaiRujukan(
     nilaiRujukanList,
     patient,
     itemPemeriksaanList
   );
 
-  console.log("filter nilai rujukan ==> ", hasil);
+  return hasilPemeriksaan;
 };
 
 export default checkNilaiRujukan;

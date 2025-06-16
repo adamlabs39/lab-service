@@ -10,6 +10,7 @@ import toEpochDate from "../helpers/date-helper.js";
 import { status } from "./order-lab-service.js";
 import { NotfoundException } from "@adameds/model-sdk/exceptions";
 import checkNilaiRujukan from "../helpers/check-nilai-rujukan.js";
+import SpesimenRepository from "../repositories/spesimen-repository.js";
 
 export default class HasilPemeriksaanService {
   static async inputHasilPemeriksaan(req) {
@@ -178,17 +179,24 @@ export default class HasilPemeriksaanService {
 
     const orderData = orderLabExist.get({ plain: true });
 
+    let spesimenList = await SpesimenRepository.findByUuids(
+      orderData.spesimen_uuids
+    );
+    spesimenList = spesimenList.map((item) => item.get({ plain: true }));
+
+    orderData.spesimen_uuids = spesimenList;
+
     const hasilPemeriksaan = await ObservationItemRepository.findByOrderLabUuid(
       order_lab_uuid,
       req.faskes_uuid
     );
 
-    const checkNilaiRujukanPemeriksaan = await checkNilaiRujukan(
+    const formattedHasilPemeriksaan = await checkNilaiRujukan(
       hasilPemeriksaan,
-      orderLabExist.patient,
+      orderData.patient,
       req.faskes_uuid
     );
 
-    return { ...orderData, hasil_pemeriksaan: hasilPemeriksaan };
+    return { ...orderData, hasil_pemeriksaan: formattedHasilPemeriksaan };
   }
 }
