@@ -156,6 +156,10 @@ routes.get(
 );
 
 routes.post(`${baseUrl}/expertise/:uuid`, HasilPemeriksaanController.expertise);
+routes.put(
+  `${baseUrl}/batal-expertise/:uuid`,
+  HasilPemeriksaanController.batalExpertise
+);
 
 routes.get(`${baseUrl}/laporan-kunjungan`, LaporanController.getKunjungan);
 

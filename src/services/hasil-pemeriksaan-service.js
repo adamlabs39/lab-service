@@ -159,8 +159,35 @@ export default class HasilPemeriksaanService {
         validata.order_lab_uuid,
         validata.faskes_uuid,
         {
+          waktu_expertise: toEpochDate(new Date()),
+          petugas_expertise: validata.petugas_expertise,
           catatan_expertise: validata.catatan_expertise,
           expertise: true,
+        },
+        t
+      );
+    });
+  }
+
+  static async batalExpertise(req) {
+    const orderLabExist = await OrderLabRepository.findByUuid(
+      req.order_lab_uuid,
+      req.faskes_uuid
+    );
+
+    if (!orderLabExist) {
+      throw new NotfoundException("Order Lab tidak ada");
+    }
+
+    await sequelizeInstance.transaction(async (t) => {
+      await OrderLabRepository.update(
+        req.order_lab_uuid,
+        req.faskes_uuid,
+        {
+          waktu_expertise: null,
+          petugas_expertise: null,
+          catatan_expertise: null,
+          expertise: false,
         },
         t
       );
