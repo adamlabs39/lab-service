@@ -127,7 +127,8 @@ export default class HasilPemeriksaanService {
       for (const observation of mergedDataHasilPemeriksaan) {
         const data = observation;
         data.waktu_periksa = toEpochDate(new Date());
-        data.status_periksa = true;
+        data.status_periksa =
+          data.result && data.result.trim() !== "" ? true : false;
 
         await ObservationItemRepository.updateResult(
           data.observation_item_uuid,

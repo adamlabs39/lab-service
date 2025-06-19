@@ -18,6 +18,7 @@ export default class HasilPemeriksaanController {
       const data = req.body;
       data.faskes_uuid = req.author.faskesUuid;
       data.order_lab_uuid = req.params.uuid;
+      data.petugas_expertise = req.author.username;
       const result = await HasilPemeriksaanService.expertise(data);
       res.status(200).json(successResponse("Expertise success", result));
     } catch (error) {
