@@ -251,11 +251,6 @@ export default class OrderLabRepository {
             {
               model: PegawaiModel,
               as: "pegawai",
-              where: {
-                deleted_at: {
-                  [Op.is]: null,
-                },
-              },
               attributes: ["uuid", "name", "first_title", "last_title"],
             },
           ],
@@ -274,11 +269,6 @@ export default class OrderLabRepository {
             {
               model: PegawaiModel,
               as: "pegawai",
-              where: {
-                deleted_at: {
-                  [Op.is]: null,
-                },
-              },
               attributes: ["uuid", "name", "first_title", "last_title"],
             },
           ],
@@ -441,11 +431,6 @@ export default class OrderLabRepository {
           {
             model: PegawaiModel,
             as: "pegawai",
-            where: {
-              deleted_at: {
-                [Op.is]: null,
-              },
-            },
             attributes: ["uuid", "name", "first_title", "last_title"],
           },
         ],
@@ -612,7 +597,6 @@ export default class OrderLabRepository {
                   model: PenjaminModel,
                   as: "penjamin",
                   required: false,
-                  where: { deleted_at: { [Op.is]: null } },
                   attributes: ["uuid", "name"],
                 },
               },
@@ -698,7 +682,6 @@ export default class OrderLabRepository {
             model: PegawaiModel,
             as: "pegawai",
             required: false,
-            where: { deleted_at: { [Op.is]: null } },
             attributes: ["uuid", "name"],
           },
         ],

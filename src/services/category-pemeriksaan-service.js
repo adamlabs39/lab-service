@@ -15,10 +15,15 @@ export default class CategoryPemeriksaanService {
     );
 
     const isCategoryPemeriksaanExist =
-      await CategoryPemeriksaanRepository.findByCode(validData.code, validData.faskes_uuid);
+      await CategoryPemeriksaanRepository.findByCode(
+        validData.code,
+        validData.faskes_uuid
+      );
 
     if (isCategoryPemeriksaanExist) {
-      throw new ConflictException("Category Pemeriksaan dengan code tersebut telah digunakan");
+      throw new ConflictException(
+        "Category Pemeriksaan dengan code tersebut telah digunakan"
+      );
     }
 
     sequelizeInstance.transaction(async (t) => {
@@ -31,24 +36,24 @@ export default class CategoryPemeriksaanService {
       await CategoryPemeriksaanRepository.findByUuid(uuid);
 
     if (!isCategoryPemeriksaanExist) {
-       throw new NotfoundException("Category Pemeriksaan tidak ada");
+      throw new NotfoundException("Category Pemeriksaan tidak ada");
     }
 
     const validData = ZodValidator.validate(
       CategoryPemeriksaanValidation.UPDATE,
       data
     );
-   sequelizeInstance.transaction(async (t) => {
+    sequelizeInstance.transaction(async (t) => {
       await CategoryPemeriksaanRepository.update(uuid, validData, t);
-   })
+    });
   }
 
   static async delete(uuid) {
-
-    const isCategoryPemeriksaanExist = await CategoryPemeriksaanRepository.findByUuid(uuid);
+    const isCategoryPemeriksaanExist =
+      await CategoryPemeriksaanRepository.findByUuid(uuid);
 
     if (!isCategoryPemeriksaanExist) {
-        throw new NotfoundException("Category Pemeriksaan tidak ada");
+      throw new NotfoundException("Category Pemeriksaan tidak ada");
     }
 
     sequelizeInstance.transaction(async (t) => {
@@ -60,7 +65,7 @@ export default class CategoryPemeriksaanService {
     const categoryPemeriksaan = await CategoryPemeriksaanRepository.findByUuid(
       uuid
     );
-    
+
     if (!categoryPemeriksaan) {
       throw new NotfoundException("Category Pemeriksaan tidak ada");
     }
@@ -76,37 +81,42 @@ export default class CategoryPemeriksaanService {
   }
 
   static async findAll(req) {
-    const categoryPemeriksaan = await CategoryPemeriksaanRepository.findAll(req);
+    const categoryPemeriksaan = await CategoryPemeriksaanRepository.findAll(
+      req
+    );
     return categoryPemeriksaan;
   }
 
-  static async import (filePath, faskes_uuid) {
-    const data = []
+  static async findAllActive(req) {
+    const categoryPemeriksaan =
+      await CategoryPemeriksaanRepository.findAllActive(req);
+    return categoryPemeriksaan;
+  }
 
-    const workSheet = await extractExcel(filePath)
-   
+  static async import(filePath, faskes_uuid) {
+    const data = [];
+
+    const workSheet = await extractExcel(filePath);
+
     workSheet.eachRow((row, rowNumber) => {
-      if (rowNumber === 1) return
+      if (rowNumber === 1) return;
       data.push({
         code: row.values[2],
         name: row.values[3],
         no_urut: row.values[4],
         status: true,
-        faskes_uuid: faskes_uuid
-      })
-    })
+        faskes_uuid: faskes_uuid,
+      });
+    });
 
-    checkDuplicate(data)
+    checkDuplicate(data);
 
     data.map((item) => {
-      ZodValidator.validate(CategoryPemeriksaanValidation.CREATE, item)
-    })
+      ZodValidator.validate(CategoryPemeriksaanValidation.CREATE, item);
+    });
 
     await sequelizeInstance.transaction(async (t) => {
-      await CategoryPemeriksaanRepository.bulkCreate(data, t)
-    }
-    )
+      await CategoryPemeriksaanRepository.bulkCreate(data, t);
+    });
   }
-
-
 }

@@ -124,4 +124,34 @@ export default class ItemPemeriksaanRepository {
       },
     });
   }
+
+  static async findAllActive(req) {
+    const options = {
+      where: {
+        faskes_uuid: req.faskes_uuid,
+        name: {
+          [Op.iLike]: `%${req.name || ""}%`,
+        },
+        deleted_at: {
+          [Op.is]: null,
+        },
+        status: {
+          [Op.is]: true,
+        },
+      },
+      include: [
+        {
+          model: CategoryPemeriksaanModel,
+          as: "category_pemeriksaan",
+          attributes: ["name", "id", "uuid"],
+        },
+      ],
+      order: [["created_at", "DESC"]],
+      attributes: {
+        exclude: ["created_at", "updated_at", "deleted_at"],
+      },
+    };
+
+    return await ItemPemeriksaanModel.findAll(options);
+  }
 }

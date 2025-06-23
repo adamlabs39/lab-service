@@ -8,6 +8,7 @@ import OrderLabController from "../controllers/order-lab-controller.js";
 import HasilPemeriksaanController from "../controllers/hasil-pemeriksaan-controller.js";
 import LaporanController from "../controllers/Laporan-controller.js";
 import multer from "multer";
+import authorizationSdk from "@adameds/authorization-sdk";
 
 const apiBase = process.env.API_BASE || "api";
 const apiVersion = process.env.API_VERSION || "v3";
@@ -23,12 +24,16 @@ routes.post(
   CategoryPemeriksaanController.create
 );
 routes.get(
-  `${baseUrl}/category-pemeriksaan/:uuid`,
-  CategoryPemeriksaanController.show
-);
-routes.get(
   `${baseUrl}/category-pemeriksaan`,
   CategoryPemeriksaanController.findAll
+);
+routes.get(
+  `${baseUrl}/category-pemeriksaan/active`,
+  CategoryPemeriksaanController.findAllActive
+);
+routes.get(
+  `${baseUrl}/category-pemeriksaan/:uuid`,
+  CategoryPemeriksaanController.show
 );
 routes.put(
   `${baseUrl}/category-pemeriksaan/:uuid`,
@@ -45,8 +50,12 @@ routes.post(
 );
 
 routes.post(`${baseUrl}/item-pemeriksaan`, ItemPemeriksaanController.create);
-routes.get(`${baseUrl}/item-pemeriksaan/:uuid`, ItemPemeriksaanController.show);
 routes.get(`${baseUrl}/item-pemeriksaan`, ItemPemeriksaanController.findAll);
+routes.get(
+  `${baseUrl}/item-pemeriksaan/active`,
+  ItemPemeriksaanController.findAllActive
+);
+routes.get(`${baseUrl}/item-pemeriksaan/:uuid`, ItemPemeriksaanController.show);
 routes.put(
   `${baseUrl}/item-pemeriksaan/:uuid`,
   ItemPemeriksaanController.update
@@ -62,8 +71,9 @@ routes.post(
 );
 
 routes.post(`${baseUrl}/spesimen`, SpesimenController.create);
-routes.get(`${baseUrl}/spesimen/:uuid`, SpesimenController.show);
 routes.get(`${baseUrl}/spesimen`, SpesimenController.getAll);
+routes.get(`${baseUrl}/spesimen/active`, SpesimenController.getAllActive);
+routes.get(`${baseUrl}/spesimen/:uuid`, SpesimenController.show);
 routes.put(`${baseUrl}/spesimen/:uuid`, SpesimenController.update);
 routes.delete(`${baseUrl}/spesimen/:uuid`, SpesimenController.delete);
 routes.post(
@@ -75,6 +85,10 @@ routes.post(
 routes.get(
   `${baseUrl}/kelompok-pemeriksaan`,
   KelompokPemeriksaanController.findAll
+);
+routes.get(
+  `${baseUrl}/kelompok-pemeriksaan/active`,
+  KelompokPemeriksaanController.findAllActive
 );
 routes.post(
   `${baseUrl}/kelompok-pemeriksaan`,

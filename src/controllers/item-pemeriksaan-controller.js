@@ -60,6 +60,20 @@ export default class ItemPemeriksaanController {
     }
   }
 
+  static async findAllActive(req, res, next) {
+    try {
+      req.body.faskes_uuid = req.author.faskesUuid;
+      const itemPemeriksaan = await ItemPemeriksaanService.findAllActive(
+        req.body
+      );
+      res
+        .status(200)
+        .json(successResponse("Data berhasil ditampilkan", itemPemeriksaan));
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static async createNilaiRujukan(req, res, next) {
     try {
       req.body.faskes_uuid = req.author.faskesUuid;

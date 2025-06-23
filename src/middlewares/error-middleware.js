@@ -4,10 +4,17 @@ import ConflictException from "../exception/conflict-exception.js";
 import InternalServerException from "../exception/internal-server-exception.js";
 import NotfoundException from "../exception/notfound-exception.js";
 import errorResponse from "../response/error-response.js";
+import pkg from "jsonwebtoken";
+const { TokenExpiredError } = pkg;
 
 const errorMiddleware = (error, request, response, nextFunction) => {
-  console.log(error);
-  if (error instanceof NotfoundException) {
+  console.log("error => ", error);
+  if (error instanceof TokenExpiredError) {
+    return response.status(401).json({
+      message: "Authorization gagal",
+      errors: [{ type: "auth", message: error.message }],
+    });
+  } else if (error instanceof NotfoundException) {
     return response.status(error.code).json(errorResponse(error.message));
   } else if (error instanceof BadRequestException) {
     return response.status(error.code).json(errorResponse(error.message));

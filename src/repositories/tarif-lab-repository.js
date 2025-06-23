@@ -459,7 +459,6 @@ export default class TarifLabRepository {
               model: CategoryPemeriksaanModel,
               as: "category_pemeriksaan",
               required: false,
-              where: { deleted_at: { [Op.is]: null } },
               attributes: ["code", "name", "no_urut"], // Ambil code dan name dari category
             },
           ],
@@ -476,7 +475,6 @@ export default class TarifLabRepository {
               model: CategoryPemeriksaanModel,
               as: "category_pemeriksaan",
               required: false,
-              where: { deleted_at: { [Op.is]: null } },
               attributes: ["code", "name", "no_urut"], // Ambil code dan name dari category
             },
           ],

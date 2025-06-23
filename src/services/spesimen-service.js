@@ -9,79 +9,85 @@ import extractExcel from "../helpers/extract-excel.js";
 import checkDuplicate from "../helpers/check-duplicate.js";
 
 export default class SpesimenSevice {
-     static async create(req){
-        const validData = ZodValidator.validate(SpesimenValidation.CREATE, req)
+  static async create(req) {
+    const validData = ZodValidator.validate(SpesimenValidation.CREATE, req);
 
-        console.log(validData)
-        const isSpesimentExist = await SpesimenRepository.findByCode(validData.code, validData.faskes_uuid)
+    console.log(validData);
+    const isSpesimentExist = await SpesimenRepository.findByCode(
+      validData.code,
+      validData.faskes_uuid
+    );
 
-         if(isSpesimentExist){
-            throw new ConflictException("Spesimen already exist")
-         }
+    if (isSpesimentExist) {
+      throw new ConflictException("Spesimen already exist");
+    }
 
-        return await SpesimenRepository.create(validData)
-     }
+    return await SpesimenRepository.create(validData);
+  }
 
-     static async update(uuid, req){
-        const isSpesimenExist = await SpesimenRepository.findByUuid(uuid)
+  static async update(uuid, req) {
+    const isSpesimenExist = await SpesimenRepository.findByUuid(uuid);
 
-        if(!isSpesimenExist){
-            throw new NotfoundException("Spesimen not found")
-        }
+    if (!isSpesimenExist) {
+      throw new NotfoundException("Spesimen not found");
+    }
 
-        const validData = ZodValidator.validate(SpesimenValidation.CREATE, req)
-        return await SpesimenRepository.update(uuid, validData)
-     }
+    const validData = ZodValidator.validate(SpesimenValidation.CREATE, req);
+    return await SpesimenRepository.update(uuid, validData);
+  }
 
-     static async delete(uuid){
-        const isSpesimentExist = await SpesimenRepository.findByUuid(uuid)
+  static async delete(uuid) {
+    const isSpesimentExist = await SpesimenRepository.findByUuid(uuid);
 
-        if(!isSpesimentExist){
-         console.log("Spesimen not found")
-            throw new NotfoundException("Spesimen not found")
-        }
+    if (!isSpesimentExist) {
+      console.log("Spesimen not found");
+      throw new NotfoundException("Spesimen not found");
+    }
 
-        return await SpesimenRepository.delete(uuid)
-     }
+    return await SpesimenRepository.delete(uuid);
+  }
 
-     static async show(uuid){
-        const spesimen  = await SpesimenRepository.findByUuid(uuid)
+  static async show(uuid) {
+    const spesimen = await SpesimenRepository.findByUuid(uuid);
 
-        if(!spesimen){
-            throw new NotfoundException("Spesimen not found")
-        }
+    if (!spesimen) {
+      throw new NotfoundException("Spesimen not found");
+    }
 
-         return spesimen
-     }
+    return spesimen;
+  }
 
-     static async getAll(req){
-        return await SpesimenRepository.findAll(req)
-     }
-   
-     static async import(path, faskes_uuid){
-         const data = []
+  static async getAll(req) {
+    return await SpesimenRepository.findAll(req);
+  }
 
-         const workSheet =await extractExcel(path)
+  static async getAllActive(req) {
+    return await SpesimenRepository.findAllActive(req);
+  }
 
-         workSheet.eachRow((row, rowNumber) => {
-               if (rowNumber === 1) return
-               data.push({
-                   code: row.values[2],
-                   name: row.values[3],
-                   status: true,
-                   faskes_uuid: faskes_uuid
-               })
-         })
+  static async import(path, faskes_uuid) {
+    const data = [];
 
-         checkDuplicate(data)
+    const workSheet = await extractExcel(path);
 
-         data.map((item) => {
-             ZodValidator.validate(SpesimenValidation.CREATE, item)
-         }) 
+    workSheet.eachRow((row, rowNumber) => {
+      if (rowNumber === 1) return;
+      data.push({
+        code: row.values[2],
+        name: row.values[3],
+        status: true,
+        faskes_uuid: faskes_uuid,
+      });
+    });
 
-         await sequelizeInstance.transaction(async (t) => {
-             await SpesimenRepository.bulkCreate(data, t)
-         })
+    checkDuplicate(data);
 
-     }
+    data.map((item) => {
+      ZodValidator.validate(SpesimenValidation.CREATE, item);
+    });
+
+    await sequelizeInstance.transaction(async (t) => {
+      await SpesimenRepository.bulkCreate(data, t);
+    });
+  }
 }

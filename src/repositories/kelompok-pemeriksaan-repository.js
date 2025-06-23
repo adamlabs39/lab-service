@@ -124,23 +124,12 @@ export default class KelompokPemeriksaanRepository {
           include: {
             model: ItemPemeriksaanModel,
             as: "item_pemeriksaan",
-            where: {
-              deleted_at: {
-                [Op.is]: null,
-              },
-            },
-
             attributes: ["uuid", "name", "code"],
           },
         },
         {
           model: CategoryPemeriksaanModel,
           as: "category_pemeriksaan",
-          where: {
-            deleted_at: {
-              [Op.is]: null,
-            },
-          },
           attributes: ["uuid", "name", "code"],
         },
       ],
@@ -173,9 +162,6 @@ export default class KelompokPemeriksaanRepository {
             model: ItemPemeriksaanModel,
             as: "item_pemeriksaan",
             required: false,
-            where: {
-              deleted_at: { [Op.is]: null },
-            },
             attributes: ["uuid", "name", "code"],
           },
         },
@@ -183,9 +169,6 @@ export default class KelompokPemeriksaanRepository {
           model: CategoryPemeriksaanModel,
           as: "category_pemeriksaan",
           required: false,
-          where: {
-            deleted_at: { [Op.is]: null },
-          },
           attributes: ["uuid", "name", "code"],
         },
         {
@@ -223,6 +206,75 @@ export default class KelompokPemeriksaanRepository {
     };
 
     return await pagination(KelompokPemeriksaanModel, req, options);
+  }
+
+  static async findAllActive(req) {
+    const options = {
+      where: {
+        faskes_uuid: req.faskes_uuid,
+        name: {
+          [Op.iLike]: `%${req.name || ""}%`,
+        },
+        deleted_at: {
+          [Op.is]: null,
+        },
+      },
+      include: [
+        {
+          model: ItemKelompokPemeriksaanModel,
+          as: "item_kelompok_pemeriksaan",
+          required: false,
+          where: {
+            deleted_at: { [Op.is]: null },
+          },
+          include: {
+            model: ItemPemeriksaanModel,
+            as: "item_pemeriksaan",
+            required: false,
+            attributes: ["uuid", "name", "code"],
+          },
+        },
+        {
+          model: CategoryPemeriksaanModel,
+          as: "category_pemeriksaan",
+          required: false,
+          attributes: ["uuid", "name", "code"],
+        },
+        {
+          model: Icd9Model,
+          as: "icd9",
+          required: false,
+          where: {
+            deleted_at: { [Op.is]: null },
+          },
+          attributes: ["uuid", "name", "code"],
+        },
+        {
+          model: SnomedModel,
+          as: "snomed",
+          required: false,
+          where: {
+            deleted_at: { [Op.is]: null },
+          },
+          attributes: ["uuid", "name", "code"],
+        },
+        {
+          model: LoincModel,
+          as: "loinc",
+          required: false,
+          where: {
+            deleted_at: { [Op.is]: null },
+          },
+          attributes: ["uuid", "name", "code"],
+        },
+      ],
+      order: [["created_at", "DESC"]],
+      attributes: {
+        exclude: ["created_at", "updated_at", "deleted_at"],
+      },
+    };
+
+    return await KelompokPemeriksaanModel.findAll(options);
   }
 
   static async bulkCreate(data, transaction) {

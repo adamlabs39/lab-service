@@ -69,6 +69,31 @@ export default class SpesimenRepository {
     return pagination(SpesimenModel, req, options);
   }
 
+  static async findAllActive(req) {
+    const options = {
+      where: {
+        faskes_uuid: req.faskes_uuid,
+        name: {
+          [Op.iLike]: `%${req.name || ""}%`,
+        },
+        deleted_at: {
+          [Op.is]: null,
+        },
+        status: {
+          [Op.is]: true,
+        },
+      },
+      order: [["created_at", "DESC"]],
+      attributes: {
+        exclude: ["created_at", "updated_at", "deleted_at"],
+      },
+      distinct: true, // Pindahkan ke sini untuk kontrol lebih baik
+      subQuery: false,
+    };
+
+    return await SpesimenModel.findAll(options);
+  }
+
   static async findByUuids(uuids) {
     return await SpesimenModel.findAll({
       where: {

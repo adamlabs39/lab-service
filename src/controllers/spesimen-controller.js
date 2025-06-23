@@ -66,6 +66,21 @@ export default class SpesimenController {
     }
   }
 
+  static async getAllActive(req, res, next) {
+    try {
+      req.body.faskes_uuid = req.author.faskesUuid;
+
+      const categoryPemeriksaans = await SpesimenSevice.getAllActive(req.body);
+      return res
+        .status(200)
+        .json(
+          successResponse("Data berhasil ditampilkan", categoryPemeriksaans)
+        );
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static async import(req, res, next) {
     try {
       validateExcel(req.file);

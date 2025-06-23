@@ -180,6 +180,11 @@ export default class ItemPemeriksaanService {
     return itemPemeriksaan;
   }
 
+  static async findAllActive(req) {
+    const itemPemeriksaan = await ItemPemeriksaanRepository.findAllActive(req);
+    return itemPemeriksaan;
+  }
+
   static async createNilaiRujukan(req) {
     console.log("req", req.item_pemeriksaan_uuid);
     const validItemPemeriksaanUuid = ZodValidator.validate(
@@ -295,7 +300,7 @@ export default class ItemPemeriksaanService {
     const data = [];
 
     const workbook = new excel.Workbook();
-    await workbook.xlsx.readFile(path)
+    await workbook.xlsx.readFile(path);
     const itemSheet = workbook.worksheets[0];
     if (!itemSheet) {
       throw new NotfoundException("Sheet Item Pemeriksaan tidak ditemukan");
@@ -402,10 +407,10 @@ export default class ItemPemeriksaanService {
           throw new NotfoundException("Item Pemeriksaan tidak ada");
 
         const nilaiNormalText = row.values[17]
-        ? String(row.values[17])
-            .split(",")
-            .map((i) => i.trim())
-        : []
+          ? String(row.values[17])
+              .split(",")
+              .map((i) => i.trim())
+          : [];
 
         const itemNilaiData = {
           item_pemeriksaan_uuid: itemPemeriksaanUuid,
@@ -428,22 +433,23 @@ export default class ItemPemeriksaanService {
           faskes_uuid: faskesUuid,
         };
 
-
-        if(nilaiNormalText.length === 0){
-          if(itemNilaiData.operator_nilai_normal == "-"){
-              itemNilaiData.tampilan = `${itemNilaiData.batas_bawah_nilai_normal} - ${itemNilaiData.batas_atas_nilai_normal}`
-          }else if(itemNilaiData.operator_nilai_normal == "<=" || itemNilaiData.operator_nilai_normal == "<"){
-              itemNilaiData.tampilan = `${itemNilaiData.operator_nilai_normal} ${itemNilaiData.batas_atas_nilai_normal}`
-          }else {
-              itemNilaiData.tampilan = `${itemNilaiData.operator_nilai_normal} ${itemNilaiData.batas_bawah_nilai_normal}`
+        if (nilaiNormalText.length === 0) {
+          if (itemNilaiData.operator_nilai_normal == "-") {
+            itemNilaiData.tampilan = `${itemNilaiData.batas_bawah_nilai_normal} - ${itemNilaiData.batas_atas_nilai_normal}`;
+          } else if (
+            itemNilaiData.operator_nilai_normal == "<=" ||
+            itemNilaiData.operator_nilai_normal == "<"
+          ) {
+            itemNilaiData.tampilan = `${itemNilaiData.operator_nilai_normal} ${itemNilaiData.batas_atas_nilai_normal}`;
+          } else {
+            itemNilaiData.tampilan = `${itemNilaiData.operator_nilai_normal} ${itemNilaiData.batas_bawah_nilai_normal}`;
           }
-        }else {
-          itemNilaiData.tampilan = row.values[17]
+        } else {
+          itemNilaiData.tampilan = row.values[17];
         }
 
         nilaiData.push(itemNilaiData);
       });
-
 
       nilaiData.map((item) => {
         if (item.nilai_normal_text.length > 0) {

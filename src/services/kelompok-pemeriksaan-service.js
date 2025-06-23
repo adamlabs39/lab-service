@@ -257,6 +257,50 @@ export default class KelompokPemeriksaanService {
     return kelompokPemerikasan;
   }
 
+  static async getAllActive(req) {
+    const kelompokPemerikasan =
+      await KelompokPemeriksaanRepository.findAllActive(req);
+    console.log(JSON.stringify(kelompokPemerikasan));
+    const formatedKelompokPemeriksaan = kelompokPemerikasan.map(
+      (kelompokPemeriksaan) => {
+        return {
+          id: kelompokPemeriksaan.id,
+          name: kelompokPemeriksaan.name,
+          code: kelompokPemeriksaan.code,
+          uuid: kelompokPemeriksaan.uuid,
+          category_pemeriksaan_uuid:
+            kelompokPemeriksaan.category_pemeriksaan_uuid,
+          category_pemeriksaan: kelompokPemeriksaan.category_pemeriksaan.name,
+          icd9_uuid: kelompokPemeriksaan.icd9?.uuid ?? "-",
+          icd9_code: kelompokPemeriksaan.icd9?.code ?? "-",
+          icd9_name: kelompokPemeriksaan.icd9?.name ?? "-",
+          snomed_uuid: kelompokPemeriksaan.snomed?.uuid ?? "-",
+          snomed_code: kelompokPemeriksaan.snomed?.code ?? "-",
+          snomed_name: kelompokPemeriksaan.snomed?.name ?? "-",
+          loinc_uuid: kelompokPemeriksaan.loinc?.uuid ?? "-",
+          loinc_code: kelompokPemeriksaan.loinc?.code ?? "-",
+          loinc_name: kelompokPemeriksaan.loinc?.name ?? "-",
+          status: kelompokPemeriksaan.status,
+          item_pemeriksaan: kelompokPemeriksaan.item_kelompok_pemeriksaan.map(
+            (item) => {
+              return {
+                id: item.item_pemeriksaan?.id,
+                name: item.item_pemeriksaan?.name,
+                uuid: item.item_pemeriksaan?.uuid,
+                status: item.item_pemeriksaan?.status,
+              };
+            }
+          ),
+        };
+      }
+    );
+
+    kelompokPemerikasan.data = formatedKelompokPemeriksaan;
+    kelompokPemerikasan.pagination = kelompokPemerikasan.pagination;
+
+    return kelompokPemerikasan;
+  }
+
   static async import(path, faskes_uuid) {
     const data = [];
 

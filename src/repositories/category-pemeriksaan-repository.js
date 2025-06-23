@@ -64,6 +64,29 @@ export default class CategoryPemeriksaanRepository {
     return pagination(CategoryPemeriksaanModel, req, options);
   }
 
+  static async findAllActive(req) {
+    const options = {
+      where: {
+        faskes_uuid: req.faskes_uuid,
+        name: {
+          [Op.iLike]: `%${req.name || ""}%`,
+        },
+        deleted_at: {
+          [Op.is]: null,
+        },
+        status: {
+          [Op.is]: true,
+        },
+      },
+      order: [["created_at", "DESC"]],
+      attributes: {
+        exclude: ["created_at", "updated_at", "deleted_at"],
+      },
+    };
+
+    return await CategoryPemeriksaanModel.findAll(options);
+  }
+
   static async bulkCreate(data, transaction) {
     return await CategoryPemeriksaanModel.bulkCreate(data, { transaction });
   }
