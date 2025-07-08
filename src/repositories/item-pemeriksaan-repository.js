@@ -98,6 +98,11 @@ export default class ItemPemeriksaanRepository {
           as: "category_pemeriksaan",
           attributes: ["name", "id", "uuid"],
         },
+        {
+          model: PilihanHasilItemPemeriksaanModel,
+          as: "pilihan_hasil_item_pemeriksaan",
+          attributes: ["pilihan_hasil"],
+        },
       ],
       order: [["created_at", "DESC"]],
       attributes: {
