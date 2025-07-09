@@ -66,9 +66,7 @@ export default class KelompokPemeriksaanService {
     );
 
     if (isCodeExist) {
-      throw new ConflictException(
-        "Kelompok Pemeriksaan dengan code tersebut telah digunakan"
-      );
+      throw new ConflictException("Kode sudah ada");
     }
 
     await sequelizeInstance.transaction(async (t) => {
