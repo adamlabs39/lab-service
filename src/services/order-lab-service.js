@@ -163,7 +163,10 @@ export default class OrderLabService {
         });
       }
 
-      const noReg = await generateregistrationNumber("REG");
+      const noReg = await generateregistrationNumber(
+        "REG",
+        validata.faskes_uuid
+      );
       const noOrder = generateCode("LPK");
 
       const orderLabData = {

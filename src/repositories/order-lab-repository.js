@@ -110,19 +110,16 @@ export default class OrderLabRepository {
     return await OrderLabModel.create(data, { transaction });
   }
 
-  static async findLatest() {
-    return await OrderLabModel.findOne(
-      {
-        where: {
-          deleted_at: {
-            [Op.is]: null,
-          },
+  static async findLatest(faskes_uuid) {
+    return await OrderLabModel.findOne({
+      where: {
+        faskes_uuid: faskes_uuid,
+        deleted_at: {
+          [Op.is]: null,
         },
       },
-      {
-        order: [["noreg", "DESC"]],
-      }
-    );
+      order: [["noreg", "DESC"]],
+    });
   }
 
   static async findByUuid(uuid, faskes_uuid) {
