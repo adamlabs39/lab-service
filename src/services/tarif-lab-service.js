@@ -29,7 +29,7 @@ export default class TarifLabService {
       validData.faskes_uuid
     );
     if (isCodeExist) {
-      throw new ConflictException("Code sudah terdaftarkan");
+      throw new ConflictException("Kode sudah ada");
     }
 
     const penjamins = await PenjaminRepository.findByUuids(
@@ -209,7 +209,7 @@ export default class TarifLabService {
     );
 
     if (isCodeExist && isCodeExist.uuid !== uuid) {
-      throw new ConflictException("Code sudah terdaftarkan");
+      throw new ConflictException("Kode sudah ada");
     }
 
     const itemPemeriksaanUuids = [];

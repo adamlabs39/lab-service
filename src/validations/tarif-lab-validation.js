@@ -23,7 +23,8 @@ export default class TarifLabValidation {
       .min(1, {
         message: "Data gagal disimpan, Code harus diisi",
       })
-      .max(255),
+      .max(255)
+      .toUpperCase(),
     name: z
       .string({
         required_error: "Data gagal disimpan, Name harus diisi",
@@ -48,7 +49,7 @@ export default class TarifLabValidation {
     presentase: z.boolean(),
   });
   static UPDATE = z.object({
-    code: z.string().min(1).max(255),
+    code: z.string().min(1).max(255).toUpperCase(),
     name: z.string().min(1).max(255),
     pelayanans: z.array(z.enum(["igd", "rajal", "ranap", "aps"])),
     penjamin_uuids: z.array(z.string().uuid()),

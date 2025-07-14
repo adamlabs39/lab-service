@@ -10,7 +10,8 @@ export default class CategoryPemeriksaanValidation {
       .min(1, {
         message: "Data gagal disimpan, Code harus diisi",
       })
-      .max(255),
+      .max(255)
+      .toUpperCase(),
     name: z
       .string({
         required_error: "Data gagal disimpan, Name harus diisi",
@@ -34,7 +35,7 @@ export default class CategoryPemeriksaanValidation {
   static IMPORT = z.array(this.CREATE);
 
   static UPDATE = z.object({
-    code: z.string().min(1).max(255),
+    code: z.string().min(1).max(255).toUpperCase(),
     name: z.string().min(1).max(255),
     no_urut: z.number().min(1),
     status: z.boolean(),
