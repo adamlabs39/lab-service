@@ -12,15 +12,14 @@ services:
     networks:
       - lab-network
     environment:
-      DOTENV_KEY: ${DOTENV_KEY}
       API_BASE: ${API_BASE}
       API_VERSION: ${API_VERSION}
       BASE_URL: ${BASE_URL}
       INFISICAL_TOKEN: ${INFISICAL_TOKEN}
-    volumes:
-      - type: bind
-        source: /home/engineer/adameds/.env.vault
-        target: /adameds-lab/.env.vault
+    # volumes:
+    #   - type: bind
+    #     source: /home/engineer/adameds/.env.vault
+    #     target: /adameds-lab/.env.vault
 networks:
   lab-network:
     driver: bridge
