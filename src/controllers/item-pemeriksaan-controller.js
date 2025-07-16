@@ -50,6 +50,9 @@ export default class ItemPemeriksaanController {
 
   static async findAll(req, res, next) {
     try {
+      request.body.name = request.query.name;
+      request.body.page = request.query.page;
+      request.body.limit = request.query.limit;
       req.body.faskes_uuid = req.author.faskesUuid;
       const itemPemeriksaan = await ItemPemeriksaanService.findAll(req.body);
       res

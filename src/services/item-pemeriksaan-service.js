@@ -38,9 +38,7 @@ export default class ItemPemeriksaanService {
     }
 
     if (isItemPemeriksaanExist) {
-      throw new ConflictException(
-        "Item Pemeriksaan dengan code tersebut telah digunakan"
-      );
+      throw new ConflictException("Kode Sudah Ada");
     }
 
     const isIoincExist = await LoincRepository.findByUuid(req.loinc_uuid);

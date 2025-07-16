@@ -16,6 +16,7 @@ services:
       API_BASE: ${API_BASE}
       API_VERSION: ${API_VERSION}
       BASE_URL: ${BASE_URL}
+      INFISICAL_TOKEN: ${INFISICAL_TOKEN}
     volumes:
       - type: bind
         source: /home/engineer/adameds/.env.vault
