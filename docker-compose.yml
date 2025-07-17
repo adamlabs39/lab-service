@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
       no_cache: true
     image: adameds/lab-service:dev
-    container_name: adameds-lab
+    container_name: api-adameds-lab
     ports:
       - 8090:8090
     restart: always
