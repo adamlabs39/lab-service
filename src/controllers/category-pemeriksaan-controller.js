@@ -3,6 +3,7 @@ import deletefile from "../helpers/file.js";
 import validateExcel from "../helpers/validator-excel.js";
 import successResponse from "../response/success-response.js";
 import CategoryPemeriksaanService from "../services/category-pemeriksaan-service.js";
+import errorResponse from "../response/error-response.js";
 
 export default class CategoryPemeriksaanController {
   static async create(request, response, next) {
