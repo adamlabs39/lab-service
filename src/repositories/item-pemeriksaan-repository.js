@@ -5,7 +5,7 @@ import {
 } from "@adameds/model-sdk/lab";
 import pagination from "../helpers/pagination.js";
 import toEpochDate from "../helpers/date-helper.js";
-import { Op } from "sequelize";
+import { Op, where } from "sequelize";
 
 export default class ItemPemeriksaanRepository {
   static async create(data, transaction) {
@@ -102,6 +102,12 @@ export default class ItemPemeriksaanRepository {
           model: PilihanHasilItemPemeriksaanModel,
           as: "pilihan_hasil_item_pemeriksaan",
           attributes: ["pilihan_hasil"],
+          required: false,
+          where: {
+            deleted_at: {
+              [Op.is]: null,
+            },
+          },
         },
       ],
       order: [["created_at", "DESC"]],
