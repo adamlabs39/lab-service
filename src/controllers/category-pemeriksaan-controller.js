@@ -26,6 +26,9 @@ export default class CategoryPemeriksaanController {
 
       response.status(200).json(successResponse("Data berhasil diedit"));
     } catch (error) {
+      if (error instanceof UniqueConstraintError) {
+        return res.status(409).json(errorResponse("Kode sudah ada"));
+      }
       next(error);
     }
   }

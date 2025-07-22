@@ -20,6 +20,9 @@ export default class TarifLabController {
       await TarifLabService.update(uuid, req.body);
       res.status(200).json(successResponse("data berhasil diedit"));
     } catch (error) {
+      if (error instanceof UniqueConstraintError) {
+        return res.status(409).json(errorResponse("Kode sudah ada"));
+      }
       next(error);
     }
   }
@@ -82,6 +85,7 @@ export default class TarifLabController {
     try {
       validateExcel(req.file);
       const path = req.file.path;
+      console.log("path ==> ", path);
       const result = await TarifLabService.import(path, req.author.faskesUuid);
       res.status(200).json(successResponse("Data berhasil diimport", result));
     } catch (error) {

@@ -19,7 +19,7 @@ export default class SpesimenSevice {
     );
 
     if (isSpesimentExist) {
-      throw new ConflictException("Spesimen already exist");
+      throw new ConflictException("Kode sudah ada");
     }
 
     return await SpesimenRepository.create(validData);

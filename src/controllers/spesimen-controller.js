@@ -3,6 +3,8 @@ import successResponse from "../response/success-response.js";
 import SpesimenSevice from "../services/spesimen-service.js";
 import validateExcel from "../helpers/validator-excel.js";
 import deletefile from "../helpers/file.js";
+import errorResponse from "../response/error-response.js";
+import { UniqueConstraintError } from "sequelize";
 
 export default class SpesimenController {
   static async create(req, res, next) {
@@ -22,6 +24,9 @@ export default class SpesimenController {
       await SpesimenSevice.update(uuid, req.body);
       return res.status(200).json(successResponse("Data berhasil diupdated"));
     } catch (error) {
+      if (error instanceof UniqueConstraintError) {
+        return res.status(409).json(errorResponse("Kode sudah ada"));
+      }
       next(error);
     }
   }

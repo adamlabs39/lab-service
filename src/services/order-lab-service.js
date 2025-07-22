@@ -27,7 +27,9 @@ export const status = {
 
 export default class OrderLabService {
   static async create(req) {
+    console.log("req ==> ", req);
     const validata = ZodValidator.validate(OrderLabValidation.CREATE, req);
+    console.log(validata);
 
     if (validata.patient_uuid) {
       const isPatientExist = await PatientRepository.findByUuid(

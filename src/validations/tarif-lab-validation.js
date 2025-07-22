@@ -46,7 +46,7 @@ export default class TarifLabValidation {
     status: z.boolean(),
     faskes_uuid: z.string(),
     grand_total: z.number().min(0),
-    presentase: z.boolean(),
+    presentase: z.boolean().optional(),
   });
   static UPDATE = z.object({
     code: z.string().min(1).max(255).toUpperCase(),

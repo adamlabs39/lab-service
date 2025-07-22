@@ -22,6 +22,9 @@ export default class ItemPemeriksaanController {
 
       res.status(200).json(successResponse("Data berhasil diedit"));
     } catch (error) {
+      if (error instanceof UniqueConstraintError) {
+        return res.status(409).json(errorResponse("Kode sudah ada"));
+      }
       next(error);
     }
   }
