@@ -5,6 +5,7 @@ export default class ZodValidator {
     try {
       return schema.parse(data);
     } catch (error) {
+      console.log(error);
       const errorMessages = error.errors.map((error) => {
         return `${error.path} - ${error.message}`;
       });

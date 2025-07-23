@@ -56,6 +56,7 @@ export default class CategoryPemeriksaanValidation {
         message: "Data gagal disimpan, Name harus diisi",
       })
       .max(255),
+
     no_urut: z
       .number({
         required_error: "Data gagal disimpan, No. Urut harus diisi",

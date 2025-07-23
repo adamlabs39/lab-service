@@ -26,6 +26,15 @@ export default class CategoryPemeriksaanRepository {
     );
   }
 
+  static async findByNoUrut(uuid, no_urut) {
+    return await CategoryPemeriksaanModel.findOne({
+      where: {
+        no_urut: no_urut,
+        uuid: { [Op.not]: uuid }, // Kecuali record ini
+      },
+    });
+  }
+
   static async findByCode(code, faskes_uuid) {
     return await CategoryPemeriksaanModel.findOne({
       where: {

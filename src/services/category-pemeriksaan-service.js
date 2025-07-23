@@ -26,6 +26,14 @@ export default class CategoryPemeriksaanService {
       );
     }
 
+    const noUrutExist = await CategoryPemeriksaanRepository.findByNoUrut(
+      uuid,
+      validData.no_urut
+    );
+    if (noUrutExist) {
+      throw new ConflictException("Nomor urut sudah digunakan");
+    }
+
     sequelizeInstance.transaction(async (t) => {
       await CategoryPemeriksaanRepository.create(validData, t);
     });
@@ -37,6 +45,14 @@ export default class CategoryPemeriksaanService {
 
     if (!isCategoryPemeriksaanExist) {
       throw new NotfoundException("Category Pemeriksaan tidak ada");
+    }
+
+    const noUrutExist = await CategoryPemeriksaanRepository.findByNoUrut(
+      uuid,
+      data.no_urut
+    );
+    if (noUrutExist) {
+      throw new ConflictException("Nomor urut sudah digunakan");
     }
 
     const validData = ZodValidator.validate(
