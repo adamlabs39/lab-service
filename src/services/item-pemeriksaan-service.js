@@ -205,7 +205,8 @@ export default class ItemPemeriksaanService {
       );
     } else if (
       isItemPemeriksaanExist.jenis_input === "text" ||
-      isItemPemeriksaanExist.jenis_input === "long text"
+      isItemPemeriksaanExist.jenis_input === "long text" ||
+      isItemPemeriksaanExist.jenis_input === "pilihan"
     ) {
       validata = ZodValidator.validate(NilaiRujukanValidation.CREATE_TEXT, req);
     } else {
