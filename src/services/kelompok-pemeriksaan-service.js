@@ -201,7 +201,7 @@ export default class KelompokPemeriksaanService {
       throw new NotfoundException("Kelompok Pemeriksaan tidak ada");
     }
 
-    sequelizeInstance.transaction(async (t) => {
+    await sequelizeInstance.transaction(async (t) => {
       await KelompokPemeriksaanRepository.delete(uuid, t);
       await ItemKelompokPemeriksaanRepository.deleteByKelompokPemeriksaan(
         uuid,

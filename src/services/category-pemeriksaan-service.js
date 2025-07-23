@@ -43,7 +43,7 @@ export default class CategoryPemeriksaanService {
       CategoryPemeriksaanValidation.UPDATE,
       data
     );
-    sequelizeInstance.transaction(async (t) => {
+    await sequelizeInstance.transaction(async (t) => {
       await CategoryPemeriksaanRepository.update(uuid, validData, t);
     });
   }
