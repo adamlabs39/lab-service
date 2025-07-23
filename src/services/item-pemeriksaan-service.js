@@ -256,14 +256,14 @@ export default class ItemPemeriksaanService {
 
     if (isItemPemeriksaanExist.jenis_input == "angka") {
       validata = ZodValidator.validate(
-        NilaiRujukanValidation.UPDATE_ANGKA,
+        NilaiRujukanValidation.CREATE_ANGKA,
         req
       );
     } else if (
       isItemPemeriksaanExist.jenis_input === "text" ||
       item_pemeriksaan_uuid.jenis_input === "long text"
     ) {
-      validata = ZodValidator.validate(NilaiRujukanValidation.UPDATE_TEXT, req);
+      validata = ZodValidator.validate(NilaiRujukanValidation.CREATE_TEXT, req);
     } else {
       throw new BadRequestException("Jenis input tidak valid");
     }
