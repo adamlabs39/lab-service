@@ -148,6 +148,9 @@ export default class ItemPemeriksaanController {
       deletefile(req.file.path);
       res.status(201).json(successResponse("Data berhasil diimport"));
     } catch (error) {
+      if (error instanceof UniqueConstraintError) {
+        return res.status(409).json(errorResponse("Kode sudah ada"));
+      }
       next(error);
     }
   }

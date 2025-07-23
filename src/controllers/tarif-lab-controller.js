@@ -89,6 +89,9 @@ export default class TarifLabController {
       const result = await TarifLabService.import(path, req.author.faskesUuid);
       res.status(200).json(successResponse("Data berhasil diimport", result));
     } catch (error) {
+      if (error instanceof UniqueConstraintError) {
+        return res.status(409).json(errorResponse("Kode sudah ada"));
+      }
       next(error);
     }
   }
