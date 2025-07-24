@@ -62,6 +62,12 @@ export default class ItemPemeriksaanService {
       }
     }
 
+    const noUrutExist = await ItemPemeriksaanRepository.findByNoUrut(validData);
+
+    if (noUrutExist) {
+      throw new ConflictException("Nomor urut sudah digunakan");
+    }
+
     await sequelizeInstance.transaction(async (t) => {
       const itemPemeriksaan = await ItemPemeriksaanRepository.create(
         validData,
@@ -121,6 +127,11 @@ export default class ItemPemeriksaanService {
       if (!isIcd9Exist) {
         throw new NotfoundException("Icd9 tidak ada");
       }
+    }
+
+    const noUrutExist = await ItemPemeriksaanRepository.findByNoUrut(validData);
+    if (noUrutExist) {
+      throw new ConflictException("Nomor urut sudah digunakan");
     }
 
     await sequelizeInstance.transaction(async (t) => {

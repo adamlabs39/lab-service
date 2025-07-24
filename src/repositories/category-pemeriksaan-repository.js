@@ -26,13 +26,32 @@ export default class CategoryPemeriksaanRepository {
     );
   }
 
-  static async findByNoUrut(uuid, no_urut) {
+  static async findByNoUrutWithUuid(uuid, no_urut) {
     return await CategoryPemeriksaanModel.findOne({
       where: {
         no_urut: no_urut,
         uuid: { [Op.not]: uuid }, // Kecuali record ini
       },
     });
+  }
+
+  static async findByNoUrut(no_urut) {
+    return await CategoryPemeriksaanModel.findOne({
+      where: {
+        no_urut: no_urut,
+      },
+    });
+  }
+
+  static async findAllNoUrut(noUrutList) {
+    const results = await CategoryPemeriksaanModel.findAll({
+      where: {
+        no_urut: noUrutList,
+      },
+      attributes: ["no_urut"],
+      raw: true,
+    });
+    return results.map((item) => item.no_urut);
   }
 
   static async findByCode(code, faskes_uuid) {

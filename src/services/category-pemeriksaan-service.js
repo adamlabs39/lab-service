@@ -27,7 +27,6 @@ export default class CategoryPemeriksaanService {
     }
 
     const noUrutExist = await CategoryPemeriksaanRepository.findByNoUrut(
-      uuid,
       validData.no_urut
     );
     if (noUrutExist) {
@@ -47,10 +46,11 @@ export default class CategoryPemeriksaanService {
       throw new NotfoundException("Category Pemeriksaan tidak ada");
     }
 
-    const noUrutExist = await CategoryPemeriksaanRepository.findByNoUrut(
-      uuid,
-      data.no_urut
-    );
+    const noUrutExist =
+      await CategoryPemeriksaanRepository.findByNoUrutWithUuid(
+        uuid,
+        data.no_urut
+      );
     if (noUrutExist) {
       throw new ConflictException("Nomor urut sudah digunakan");
     }
@@ -111,18 +111,21 @@ export default class CategoryPemeriksaanService {
 
   static async import(filePath, faskes_uuid) {
     const data = [];
+    const noUrutList = [];
 
     const workSheet = await extractExcel(filePath);
 
     workSheet.eachRow((row, rowNumber) => {
       if (rowNumber === 1) return;
+      const noUrut = row.values[4];
       data.push({
         code: row.values[2],
         name: row.values[3],
-        no_urut: row.values[4],
+        no_urut: noUrut,
         status: true,
         faskes_uuid: faskes_uuid,
       });
+      noUrutList.push(noUrut);
     });
 
     checkDuplicate(data);
@@ -130,6 +133,16 @@ export default class CategoryPemeriksaanService {
     data.map((item) => {
       ZodValidator.validate(CategoryPemeriksaanValidation.CREATE, item);
     });
+
+    // Cek duplikat no_urut dengan yang sudah ada di database
+    const existingNoUrut = await CategoryPemeriksaanRepository.findAllNoUrut(
+      noUrutList
+    );
+    if (existingNoUrut.length > 0) {
+      throw new ConflictException(
+        `Nomor urut berikut sudah digunakan: ${existingNoUrut.join(", ")}`
+      );
+    }
 
     await sequelizeInstance.transaction(async (t) => {
       await CategoryPemeriksaanRepository.bulkCreate(data, t);
