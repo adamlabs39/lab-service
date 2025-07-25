@@ -193,4 +193,18 @@ export default class ItemPemeriksaanRepository {
       },
     });
   }
+
+  static async findByCategoryAndNoUruts({
+    category_pemeriksaan_uuid,
+    no_uruts,
+  }) {
+    return await ItemPemeriksaanModel.findAll({
+      where: {
+        category_pemeriksaan_uuid: category_pemeriksaan_uuid,
+        no_urut: { [Op.in]: no_uruts },
+      },
+      attributes: ["no_urut"], // ambil no_urut saja
+      raw: true,
+    });
+  }
 }

@@ -9,7 +9,7 @@ export default class OrderLabValidation {
       no_rm: z.string().min(1).max(255),
       rekam_medis_date: z.string().nullable().optional(),
       payment_method: z.number().min(1).max(2),
-      penjamin_uuid: z.string().uuid().optional(),
+      penjamin_uuid: z.string().uuid().nullable().optional(),
       pelayanan: z.enum(["rajal", "ranap", "igd", "aps"]),
       lokasi_uuid: z.string().uuid(),
       dokter_pengirim_uuid: z.string().uuid().optional(),
@@ -40,7 +40,7 @@ export default class OrderLabValidation {
     )
     .refine(
       (data) => {
-        if (data.penjamin_uuid == 2 && !data.penjamin_uuid) {
+        if (data.payment_method == 2 && !data.penjamin_uuid) {
           return false;
         }
         return true;

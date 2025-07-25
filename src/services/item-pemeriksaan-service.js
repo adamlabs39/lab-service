@@ -308,6 +308,8 @@ export default class ItemPemeriksaanService {
 
   static async import(path, faskesUuid) {
     const data = [];
+    const noUrutMap = new Map(); // Untuk melacak no_urut per kategori
+    const categoryCodeToUuid = new Map(); // Untuk mapping code kategori ke UUID
 
     const workbook = new excel.Workbook();
     await workbook.xlsx.readFile(path);
@@ -318,14 +320,58 @@ export default class ItemPemeriksaanService {
 
     const nilaiSheet = workbook.worksheets[1];
 
+    // 1. Kumpulkan semua kategori pemeriksaan yang ada di file
     itemSheet.eachRow((row, rowNumber) => {
       if (rowNumber === 1) return;
+      const categoryCode = row.values[5];
+      if (categoryCode && !categoryCodeToUuid.has(categoryCode)) {
+        categoryCodeToUuid.set(categoryCode, null);
+      }
+    });
+
+    // 2. Dapatkan UUID untuk semua kategori
+    const categoryPemeriksaanList =
+      await CategoryPemeriksaanRepository.findByCodeIn(
+        Array.from(categoryCodeToUuid.keys()),
+        faskesUuid
+      );
+
+    // Isi mapping code kategori ke UUID
+    categoryPemeriksaanList.forEach((item) => {
+      categoryCodeToUuid.set(item.code, item.uuid);
+    });
+
+    itemSheet.eachRow((row, rowNumber) => {
+      if (rowNumber === 1) return;
+
+      const categoryCode = row.values[5];
+      const categoryUuid = categoryCodeToUuid.get(categoryCode);
+      if (!categoryUuid) {
+        throw new NotfoundException(
+          `Kategori pemeriksaan dengan code ${categoryCode} tidak ditemukan`
+        );
+      }
+
+      const noUrut = row.values[4];
+      if (noUrutMap.has(categoryUuid)) {
+        if (noUrutMap.get(categoryUuid).includes(noUrut)) {
+          throw new ConflictException(
+            `Item ${row.values[3]} error: No urut ${noUrut} sudah digunakan oleh item lain dalam kategori ${categoryCode}`
+          );
+        }
+        // Tambahkan no urut ke kategori tersebut
+        noUrutMap.get(categoryUuid).push(noUrut);
+      } else {
+        // Jika kategori baru, buat entry baru
+        noUrutMap.set(categoryUuid, [noUrut]);
+      }
+
       data.push({
         uuid: uuidv7(),
         code: row.values[2],
         name: row.values[3],
-        no_urut: row.values[4],
-        category_pemeriksaan: row.values[5],
+        no_urut: noUrut,
+        category_pemeriksaan: categoryUuid,
         satuan: row.values[6],
         metode: row.values[7],
         jenis_input: String(row.values[8]).trim(),
@@ -341,6 +387,26 @@ export default class ItemPemeriksaanService {
       });
     });
 
+    // Validasi no_urut di database
+    for (const [categoryUuid, noUrutList] of noUrutMap.entries()) {
+      const existingItems =
+        await ItemPemeriksaanRepository.findByCategoryAndNoUruts({
+          category_pemeriksaan_uuid: categoryUuid,
+          no_uruts: noUrutList,
+        });
+
+      if (existingItems.length > 0) {
+        const duplicates = existingItems.map((item) => item.no_urut).join(", ");
+        const categoryCode =
+          categoryPemeriksaanList.find((cat) => cat.uuid === categoryUuid)
+            ?.code || "unknown";
+
+        throw new ConflictException(
+          `Nomor urut berikut sudah digunakan untuk kategori ${categoryCode}: ${duplicates}`
+        );
+      }
+    }
+
     const loincNames = data.map((item) => item.loinc).filter(Boolean);
     const snomedNames = data.map((item) => item.snomed).filter(Boolean);
     const icd9Names = data.map((item) => item.icd9).filter(Boolean);
@@ -348,24 +414,23 @@ export default class ItemPemeriksaanService {
       (item) => item.category_pemeriksaan
     );
 
-    const [loincList, snomedList, icd9List, categoryPemeriksaanList] =
-      await Promise.all([
-        LoincRepository.findByNameIn(loincNames),
-        SnomedRepository.findByNameIn(snomedNames),
-        Icd9Repository.findByNameIn(icd9Names),
-        CategoryPemeriksaanRepository.findByCodeIn(
-          categoryPemeriksaanCodes,
-          faskesUuid
-        ),
-      ]);
+    const [loincList, snomedList, icd9List] = await Promise.all([
+      LoincRepository.findByNameIn(loincNames),
+      SnomedRepository.findByNameIn(snomedNames),
+      Icd9Repository.findByNameIn(icd9Names),
+      // CategoryPemeriksaanRepository.findByCodeIn(
+      //   categoryPemeriksaanCodes,
+      //   faskesUuid
+      // ),
+    ]);
 
     // Buat lookup table untuk pencarian cepat
     const loincMap = new Map(loincList.map((item) => [item.name, item.uuid]));
     const snomedMap = new Map(snomedList.map((item) => [item.name, item.uuid]));
     const icd9Map = new Map(icd9List.map((item) => [item.name, item.uuid]));
-    const categoryMap = new Map(
-      categoryPemeriksaanList.map((item) => [item.code, item.uuid])
-    );
+    // const categoryMap = new Map(
+    //   categoryPemeriksaanList.map((item) => [item.code, item.uuid])
+    // );
 
     // Update data dengan UUID yang sesuai
     data.forEach((item) => {
@@ -390,14 +455,14 @@ export default class ItemPemeriksaanService {
         delete item.icd9;
       }
 
-      if (item.category_pemeriksaan) {
-        if (!categoryMap.has(item.category_pemeriksaan))
-          throw new NotfoundException("Category Pemeriksaan tidak ada");
-        item.category_pemeriksaan_uuid = categoryMap.get(
-          item.category_pemeriksaan
-        );
-        delete item.category_pemeriksaan;
-      }
+      // if (item.category_pemeriksaan) {
+      //   if (!categoryMap.has(item.category_pemeriksaan))
+      //     throw new NotfoundException("Category Pemeriksaan tidak ada");
+      //   item.category_pemeriksaan_uuid = categoryMap.get(
+      //     item.category_pemeriksaan
+      //   );
+      //   delete item.category_pemeriksaan;
+      // }
     });
 
     checkDuplicate(data);

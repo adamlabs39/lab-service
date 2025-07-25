@@ -108,8 +108,11 @@ export default class CategoryPemeriksaanController {
 
       response.status(201).json(successResponse("Data berhasil disimpan"));
     } catch (error) {
+      console.log(JSON.stringify(error.fields.code));
       if (error instanceof UniqueConstraintError) {
-        return response.status(409).json(errorResponse("Kode sudah ada"));
+        return response
+          .status(409)
+          .json(errorResponse(`Kode sudah ada : ${error.fields.code} `));
       }
       next(error);
     }
