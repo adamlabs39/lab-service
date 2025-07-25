@@ -4,6 +4,7 @@ COPY . .
 ENV APPLICATION_HOST=0.0.0.0
 ENV APPLICATION_PORT=8090
 RUN npm install
-RUN npm install -g @infisical/cli
+RUN npm cache clean --force && \
+    npm install -g @infisical/cli --fetch-timeout=600000
 EXPOSE ${APPLICATION_PORT}/tcp
 CMD ["sh", "-c", "infisical run --env=development -- npm run start"]
