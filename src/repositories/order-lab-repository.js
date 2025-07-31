@@ -568,6 +568,17 @@ export default class OrderLabRepository {
       ];
     }
 
+    // Basic include untuk count
+    const countInclude = [
+      {
+        model: PatientModel,
+        as: "patient",
+        required: true,
+        where: { deleted_at: { [Op.is]: null } },
+        attributes: [],
+      },
+    ];
+
     const includeOptions = [
       {
         model: OrderLabPemeriksaanModel,
@@ -629,7 +640,7 @@ export default class OrderLabRepository {
       {
         model: PatientModel,
         as: "patient",
-        required: false,
+        required: true,
         where: { deleted_at: { [Op.is]: null } },
         attributes: {
           exclude: [
@@ -640,8 +651,6 @@ export default class OrderLabRepository {
             "motherName",
             "religion",
             "maritialStatus",
-            "address_uuid",
-            "birth_detail_uuid",
             "addressUuid",
             "birthDetailUuid",
           ],
@@ -714,6 +723,7 @@ export default class OrderLabRepository {
       // Pertama, hitung total records dengan query sederhana
       const total = await OrderLabModel.count({
         where: baseWhere,
+        include: countInclude,
         distinct: true,
         col: "uuid", // Pastikan menggunakan kolom utama
       });

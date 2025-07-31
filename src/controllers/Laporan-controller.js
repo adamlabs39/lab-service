@@ -16,6 +16,8 @@ export default class LaporanController {
       data.page = safePage;
       data.limit = safeLimit;
 
+      console.log("data => ", JSON.stringify(data));
+
       const laporan = await LaporanService.getKunjungan(data);
       res
         .status(200)
