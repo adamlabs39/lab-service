@@ -35,17 +35,21 @@ export default class CategoryPemeriksaanRepository {
     });
   }
 
-  static async findByNoUrut(no_urut) {
+  static async findByNoUrut(no_urut, faskes_uuid) {
     return await CategoryPemeriksaanModel.findOne({
       where: {
+        deleted_at: null,
+        faskes_uuid: faskes_uuid,
         no_urut: no_urut,
       },
     });
   }
 
-  static async findAllNoUrut(noUrutList) {
+  static async findAllNoUrut(noUrutList, faskes_uuid) {
     const results = await CategoryPemeriksaanModel.findAll({
       where: {
+        deleted_at: null,
+        faskes_uuid: faskes_uuid,
         no_urut: noUrutList,
       },
       attributes: ["no_urut"],

@@ -27,8 +27,10 @@ export default class CategoryPemeriksaanService {
     }
 
     const noUrutExist = await CategoryPemeriksaanRepository.findByNoUrut(
-      validData.no_urut
+      validData.no_urut,
+      validData.faskes_uuid
     );
+
     if (noUrutExist) {
       throw new ConflictException("Nomor urut sudah digunakan");
     }
