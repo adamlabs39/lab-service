@@ -39,7 +39,7 @@ export default class SpesimenRepository {
   }
 
   static async findByCodeWithoutItself(uuid, req) {
-    return await CategoryPemeriksaanModel.findOne({
+    return await SpesimenModel.findOne({
       where: {
         code: req.code,
         faskes_uuid: req.faskes_uuid,
