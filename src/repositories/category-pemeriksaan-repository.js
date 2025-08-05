@@ -26,10 +26,12 @@ export default class CategoryPemeriksaanRepository {
     );
   }
 
-  static async findByNoUrutWithUuid(uuid, no_urut) {
+  static async findByNoUrutWithUuid(uuid, req) {
     return await CategoryPemeriksaanModel.findOne({
       where: {
-        no_urut: no_urut,
+        no_urut: req.no_urut,
+        faskes_uuid: req.faskes_uuid,
+        deleted_at: null,
         uuid: { [Op.not]: uuid }, // Kecuali record ini
       },
     });
@@ -64,6 +66,17 @@ export default class CategoryPemeriksaanRepository {
         code: code,
         deleted_at: null,
         faskes_uuid: faskes_uuid,
+      },
+    });
+  }
+
+  static async findByCodeWithoutItself(req) {
+    return await CategoryPemeriksaanModel.findOne({
+      where: {
+        code: req.code,
+        deleted_at: null,
+        faskes_uuid: req.faskes_uuid,
+        uuid: { [Op.not]: req.uuid }, // Kecuali record ini
       },
     });
   }

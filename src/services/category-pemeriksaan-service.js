@@ -21,9 +21,7 @@ export default class CategoryPemeriksaanService {
       );
 
     if (isCategoryPemeriksaanExist) {
-      throw new ConflictException(
-        "Category Pemeriksaan dengan code tersebut telah digunakan"
-      );
+      throw new ConflictException("Kode sudah ada");
     }
 
     const noUrutExist = await CategoryPemeriksaanRepository.findByNoUrut(
@@ -48,11 +46,15 @@ export default class CategoryPemeriksaanService {
       throw new NotfoundException("Category Pemeriksaan tidak ada");
     }
 
+    const isCodeExist =
+      await CategoryPemeriksaanRepository.findByCodeWithoutItself(data);
+
+    if (isCodeExist) {
+      throw new ConflictException("Kode sudah ada");
+    }
+
     const noUrutExist =
-      await CategoryPemeriksaanRepository.findByNoUrutWithUuid(
-        uuid,
-        data.no_urut
-      );
+      await CategoryPemeriksaanRepository.findByNoUrutWithUuid(uuid, data);
     if (noUrutExist) {
       throw new ConflictException("Nomor urut sudah digunakan");
     }
