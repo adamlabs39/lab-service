@@ -38,6 +38,19 @@ export default class SpesimenRepository {
     });
   }
 
+  static async findByCodeWithoutItself(uuid, req) {
+    return await CategoryPemeriksaanModel.findOne({
+      where: {
+        code: req.code,
+        faskes_uuid: req.faskes_uuid,
+        deleted_at: {
+          [Op.is]: null,
+        },
+        uuid: { [Op.not]: uuid }, // Kecuali record ini
+      },
+    });
+  }
+
   static async findByUuid(uuid) {
     return await SpesimenModel.findOne({
       where: { uuid: uuid, deleted_at: { [Op.is]: null } },

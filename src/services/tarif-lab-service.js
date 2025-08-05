@@ -203,12 +203,12 @@ export default class TarifLabService {
 
     const validData = ZodValidator.validate(TarifLabValidation.UPDATE, req);
 
-    const isCodeExist = await TarifLabRepository.findByCode(
-      validData.code,
-      validData.faskes_uuid
+    const isCodeExist = await TarifLabRepository.findByCodeWithoutItself(
+      uuid,
+      req
     );
 
-    if (isCodeExist && isCodeExist.uuid !== uuid) {
+    if (isCodeExist) {
       throw new ConflictException("Kode sudah ada");
     }
 

@@ -28,6 +28,10 @@ export default class ItemPemeriksaanService {
       validData.faskes_uuid
     );
 
+    if (isItemPemeriksaanExist) {
+      throw new ConflictException("Kode Sudah Ada");
+    }
+
     const isCategoryPemeriksaanExist =
       await CategoryPemeriksaanRepository.findByUuid(
         validData.category_pemeriksaan_uuid
@@ -35,10 +39,6 @@ export default class ItemPemeriksaanService {
 
     if (!isCategoryPemeriksaanExist) {
       throw new NotfoundException("Category Pemeriksaan tidak ada");
-    }
-
-    if (isItemPemeriksaanExist) {
-      throw new ConflictException("Kode Sudah Ada");
     }
 
     const isIoincExist = await LoincRepository.findByUuid(req.loinc_uuid);
@@ -93,6 +93,15 @@ export default class ItemPemeriksaanService {
 
     if (!isItemPemeriksaanExist) {
       throw new NotfoundException("Item Pemeriksaan tidak ada");
+    }
+
+    const isCodeExist = await ItemPemeriksaanRepository.findByCodeWithoutItself(
+      uuid,
+      req
+    );
+
+    if (isCodeExist) {
+      throw new ConflictException("Kode Sudah Ada");
     }
 
     const isCategoryPemeriksaanExist =

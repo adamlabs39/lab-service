@@ -417,6 +417,19 @@ export default class TarifLabRepository {
     });
   }
 
+  static async findByCodeWithoutItself(uuid, req) {
+    return await TarifLabModel.findOne({
+      where: {
+        code: req.code,
+        faskes_uuid: req.faskes_uuid,
+        deleted_at: {
+          [Op.is]: null,
+        },
+        uuid: { [Op.not]: uuid }, // Kecuali record ini
+      },
+    });
+  }
+
   static async findAllActive(req) {
     // 1. Query utama untuk mendapatkan data TarifLab dengan pagination
     const mainData = await TarifLabModel.findAll({

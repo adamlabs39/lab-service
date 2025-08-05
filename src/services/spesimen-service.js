@@ -12,7 +12,6 @@ export default class SpesimenSevice {
   static async create(req) {
     const validData = ZodValidator.validate(SpesimenValidation.CREATE, req);
 
-    console.log(validData);
     const isSpesimentExist = await SpesimenRepository.findByCode(
       validData.code,
       validData.faskes_uuid
@@ -30,6 +29,15 @@ export default class SpesimenSevice {
 
     if (!isSpesimenExist) {
       throw new NotfoundException("Spesimen not found");
+    }
+
+    const isCodeExist = await SpesimenRepository.findByCodeWithoutItself(
+      uuid,
+      req
+    );
+
+    if (isCodeExist) {
+      throw new ConflictException("Kode sudah ada");
     }
 
     const validData = ZodValidator.validate(SpesimenValidation.CREATE, req);

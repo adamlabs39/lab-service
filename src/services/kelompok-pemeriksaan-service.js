@@ -127,6 +127,13 @@ export default class KelompokPemeriksaanService {
       throw new NotfoundException("Kelompok Pemeriksaan tidak ada");
     }
 
+    const isCodeExist =
+      await KelompokPemeriksaanRepository.findByCodeWithoutItself(uuid, data);
+
+    if (isCodeExist) {
+      throw new ConflictException("Kode sudah ada");
+    }
+
     const validData = ZodValidator.validate(
       KelompokPemeriksaanValidation.UPDATE,
       data
