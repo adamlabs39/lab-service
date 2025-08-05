@@ -67,6 +67,7 @@ export default class TarifLabRepository {
         {
           model: TarifLabPenjaminModel,
           as: "tarif_lab_penjamin",
+          required: false,
           where: {
             deleted_at: {
               [Op.is]: null,
@@ -76,6 +77,7 @@ export default class TarifLabRepository {
           include: {
             model: PenjaminModel,
             as: "penjamin",
+            required: false,
             where: {
               deleted_at: {
                 [Op.is]: null,
@@ -87,6 +89,7 @@ export default class TarifLabRepository {
         {
           model: TarifLabPelayananModel,
           as: "pelayanan",
+          required: false,
           where: {
             deleted_at: {
               [Op.is]: null,
@@ -97,14 +100,17 @@ export default class TarifLabRepository {
         {
           model: TarifLabItemModel,
           as: "tarif_lab_item",
+          required: false,
           include: [
             {
               model: KelompokPemeriksaanModel,
+              required: false,
               as: "kelompok_pemeriksaan",
               attributes: ["uuid", "name"],
             },
             {
               model: ItemPemeriksaanModel,
+              required: false,
               as: "item_pemeriksaan",
               attributes: ["uuid", "name"],
             },

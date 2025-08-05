@@ -22,7 +22,7 @@ export default class SpesimenController {
       req.body.faskes_uuid = req.author.faskesUuid;
       const uuid = req.params.uuid;
       await SpesimenSevice.update(uuid, req.body);
-      return res.status(200).json(successResponse("Data berhasil diupdated"));
+      return res.status(200).json(successResponse("Data berhasil diubah"));
     } catch (error) {
       if (error instanceof UniqueConstraintError) {
         return res.status(409).json(errorResponse("Kode sudah ada"));

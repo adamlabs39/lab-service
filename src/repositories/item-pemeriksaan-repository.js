@@ -184,6 +184,8 @@ export default class ItemPemeriksaanRepository {
       where: {
         category_pemeriksaan_uuid: req.category_pemeriksaan_uuid,
         no_urut: req.no_urut,
+        faskes_uuid: req.faskes_uuid,
+        deleted_at: { [Op.is]: null },
         uuid: { [Op.not]: req.uuid }, // Kecuali record ini
       },
     });

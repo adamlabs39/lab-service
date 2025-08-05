@@ -26,7 +26,7 @@ export default class CategoryPemeriksaanController {
       data.faskes_uuid = request.author.faskesUuid;
       await CategoryPemeriksaanService.update(uuid, data);
 
-      response.status(200).json(successResponse("Data berhasil diedit"));
+      response.status(200).json(successResponse("Data berhasil diubah"));
     } catch (error) {
       if (error instanceof UniqueConstraintError) {
         return response.status(409).json(errorResponse("Kode sudah ada"));

@@ -195,11 +195,12 @@ export default class TarifLabService {
   }
 
   static async update(uuid, req) {
-    const isTarifLabExist = await TarifLabRepository.findByUuid(uuid);
+    // const isTarifLabExist = await TarifLabRepository.findByUuid(uuid);
+    // console.log("tarif ==> ", JSON.stringify(isTarifLabExist));
 
-    if (!isTarifLabExist) {
-      throw new NotfoundException("Tarif Lab tidak ada");
-    }
+    // if (!isTarifLabExist) {
+    //   throw new NotfoundException("Tarif Lab tidak ada");
+    // }
 
     const validData = ZodValidator.validate(TarifLabValidation.UPDATE, req);
 

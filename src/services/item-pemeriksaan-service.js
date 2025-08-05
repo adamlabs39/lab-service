@@ -138,7 +138,9 @@ export default class ItemPemeriksaanService {
       }
     }
 
-    const noUrutExist = await ItemPemeriksaanRepository.findByNoUrut(validData);
+    const noUrutExist = await ItemPemeriksaanRepository.findByNoUrutWithUuid(
+      validData
+    );
     if (noUrutExist) {
       throw new ConflictException("Nomor urut sudah digunakan");
     }

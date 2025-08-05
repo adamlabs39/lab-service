@@ -24,7 +24,7 @@ export default class KelompokPemeriksaanController {
       const data = req.body;
       data.faskes_uuid = req.author.faskesUuid;
       await KelompokPemeriksaanService.update(uuid, data);
-      return res.status(200).json(successResponse("Data berhasil diedit"));
+      return res.status(200).json(successResponse("Data berhasil diubah"));
     } catch (error) {
       if (error instanceof UniqueConstraintError) {
         return res.status(409).json(errorResponse("Kode sudah ada"));
@@ -37,7 +37,7 @@ export default class KelompokPemeriksaanController {
     try {
       const uuid = req.params.uuid;
       await KelompokPemeriksaanService.delete(uuid);
-      return res.status(200).json(successResponse("Data berhasil dhapus   "));
+      return res.status(200).json(successResponse("Data berhasil dhapus"));
     } catch (error) {
       next(error);
     }

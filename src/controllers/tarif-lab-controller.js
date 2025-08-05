@@ -1,3 +1,4 @@
+import { UniqueConstraintError } from "sequelize";
 import validateExcel from "../helpers/validator-excel.js";
 import successResponse from "../response/success-response.js";
 import TarifLabService from "../services/tarif-lab-service.js";
@@ -17,8 +18,10 @@ export default class TarifLabController {
     try {
       req.body.faskes_uuid = req.author.faskesUuid;
       const uuid = req.params.uuid;
+      console.log(req.params);
+      console.log("uuid ==> ", uuid);
       await TarifLabService.update(uuid, req.body);
-      res.status(200).json(successResponse("data berhasil diedit"));
+      res.status(200).json(successResponse("data berhasil diubah"));
     } catch (error) {
       if (error instanceof UniqueConstraintError) {
         return res.status(409).json(errorResponse("Kode sudah ada"));

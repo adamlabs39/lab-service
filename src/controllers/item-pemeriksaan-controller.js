@@ -22,7 +22,7 @@ export default class ItemPemeriksaanController {
       const uuid = req.params.uuid;
       await ItemPemeriksaanService.update(uuid, req.body);
 
-      res.status(200).json(successResponse("Data berhasil diedit"));
+      res.status(200).json(successResponse("Data berhasil diubah"));
     } catch (error) {
       if (error instanceof UniqueConstraintError) {
         return res.status(409).json(errorResponse("Kode sudah ada"));
