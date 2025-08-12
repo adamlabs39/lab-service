@@ -33,8 +33,8 @@ export default class KelompokPemeriksaanValidation {
   static UPDATE = z.object({
     code: z.string().min(1).max(255).toUpperCase(),
     name: z.string().min(1).max(255),
-    snomed_uuid: z.string().uuid().optional(),
-    icd9_uuid: z.string().uuid().optional(),
+    snomed_uuid: z.string().uuid().nullable().optional(),
+    icd9_uuid: z.string().uuid().nullable().optional(),
     loinc_uuid: z.string().uuid(),
     category_pemeriksaan_uuid: z.string().uuid(),
     item_pemeriksaans: z.array(z.string().uuid()).nonempty(),
