@@ -21,7 +21,7 @@ export default class KelompokPemeriksaanValidation {
         message: "Data gagal disimpan, Name harus diisi",
       })
       .max(255),
-    snomed_uuid: z.string().uuid().nullable().optional(),
+    snomedct_uuid: z.string().uuid().nullable().optional(),
     icd9_uuid: z.string().uuid().nullable().optional(),
     loinc_uuid: z.string().uuid(),
     category_pemeriksaan_uuid: z.string().uuid(),
@@ -33,7 +33,7 @@ export default class KelompokPemeriksaanValidation {
   static UPDATE = z.object({
     code: z.string().min(1).max(255).toUpperCase(),
     name: z.string().min(1).max(255),
-    snomed_uuid: z.string().uuid().nullable().optional(),
+    snomedct_uuid: z.string().uuid().nullable().optional(),
     icd9_uuid: z.string().uuid().nullable().optional(),
     loinc_uuid: z.string().uuid(),
     category_pemeriksaan_uuid: z.string().uuid(),

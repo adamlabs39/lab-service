@@ -40,8 +40,10 @@ export default class KelompokPemeriksaanService {
       throw new NotfoundException("Category Pemeriksaan tidak ada");
     }
 
-    if (validData.snomed_uuid) {
-      const isSnomedExist = await SnomedRepository.find(validData.snomed_uuid);
+    if (validData.snomedct_uuid) {
+      const isSnomedExist = await SnomedRepository.find(
+        validData.snomedct_uuid
+      );
       if (!isSnomedExist) {
         throw new NotfoundException("Snomed tidak ada");
       }
@@ -156,8 +158,10 @@ export default class KelompokPemeriksaanService {
       throw new NotfoundException("Category Pemeriksaan tidak ada");
     }
 
-    if (validData.snomed_uuid) {
-      const isSnomedExist = await SnomedRepository.find(validData.snomed_uuid);
+    if (validData.snomedct_uuid) {
+      const isSnomedExist = await SnomedRepository.find(
+        validData.snomedct_uuid
+      );
       if (!isSnomedExist) {
         throw new NotfoundException("Snomed tidak ada");
       }
