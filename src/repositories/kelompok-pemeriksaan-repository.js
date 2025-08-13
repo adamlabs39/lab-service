@@ -154,7 +154,32 @@ export default class KelompokPemeriksaanRepository {
   }
 
   static async findAll(req) {
-    // 1. Hitung total records (lebih cepat karena tanpa include)
+    // Validasi dan default value untuk pagination
+    const page = parseInt(req.page) || 1;
+    const limit = parseInt(req.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    // 1. Pertama ambil hanya ID dengan pagination yang benar
+    const idsResult = await KelompokPemeriksaanModel.findAll({
+      where: {
+        faskes_uuid: req.faskes_uuid,
+        deleted_at: { [Op.is]: null },
+        ...(req.name && { name: { [Op.iLike]: `%${req.name}%` } }),
+      },
+      attributes: ["uuid"],
+      order: [["created_at", "DESC"]],
+      limit: limit,
+      offset: offset,
+    });
+
+    if (idsResult.length === 0) {
+      return {
+        data: [],
+        pagination: Utils.paginationHelper(page, limit, 0),
+      };
+    }
+
+    // 1. Hitung total records (tanpa include untuk performa)
     const countQuery = await KelompokPemeriksaanModel.count({
       where: {
         faskes_uuid: req.faskes_uuid,
@@ -163,9 +188,10 @@ export default class KelompokPemeriksaanRepository {
       },
     });
 
-    // 2. Ambil data lengkap hanya untuk ID yang sudah difilter
-    const fullData = await KelompokPemeriksaanModel.findAll({
+    // 2. Query untuk data dengan include
+    const queryOptions = {
       where: {
+        uuid: { [Op.in]: idsResult.map((item) => item.uuid) },
         faskes_uuid: req.faskes_uuid,
         deleted_at: { [Op.is]: null },
         ...(req.name && { name: { [Op.iLike]: `%${req.name}%` } }),
@@ -175,15 +201,15 @@ export default class KelompokPemeriksaanRepository {
           model: ItemKelompokPemeriksaanModel,
           as: "item_kelompok_pemeriksaan",
           required: false,
-          where: {
-            deleted_at: { [Op.is]: null },
-          },
-          include: {
-            model: ItemPemeriksaanModel,
-            as: "item_pemeriksaan",
-            required: false,
-            attributes: ["uuid", "name", "code"],
-          },
+          where: { deleted_at: { [Op.is]: null } },
+          include: [
+            {
+              model: ItemPemeriksaanModel,
+              as: "item_pemeriksaan",
+              required: false,
+              attributes: ["uuid", "name", "code"],
+            },
+          ],
         },
         {
           model: CategoryPemeriksaanModel,
@@ -195,27 +221,21 @@ export default class KelompokPemeriksaanRepository {
           model: Icd9Model,
           as: "icd9",
           required: false,
-          where: {
-            deleted_at: { [Op.is]: null },
-          },
+          where: { deleted_at: { [Op.is]: null } },
           attributes: ["uuid", "name", "code"],
         },
         {
           model: SnomedModel,
           as: "snomed",
           required: false,
-          where: {
-            deleted_at: { [Op.is]: null },
-          },
+          where: { deleted_at: { [Op.is]: null } },
           attributes: ["uuid", "name", "code"],
         },
         {
           model: LoincModel,
           as: "loinc",
           required: false,
-          where: {
-            deleted_at: { [Op.is]: null },
-          },
+          where: { deleted_at: { [Op.is]: null } },
           attributes: ["uuid", "name", "code"],
         },
       ],
@@ -223,11 +243,13 @@ export default class KelompokPemeriksaanRepository {
       attributes: {
         exclude: ["created_at", "updated_at", "deleted_at"],
       },
-    });
+    };
+
+    const fullData = await KelompokPemeriksaanModel.findAll(queryOptions);
 
     return {
       data: fullData.map((item) => item.get({ plain: true })),
-      pagination: Utils.paginationHelper(req.page, req.limit, countQuery),
+      pagination: Utils.paginationHelper(page, limit, countQuery),
     };
   }
 
