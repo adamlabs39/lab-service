@@ -122,6 +122,11 @@ export default class KelompokPemeriksaanService {
   }
 
   static async update(uuid, data) {
+    const validData = ZodValidator.validate(
+      KelompokPemeriksaanValidation.UPDATE,
+      data
+    );
+
     const isKelompokPemeriksaanExist =
       await KelompokPemeriksaanRepository.findByUuid(uuid);
 
@@ -131,15 +136,11 @@ export default class KelompokPemeriksaanService {
 
     const isCodeExist =
       await KelompokPemeriksaanRepository.findByCodeWithoutItself(uuid, data);
+    console.log(JSON.stringify(isCodeExist));
 
     if (isCodeExist) {
       throw new ConflictException("Kode sudah ada");
     }
-
-    const validData = ZodValidator.validate(
-      KelompokPemeriksaanValidation.UPDATE,
-      data
-    );
 
     const itemPemeriksaans = await ItemPemeriksaanRepository.findByUuids(
       validData.item_pemeriksaans
