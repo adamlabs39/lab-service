@@ -12,6 +12,7 @@ import {
 import { Op, where } from "sequelize";
 import toEpochDate from "../helpers/date-helper.js";
 import pagination from "../helpers/pagination.js";
+import Utils from "../helpers/utils.js";
 
 KelompokPemeriksaanModel.belongsTo(CategoryPemeriksaanModel, {
   foreignKey: "category_pemeriksaan_uuid",
@@ -153,15 +154,21 @@ export default class KelompokPemeriksaanRepository {
   }
 
   static async findAll(req) {
-    const options = {
+    // 1. Hitung total records (lebih cepat karena tanpa include)
+    const countQuery = await KelompokPemeriksaanModel.count({
       where: {
         faskes_uuid: req.faskes_uuid,
-        name: {
-          [Op.iLike]: `%${req.name || ""}%`,
-        },
-        deleted_at: {
-          [Op.is]: null,
-        },
+        deleted_at: { [Op.is]: null },
+        ...(req.name && { name: { [Op.iLike]: `%${req.name}%` } }),
+      },
+    });
+
+    // 2. Ambil data lengkap hanya untuk ID yang sudah difilter
+    const fullData = await KelompokPemeriksaanModel.findAll({
+      where: {
+        faskes_uuid: req.faskes_uuid,
+        deleted_at: { [Op.is]: null },
+        ...(req.name && { name: { [Op.iLike]: `%${req.name}%` } }),
       },
       include: [
         {
@@ -216,9 +223,12 @@ export default class KelompokPemeriksaanRepository {
       attributes: {
         exclude: ["created_at", "updated_at", "deleted_at"],
       },
-    };
+    });
 
-    return await pagination(KelompokPemeriksaanModel, req, options);
+    return {
+      data: fullData.map((item) => item.get({ plain: true })),
+      pagination: Utils.paginationHelper(req.page, req.limit, countQuery),
+    };
   }
 
   static async findAllActive(req) {
