@@ -128,7 +128,7 @@ export default class NilaiRujukanValidation {
     )
     .refine(
       (data) => {
-        if (data.kritis_bawah !== undefined && data.kritis_atas !== undefined) {
+        if (data.kritis_bawah && data.kritis_atas) {
           return data.kritis_atas > data.kritis_bawah;
         }
         return true;
@@ -241,7 +241,10 @@ export default class NilaiRujukanValidation {
     )
     .refine(
       (data) => {
-        return data.kritis_atas > data.kritis_bawah;
+        if (data.kritis_bawah && data.kritis_atas) {
+          return data.kritis_atas > data.kritis_bawah;
+        }
+        return true;
       },
       {
         message: "Kritis atas harus lebih besar dari kritis bawah",
