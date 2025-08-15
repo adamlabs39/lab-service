@@ -112,10 +112,7 @@ export default class NilaiRujukanValidation {
     )
     .refine(
       (data) => {
-        if (
-          data.batas_bawah_nilai_normal !== undefined &&
-          data.batas_atas_nilai_normal !== undefined
-        ) {
+        if (data.batas_bawah_nilai_normal && data.batas_atas_nilai_normal) {
           return data.batas_atas_nilai_normal > data.batas_bawah_nilai_normal;
         }
         return true;
@@ -231,7 +228,10 @@ export default class NilaiRujukanValidation {
     )
     .refine(
       (data) => {
-        return data.batas_atas_nilai_normal > data.batas_bawah_nilai_normal;
+        if (data.batas_bawah_nilai_normal && data.batas_atas_nilai_normal) {
+          return data.batas_atas_nilai_normal > data.batas_bawah_nilai_normal;
+        }
+        return true;
       },
       {
         message:
