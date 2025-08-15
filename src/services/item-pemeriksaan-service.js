@@ -87,6 +87,11 @@ export default class ItemPemeriksaanService {
   }
 
   static async update(uuid, req) {
+    const validData = ZodValidator.validate(
+      ItemPemeriksaanValidation.UPDATE,
+      req
+    );
+
     const isItemPemeriksaanExist = await ItemPemeriksaanRepository.findByUuid(
       uuid
     );
@@ -97,7 +102,7 @@ export default class ItemPemeriksaanService {
 
     const isCodeExist = await ItemPemeriksaanRepository.findByCodeWithoutItself(
       uuid,
-      req
+      validData
     );
 
     if (isCodeExist) {
@@ -112,11 +117,6 @@ export default class ItemPemeriksaanService {
     if (!isCategoryPemeriksaanExist) {
       throw new NotfoundException("Category Pemeriksaan tidak ada");
     }
-
-    const validData = ZodValidator.validate(
-      ItemPemeriksaanValidation.UPDATE,
-      req
-    );
 
     const isIoincExist = await LoincRepository.findByUuid(req.loinc_uuid);
 
@@ -139,6 +139,7 @@ export default class ItemPemeriksaanService {
     }
 
     const noUrutExist = await ItemPemeriksaanRepository.findByNoUrutWithUuid(
+      uuid,
       validData
     );
     if (noUrutExist) {

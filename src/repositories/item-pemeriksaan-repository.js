@@ -179,14 +179,14 @@ export default class ItemPemeriksaanRepository {
     return await ItemPemeriksaanModel.findAll(options);
   }
 
-  static async findByNoUrutWithUuid(req) {
+  static async findByNoUrutWithUuid(uuid, req) {
     return await ItemPemeriksaanModel.findOne({
       where: {
         category_pemeriksaan_uuid: req.category_pemeriksaan_uuid,
         no_urut: req.no_urut,
         faskes_uuid: req.faskes_uuid,
         deleted_at: { [Op.is]: null },
-        uuid: { [Op.not]: req.uuid }, // Kecuali record ini
+        uuid: { [Op.not]: uuid }, // Kecuali record ini
       },
     });
   }

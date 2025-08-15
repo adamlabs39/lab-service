@@ -39,6 +39,11 @@ export default class CategoryPemeriksaanService {
   }
 
   static async update(uuid, data) {
+    const validData = ZodValidator.validate(
+      CategoryPemeriksaanValidation.UPDATE,
+      data
+    );
+
     const isCategoryPemeriksaanExist =
       await CategoryPemeriksaanRepository.findByUuid(uuid);
 
@@ -47,7 +52,10 @@ export default class CategoryPemeriksaanService {
     }
 
     const isCodeExist =
-      await CategoryPemeriksaanRepository.findByCodeWithoutItself(data);
+      await CategoryPemeriksaanRepository.findByCodeWithoutItself(
+        uuid,
+        validData
+      );
 
     if (isCodeExist) {
       throw new ConflictException("Kode sudah ada");
@@ -59,10 +67,6 @@ export default class CategoryPemeriksaanService {
       throw new ConflictException("Nomor urut sudah digunakan");
     }
 
-    const validData = ZodValidator.validate(
-      CategoryPemeriksaanValidation.UPDATE,
-      data
-    );
     await sequelizeInstance.transaction(async (t) => {
       await CategoryPemeriksaanRepository.update(uuid, validData, t);
     });

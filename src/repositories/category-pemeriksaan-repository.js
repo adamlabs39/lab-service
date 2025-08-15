@@ -70,13 +70,13 @@ export default class CategoryPemeriksaanRepository {
     });
   }
 
-  static async findByCodeWithoutItself(req) {
+  static async findByCodeWithoutItself(uuid, req) {
     return await CategoryPemeriksaanModel.findOne({
       where: {
         code: req.code,
         deleted_at: null,
         faskes_uuid: req.faskes_uuid,
-        uuid: { [Op.not]: req.uuid }, // Kecuali record ini
+        uuid: { [Op.not]: uuid }, // Kecuali record ini
       },
     });
   }

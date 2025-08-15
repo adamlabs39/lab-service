@@ -135,7 +135,10 @@ export default class KelompokPemeriksaanService {
     }
 
     const isCodeExist =
-      await KelompokPemeriksaanRepository.findByCodeWithoutItself(uuid, data);
+      await KelompokPemeriksaanRepository.findByCodeWithoutItself(
+        uuid,
+        validData
+      );
     console.log(JSON.stringify(isCodeExist));
 
     if (isCodeExist) {
