@@ -25,6 +25,7 @@ export default class SpesimenSevice {
   }
 
   static async update(uuid, req) {
+    const validData = ZodValidator.validate(SpesimenValidation.CREATE, req);
     const isSpesimenExist = await SpesimenRepository.findByUuid(uuid);
 
     if (!isSpesimenExist) {
@@ -33,14 +34,13 @@ export default class SpesimenSevice {
 
     const isCodeExist = await SpesimenRepository.findByCodeWithoutItself(
       uuid,
-      req
+      validData
     );
 
     if (isCodeExist) {
       throw new ConflictException("Kode sudah ada");
     }
 
-    const validData = ZodValidator.validate(SpesimenValidation.CREATE, req);
     return await SpesimenRepository.update(uuid, validData);
   }
 
