@@ -372,6 +372,7 @@ export default class TarifLabRepository {
         })
         .map((kt) => ({
           uuid: kt.uuid,
+          tarif_komponen_uuid: kt.tarif_komponen?.uuid || null,
           name: kt.tarif_komponen?.name || null,
           prosentase: kt.prosentase_per_komponen,
           tarif: kt.tarif_per_komponen,
