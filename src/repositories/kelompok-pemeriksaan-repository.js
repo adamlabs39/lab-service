@@ -260,6 +260,9 @@ export default class KelompokPemeriksaanRepository {
         name: {
           [Op.iLike]: `%${req.name || ""}%`,
         },
+        status: {
+          [Op.is]: true,
+        },
         deleted_at: {
           [Op.is]: null,
         },
