@@ -248,13 +248,13 @@ export default class TarifLabService {
       throw new NotfoundException("Kelompok Pemeriksaan tidak ada");
     }
 
-    const nameTarifKomponens = await NameTarifKomponenRepository.findByUuids(
-      nameTarifKomponenUuids
-    );
+    // const nameTarifKomponens = await NameTarifKomponenRepository.findByUuids(
+    //   nameTarifKomponenUuids
+    // );
 
-    if (nameTarifKomponens.length !== nameTarifKomponenUuids.length) {
-      throw new NotfoundException("Komponen Tarif tidak ada");
-    }
+    // if (nameTarifKomponens.length !== nameTarifKomponenUuids.length) {
+    //   throw new NotfoundException("Komponen Tarif tidak ada");
+    // }
 
     await sequelizeInstance.transaction(async (t) => {
       await TarifLabRepository.update(uuid, validData, t);
