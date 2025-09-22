@@ -139,21 +139,17 @@ export default class TarifLabService {
 
       await TarifLabItemRepository.bulkCreate(tarifLabItems, t);
 
-      const tarifLabKomponenTindakan = [];
-
-      validData.tarif_lab_items.forEach((item) => {
-        item.komponen_tindakan_labs.map((komponen) => {
-          tarifLabKomponenTindakan.push({
+      const tarifLabKomponenTindakan = validData.tarif_lab_items.flatMap(
+        (item) =>
+          item.komponen_tindakan_labs.map((komponen) => ({
             tarif_lab_item_uuid: item.uuid,
             tarif_komponen_uuid: komponen.tarif_komponen_uuid,
-            diskon: komponen.diskon,
             tarif_per_komponen: komponen.tarif_per_komponen,
             faskes_uuid: validData.faskes_uuid,
             tarif_lab_uuid: tarifLab.uuid,
             prosentase_per_komponen: komponen.prosentase_per_komponen,
-          });
-        });
-      });
+          }))
+      );
 
       await TarifKomponenTindakanLabRepository.bulkCreate(
         tarifLabKomponenTindakan,
@@ -292,24 +288,37 @@ export default class TarifLabService {
         };
       });
 
-      await TarifLabItemRepository.bulkCreate(tarifLabItems, t);
+      const createdTarifLabItems = await TarifLabItemRepository.bulkCreate(
+        tarifLabItems,
+        t
+      );
+      // inject uuid hasil create ke validData
+      validData.tarif_lab_items.forEach((item) => {
+        const match = createdTarifLabItems.find(
+          (c) =>
+            c.item_pemeriksaan_uuid === item.item_pemeriksaan_uuid ||
+            c.kelompok_pemeriksaan_uuid === item.kelompok_pemeriksaan_uuid
+        );
+
+        if (match) {
+          item.uuid = match.uuid; // simpan uuid baru
+        }
+      });
 
       await TarifKomponenTindakanLabRepository.deleteByTarifLab(uuid, t);
-      const tarifLabKomponenTindakan = [];
+      // const tarifLabKomponenTindakan = [];
 
-      validData.tarif_lab_items.forEach((item) => {
-        item.komponen_tindakan_labs.forEach((komponen) => {
-          tarifLabKomponenTindakan.push({
-            tarif_lab_item_uuid: item.item_pemeriksaan_uuid,
+      const tarifLabKomponenTindakan = validData.tarif_lab_items.flatMap(
+        (item) =>
+          item.komponen_tindakan_labs.map((komponen) => ({
+            tarif_lab_item_uuid: item.uuid,
             tarif_komponen_uuid: komponen.tarif_komponen_uuid,
-            diskon: komponen.diskon,
             tarif_per_komponen: komponen.tarif_per_komponen,
             faskes_uuid: validData.faskes_uuid,
             tarif_lab_uuid: uuid,
             prosentase_per_komponen: komponen.prosentase_per_komponen,
-          });
-        });
-      });
+          }))
+      );
 
       await TarifKomponenTindakanLabRepository.bulkCreate(
         tarifLabKomponenTindakan,

@@ -10,6 +10,7 @@ TarifKomponenTindakanLabModel.belongsTo(NameTarifKomponenModel, {
 });
 export default class TarifKomponenTindakanLabRepository {
   static async bulkCreate(data, transaction) {
+    // console.log("data komponen tindakan lab ==> ", data);
     return await TarifKomponenTindakanLabModel.bulkCreate(data, {
       transaction,
     });
