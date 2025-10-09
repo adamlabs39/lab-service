@@ -19,7 +19,6 @@ import { parse } from "dotenv";
 import calculatePersen from "../helpers/calculate_persen.js";
 import calculateRupiah from "../helpers/calculate_rupiah.js";
 import convertRupiahToNumber from "../helpers/convert_rupiah_to_number.js";
-
 export default class TarifLabService {
   static async create(req) {
     console.log(JSON.stringify(req));
@@ -69,6 +68,21 @@ export default class TarifLabService {
         uuid: uuid,
       };
     });
+
+    const duplicatesItem = findDuplicateUuids(itemPemeriksaanUuids);
+    if (duplicatesItem.length > 0) {
+      throw new ConflictException(`item pemeriksaan tidak boleh sama`);
+    }
+
+    const duplicatesKelompok = findDuplicateUuids(kelomPokPemerikSaanUuids);
+    if (duplicatesKelompok.length > 0) {
+      throw new ConflictException(`kelompok pemeriksaan tidak boleh sama`);
+    }
+
+    const duplicatesKomponen = findDuplicateUuids(nameTarifKomponenUuids);
+    if (duplicatesKomponen.length > 0) {
+      throw new ConflictException(`komponen tarif tidak boleh sama`);
+    }
 
     const itemPemeriksaans = await ItemPemeriksaanRepository.findByUuids(
       itemPemeriksaanUuids
@@ -228,6 +242,21 @@ export default class TarifLabService {
         });
       }
     });
+
+    const duplicatesItem = findDuplicateUuids(itemPemeriksaanUuids);
+    if (duplicatesItem.length > 0) {
+      throw new ConflictException(`item pemeriksaan tidak boleh sama`);
+    }
+
+    const duplicatesKelompok = findDuplicateUuids(kelomPokPemerikSaanUuids);
+    if (duplicatesKelompok.length > 0) {
+      throw new ConflictException(`kelompok pemeriksaan tidak boleh sama`);
+    }
+
+    const duplicatesKomponen = findDuplicateUuids(nameTarifKomponenUuids);
+    if (duplicatesKomponen.length > 0) {
+      throw new ConflictException(`komponen tarif tidak boleh sama`);
+    }
 
     const itemPemeriksaans = await ItemPemeriksaanRepository.findByUuids(
       itemPemeriksaanUuids
@@ -693,4 +722,19 @@ export default class TarifLabService {
 
     return result;
   }
+}
+
+function findDuplicateUuids(uuids) {
+  const seen = new Set();
+  const duplicates = new Set();
+
+  uuids.forEach((uuid) => {
+    if (seen.has(uuid)) {
+      duplicates.add(uuid);
+    } else {
+      seen.add(uuid);
+    }
+  });
+
+  return Array.from(duplicates);
 }
