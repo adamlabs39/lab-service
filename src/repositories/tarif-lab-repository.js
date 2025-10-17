@@ -291,7 +291,6 @@ export default class TarifLabRepository {
           .filter(Boolean)
       : [];
 
-    console.log("req.pelayanans ==> ", pelayananValues);
     const pelayanan = await TarifLabPelayananModel.findAll({
       where: {
         tarif_lab_uuid: { [Op.in]: uuids },
@@ -303,8 +302,6 @@ export default class TarifLabRepository {
       attributes: ["uuid", "pelayanan", "tarif_lab_uuid"],
       raw: true,
     });
-
-    console.log("pelayanans ==> ", pelayanan);
 
     // Query untuk Ambil tarif items
     const tarifItems = await TarifLabItemModel.findAll({
