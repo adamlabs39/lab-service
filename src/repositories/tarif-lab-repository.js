@@ -284,17 +284,27 @@ export default class TarifLabRepository {
     });
 
     // Query untuk pelayanan
+    const pelayananValues = req.pelayanans
+      ? req.pelayanans
+          .split(",")
+          .map((v) => v.trim())
+          .filter(Boolean)
+      : [];
+
+    console.log("req.pelayanans ==> ", pelayananValues);
     const pelayanan = await TarifLabPelayananModel.findAll({
       where: {
         tarif_lab_uuid: { [Op.in]: uuids },
         deleted_at: { [Op.is]: null },
-        ...(req.pelayanans?.length > 0 && {
-          uuid: { [Op.in]: req.pelayanans },
+        ...(pelayananValues?.length > 0 && {
+          pelayanan: { [Op.in]: pelayananValues },
         }),
       },
       attributes: ["uuid", "pelayanan", "tarif_lab_uuid"],
       raw: true,
     });
+
+    console.log("pelayanans ==> ", pelayanan);
 
     // Query untuk Ambil tarif items
     const tarifItems = await TarifLabItemModel.findAll({
