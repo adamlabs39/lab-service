@@ -2,8 +2,7 @@ FROM node:20-alpine
 WORKDIR /adameds-lab
 COPY . .
 ENV APPLICATION_HOST=0.0.0.0
-ENV APPLICATION_PORT=8090
+ENV APPLICATION_PORT=8087
 RUN npm install
-RUN npm install -g @infisical/cli --verbose
 EXPOSE ${APPLICATION_PORT}/tcp
-CMD ["sh", "-c", "infisical run --env=development -- npm run start"]
+CMD ["npm", "run", "start"]
