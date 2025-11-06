@@ -1,4 +1,4 @@
-FROM node:20-alpine
+FROM node:25-alpine3.22
 WORKDIR /adameds-lab
 COPY . .
 ENV APPLICATION_HOST=0.0.0.0
